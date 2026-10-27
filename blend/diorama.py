@@ -1,0 +1,398 @@
+# Builds a castillos-style disc diorama of one castro in Blender (bpy) and exports a GLB for three.js.
+# Usage: /opt/bvenv/bin/python blend/diorama.py <site-id>
+# Local frame: x east, y north (Blender Z up), metres, origin = disc centre.
+import sys, json, math, importlib, os
+import numpy as np
+import bpy, bmesh
+from PIL import Image, ImageFilter, ImageEnhance
+from scipy.interpolate import RectBivariateSpline
+from scipy.ndimage import gaussian_filter, maximum_filter, label
+
+SID = sys.argv[-1]
+ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+os.chdir(ROOT)
+sys.path.insert(0, 'blend')
+P = importlib.import_module({'guimaraes-castro-de-sabroso': 'sab_plan'}[SID])
+FIT = json.load(open('blend/sab_fit.json'))
+rng = np.random.default_rng(11)
+
+# ---------- plan -> local metres (x east, z south), then to Blender (x, y=-z)
+mean = np.array(FIT['mean']); K = FIT['K']; tx, tz, th, kk = FIT['x']
+def plan2m(p):
+    q = (np.asarray(p, float) - mean) * K * kk; c, s = math.cos(th), math.sin(th)
+    return np.stack([q[..., 0] * c - q[..., 1] * s, q[..., 0] * s + q[..., 1] * c], -1) + [tx, tz]
+allw = np.vstack([plan2m(L) for L in [P.W_WEST, P.W_LOWER, P.W_EAST_OUTER, P.W_EAST_INNER]])
+CX, CZ = (allw.min(0) + allw.max(0)) / 2          # disc centre in the -c.jpg frame (m from site point)
+R = float(np.max(np.hypot(allw[:, 0] - CX, allw[:, 1] - CZ))) + 24
+def loc(p):  # plan px -> Blender xy
+    m = plan2m(p); return np.stack([m[..., 0] - CX, -(m[..., 1] - CZ)], -1)
+
+# ---------- terrain heights (DEM 129x129 over 2 km), bicubic
+D = np.asarray(Image.open(f'app/t3/{SID}.png').convert('RGB')).astype(float)
+Hd = (D[..., 0] * 256 + D[..., 1]) / 10 - 100
+ax = np.linspace(-1000, 1000, Hd.shape[0])
+spl = RectBivariateSpline(ax, ax, Hd, kx=3, ky=3)           # rows = z (south), cols = x
+def hraw(x, y):  # Blender xy -> metres
+    return spl.ev(-np.asarray(y) + CZ, np.asarray(x) + CX)
+H0 = float(hraw(0, 0)); EX = 1.25
+def hz(x, y): return (hraw(x, y) - H0) * EX
+
+def new_obj(name, me, mat=None):
+    ob = bpy.data.objects.new(name, me); bpy.context.scene.collection.objects.link(ob)
+    if mat: me.materials.append(mat)
+    return ob
+def img_mat(name, path, rough=.95, alpha=False):
+    m = bpy.data.materials.new(name); m.use_nodes = True; nt = m.node_tree
+    b = nt.nodes['Principled BSDF']; b.inputs['Roughness'].default_value = rough
+    t = nt.nodes.new('ShaderNodeTexImage'); t.image = bpy.data.images.load(os.path.abspath(path))
+    nt.links.new(t.outputs['Color'], b.inputs['Base Color']); return m, t
+def col_mat(name, rgb, rough=.9):
+    m = bpy.data.materials.new(name); m.use_nodes = True; b = m.node_tree.nodes['Principled BSDF']
+    b.inputs['Base Color'].default_value = (*[c / 255 for c in rgb], 1); b.inputs['Roughness'].default_value = rough; return m
+def mesh_from(name, V, F, UV=None):
+    me = bpy.data.meshes.new(name); me.from_pydata([tuple(v) for v in V], [], [tuple(f) for f in F])
+    if UV is not None:
+        uvl = me.uv_layers.new(name='UVMap'); loops = [li for f in me.polygons for li in f.loop_indices]
+        vi = np.array([me.loops[li].vertex_index for li in loops]); uvl.data.foreach_set('uv', np.asarray(UV)[vi].ravel())
+    me.validate(); me.update(); return me
+
+for o in list(bpy.data.objects): bpy.data.objects.remove(o)
+
+# ---------- ground texture: orthophoto crop of the disc, warmed slightly
+ORT = Image.open(f'app/t3/{SID}-c.jpg').convert('RGB')     # 4 px/m, centre (1024,1024)
+px0 = 1024 + (CX - R) * 4; py0 = 1024 + (CZ - R) * 4; S = int(2 * R * 4)
+crop = ORT.crop((int(px0), int(py0), int(px0) + S, int(py0) + S)).resize((2048, 2048), Image.LANCZOS)
+crop = ImageEnhance.Color(crop).enhance(1.12); crop = ImageEnhance.Brightness(crop).enhance(1.06)
+crop.save('blend/ground_raw.jpg', quality=92)
+def uv_of(x, y): return np.stack([(x + R) / (2 * R), (y + R) / (2 * R)], -1)
+
+# ---------- terrain disc (polar grid)
+NR, NA = 80, 300
+rr = np.linspace(0, R, NR + 1)[1:]; aa = np.linspace(0, 2 * np.pi, NA, endpoint=False)
+X = np.concatenate([[0], (rr[:, None] * np.cos(aa)[None]).ravel()]); Y = np.concatenate([[0], (rr[:, None] * np.sin(aa)[None]).ravel()])
+Z = hz(X, Y); V = np.stack([X, Y, Z], 1); F = []
+for a in range(NA): F.append((0, 1 + a, 1 + (a + 1) % NA))
+for r in range(NR - 1):
+    o0, o1 = 1 + r * NA, 1 + (r + 1) * NA
+    for a in range(NA): b = (a + 1) % NA; F.append((o0 + a, o1 + a, o1 + b, o0 + b))
+gmat, gtex = img_mat('ground', 'blend/ground_raw.jpg')
+terrain = new_obj('terrain', mesh_from('terrain', V, F, uv_of(X, Y)), gmat)
+for p in terrain.data.polygons: p.use_smooth = True
+rim = np.arange(1 + (NR - 1) * NA, 1 + NR * NA)
+
+# ---------- earth skirt with strata, and base
+zb = float(Z.min()) - 16
+sx, sy, sz = X[rim], Y[rim], Z[rim]
+SV = []; SF = []; SUV = []
+levels = [0, 1.2, 4, 7, 10, 13, None]
+for li, d in enumerate(levels):
+    for a in range(NA):
+        z = zb if d is None else sz[a] - d
+        SV.append((sx[a] * (1 + .0 * li), sy[a], z)); SUV.append((a / NA * 12, (z - zb) / 40))
+for li in range(len(levels) - 1):
+    for a in range(NA):
+        b = (a + 1) % NA; SF.append((li * NA + a, li * NA + b, (li + 1) * NA + b, (li + 1) * NA + a))
+cap = len(SV); SV.append((0, 0, zb)); SUV.append((.5, .5))
+for a in range(NA): SF.append(((len(levels) - 1) * NA + (a + 1) % NA, (len(levels) - 1) * NA + a, cap))
+# strata texture
+st = np.zeros((256, 64, 3)); yy = np.arange(256)[:, None] / 256
+band = (np.sin(yy * 40 + np.sin(np.arange(64)[None] / 64 * 2 * np.pi * 3) * .6) * .5 + .5)
+st[...] = np.array([120, 86, 56]) * (.78 + .3 * band[..., None]); st[:20] = [92, 120, 60]
+st[20:26] = [88, 64, 42]
+Image.fromarray(np.clip(st[::-1] + rng.normal(0, 6, st.shape), 0, 255).astype(np.uint8)).resize((64, 256)).save('blend/strata.jpg', quality=90)
+smat, _ = img_mat('earth', 'blend/strata.jpg')
+skirt = new_obj('skirt', mesh_from('skirt', SV, SF, SUV), smat)
+
+# ---------- wall sweep helper (trapezoid profile following the ground)
+stone_m, _ = img_mat('stone', 'blend/stone.jpg', .85)
+def dense(pts, step=.8, closed=False):
+    pts = np.asarray(pts, float)
+    if closed: pts = np.vstack([pts, pts[:1]])
+    out = [pts[0]]
+    for a, b in zip(pts[:-1], pts[1:]):
+        n = max(1, int(np.ceil(np.linalg.norm(b - a) / step)))
+        for t in np.linspace(0, 1, n + 1)[1:]: out.append(a * (1 - t) + b * t)
+    return np.array(out)
+def sweep(pts, w, h, jitter=.25, sink=.6, closed=False, top_taper=.85):
+    p = dense(pts, closed=closed); n = len(p)
+    if n < 2: return [], [], []
+    d = np.gradient(p, axis=0); d /= np.linalg.norm(d, axis=1, keepdims=True) + 1e-9
+    nr = np.stack([-d[:, 1], d[:, 0]], 1)
+    g = hz(p[:, 0], p[:, 1])
+    hh = h + gaussian_filter(rng.normal(0, jitter, n), 2.5, mode='wrap' if closed else 'nearest')
+    s = np.concatenate([[0], np.cumsum(np.linalg.norm(np.diff(p, axis=0), axis=1))])
+    prof = [(-w / 2, -sink), (-w / 2 * top_taper, 1), (w / 2 * top_taper, 1), (w / 2, -sink)]
+    V = []; UV = []
+    for i in range(n):
+        for j, (o, zz) in enumerate(prof):
+            z = g[i] + (zz if zz < 0 else hh[i])
+            V.append((p[i, 0] + nr[i, 0] * o, p[i, 1] + nr[i, 1] * o, z))
+            UV.append((s[i] / 2.2, (z - g[i]) / 2.2 + j * .37))
+    F = []
+    for i in range(n - 1):
+        for j in range(3): a = i * 4 + j; F.append((a, a + 4, a + 5, a + 1))
+    if not closed: F += [(0, 1, 2, 3), ((n - 1) * 4 + 3, (n - 1) * 4 + 2, (n - 1) * 4 + 1, (n - 1) * 4)]
+    return V, F, UV
+class Acc:
+    def __init__(s): s.V = []; s.F = []; s.UV = []
+    def add(s, r):
+        V, F, UV = r; o = len(s.V); s.V += V; s.UV += UV; s.F += [tuple(i + o for i in f) for f in F]
+    def obj(s, name, mat, smooth=False):
+        if not s.V: return None
+        ob = new_obj(name, mesh_from(name, s.V, s.F, s.UV), mat)
+        for p in ob.data.polygons: p.use_smooth = smooth
+        return ob
+# ---------- structures: one object per documented structure, mode A (current state) and B (reconstitution)
+CAT = []          # catalogue for the viewer: id, name, kind, phase, evidence, sources
+def put(sid, name, mat, geo, mode, ev):
+    A = Acc()
+    for g in geo: A.add(g)
+    o = A.obj(f'{mode}-{sid}', mat)
+    if o: o['sid'] = sid; o['mode'] = mode; o['ev'] = ev
+    return o
+def item(**k): CAT.append(k)
+WALLS = [  # id, plan line, name, phase, width, height now, height in reconstitution, evidence of the reconstituted height
+ ('M1', P.W_WEST, 'Muralha do recinto superior, troço poente', '1.ª/2.ª fase', 4.0, 3.2, 5.0, 'doc'),
+ ('M2', P.W_EAST_INNER, 'Muralha do recinto superior, troço nascente (aparelho poligonal)', '1.ª/2.ª fase', 4.0, 3.4, 5.2, 'doc'),
+ ('M3', P.W_LOWER, 'Muralha do alargamento sul', '3.ª fase', 2.6, 2.0, 3.5, 'hip'),
+ ('M4', P.W_EAST_OUTER, 'Muralha do alargamento nascente', '3.ª fase', 2.6, 2.0, 3.5, 'hip'),
+]
+for sid, L, name, ph, w, h, hb, evb in WALLS:
+    put(sid, name, stone_m, [sweep(loc(L), w, h, .35)], 'A', 'conf')
+    put(sid, name, stone_m, [sweep(loc(L), w, hb, .12, top_taper=.92)], 'B', evb)
+    item(id=sid, name=name, kind='Muralha', phase=ph, ev='conf', evB=evb,
+         dims=f'largura ≈ {w:g} m · altura actual representada ≈ {h:g} m · reconstituição {hb:g} m',
+         note='Traçado da planta de 1930 (Cardozo), confirmado pelo painel de 2021. ' + ('Altura de reconstituição segundo Cardozo (1976): 3 a 5 m; face externa com 5,20 m medida em 2015.' if evb == 'doc' else 'A altura original deste troço não está publicada: valor hipotético, por comparação com o recinto superior.'),
+         src=['cardozo1930', 'era2021', 'cardozo1976' if evb == 'doc' else 'loureiro1999'] + (['cruz2015'] if sid == 'M2' else []))
+# SE entrance: elbow corridor (3rd phase), drawn in the 1930 plan
+ent = [sweep(loc(P.W_SE), 1.6, 1.4, .25)] + [sweep(loc(L), 1.2, 1.4, .2) for L in P.W_INNER[:2]]
+put('E1', 'Entrada SE', stone_m, ent, 'A', 'conf'); put('E1', 'Entrada SE', stone_m, [sweep(loc(P.W_SE), 1.6, 3.0, .1)] + [sweep(loc(L), 1.2, 3.0, .1) for L in P.W_INNER[:2]], 'B', 'hip')
+item(id='E1', name='Entrada SE em corredor de cotovelo', kind='Entrada', phase='3.ª fase', ev='conf', evB='hip', dims='corredor com cerca de 18 m',
+     note='Muros do corredor segundo a planta de 1930; interpretação como entrada em cotovelo de Hawkes (1958). Altura reconstituída hipotética.', src=['cardozo1930', 'hawkes1958', 'loureiro1999'])
+for i, L in enumerate(P.W_INNER[2:]):
+    sid = f'W{i + 1:02d}'
+    put(sid, 'Muro', stone_m, [sweep(loc(L), .8, .9, .2, .4)], 'A', 'conf'); put(sid, 'Muro', stone_m, [sweep(loc(L), .8, 1.6, .05, .4)], 'B', 'hip')
+    item(id=sid, name='Muro associado às habitações', kind='Muro', phase='—', ev='conf', evB='hip', dims='largura ≈ 0,8 m',
+         note='Muros de pedra dispersos, associados às casas (Loureiro 1999). Traçado da planta de 1930; altura hipotética.', src=['cardozo1930', 'loureiro1999'])
+# round houses (diameters measured on the 1930 plan, kept within the 3,50–5,27 m range published by Cartailhac)
+th_m, _ = img_mat('thatch', 'blend/thatch.jpg', 1)
+hpos = []
+cyl = lambda c, rad, n=28: [(c[0] + math.cos(a) * rad, c[1] + math.sin(a) * rad) for a in np.linspace(0, 2 * np.pi, n + 1)[:-1]]
+north_lim = loc([0, 760])[1]
+hn = 0
+for (x, y, r) in P.HOUSES:
+    c = loc([x, y]); dia = float(np.clip(2 * r * K * kk, 3.5, 5.27)); rad = dia / 2
+    if (x, y) == P.CISTERN_HOUSE:
+        put('C1', 'Cisterna', stone_m, [sweep(cyl(c, rad), .55, .6, .05, .5, closed=True)], 'A', 'conf')
+        item(id='C1', name='Cisterna', kind='Estrutura hidráulica', phase='—', ev='conf', evB='conf', dims=f'diâmetro ≈ {dia:.1f} m', note='Identificada como cisterna (n.º 1) na legenda da planta de 1930.', src=['cardozo1930'])
+        hpos.append((c[0], c[1], rad)); continue
+    hn += 1; sid = f'H{hn:02d}'; hpos.append((c[0], c[1], rad))
+    put(sid, 'Casa', stone_m, [sweep(cyl(c, rad), .5, .7 + rng.random() * .35, .1, .3, closed=True)], 'A', 'conf')
+    put(sid, 'Casa', stone_m, [sweep(cyl(c, rad), .5, 2.1, .02, .3, closed=True, top_taper=1)], 'B', 'doc')
+    gz = float(hz(c[0], c[1])) + 2.1; rr2 = rad + .6; hr = rad * 1.15
+    rv = [(c[0], c[1], gz + hr)] + [(c[0] + math.cos(k / 24 * 2 * np.pi) * rr2, c[1] + math.sin(k / 24 * 2 * np.pi) * rr2, gz - .3) for k in range(24)]
+    ro = put(sid + 'R', 'Cobertura', th_m, [(rv, [(0, 1 + k, 1 + (k + 1) % 24) for k in range(24)], [(.5, .5)] + [(k / 24 * 3, 1.5) for k in range(24)])], 'B', 'hip')
+    if ro:
+        for p in ro.data.polygons: p.use_smooth = True
+    zone = 'tabuleiro superior (norte)' if c[1] > north_lim else 'tabuleiro inferior (sul)'
+    item(id=sid, name=f'Casa circular {hn}', kind='Habitação', phase=zone, ev='conf', evB='doc', roof='hip', dims=f'diâmetro ≈ {dia:.1f} m (medido na planta de 1930)',
+         note='Planta circular em pedra. Reconstituição: paredes com 2,10 m, altura da reconstituição de Martins Sarmento no Museu de Guimarães (Pereira 1938). A cobertura cónica é hipotética: o material (vegetal ou placas de xisto, proposta de Sarmento nunca confirmada) é desconhecido. A posição das portas não está documentada e não foi representada.',
+         src=['cardozo1930', 'sarmento1909', 'pereira1938', 'cruz2015'])
+for i, (x, y) in enumerate(P.FILLED):
+    c = loc([x, y]); sid = f'X{i + 1}'
+    put(sid, 'Estrutura circular', stone_m, [sweep(cyl(c, 1.3, 18), .5, .45, .05, .3, closed=True)], 'A', 'conf')
+    item(id=sid, name='Estrutura circular preenchida', kind='Indeterminada', phase='—', ev='conf', evB='conf', dims='diâmetro ≈ 2,6 m',
+         note='Representada a cheio na planta de 1930; função não identificada nas fontes consultadas.', src=['cardozo1930'])
+print('houses', hn)
+
+# ---------- granite outcrops (gravuras / gruta are on these)
+rock_m = col_mat('granite', (122, 116, 104), .95)
+bm = bmesh.new()
+for (x, y, r) in P.ROCKS:
+    c = loc([x, y]); rad = r * K * kk
+    for k in range(max(1, int(rad / 1.6))):
+        tmp = bmesh.new(); bmesh.ops.create_icosphere(tmp, subdivisions=2, radius=1)
+        sc = np.array([rad * (.35 + .4 * rng.random()), rad * (.3 + .35 * rng.random()), 1.2 + rng.random() * 1.6])
+        off = (rng.random(2) - .5) * rad * 1.1; ang = rng.random() * np.pi
+        for v in tmp.verts:
+            p = np.array(v.co) * sc * (1 + rng.normal(0, .07)); ca, sa = math.cos(ang), math.sin(ang)
+            v.co = (c[0] + off[0] + p[0] * ca - p[1] * sa, c[1] + off[1] + p[0] * sa + p[1] * ca, 0)
+            v.co.z = float(hz(v.co.x, v.co.y)) + max(-.6, p[2] * .8 - .4)
+        me = bpy.data.meshes.new('t'); tmp.to_mesh(me); tmp.free(); bm.from_mesh(me); bpy.data.meshes.remove(me)
+from matplotlib.path import Path as MPath
+_encl0 = MPath(loc(P.W_WEST + P.W_LOWER + P.W_EAST_OUTER[::-1] + P.W_EAST_INNER[::-1]))
+bm2 = bmesh.new(); nb = 0
+for _ in range(4000):
+    x, y = (rng.random(2) * 2 - 1) * R
+    if nb >= 70 or math.hypot(x, y) > R - 4 or _encl0.contains_point((x, y)): continue
+    if min(np.hypot(*(np.vstack([loc(L) for L in [P.W_WEST, P.W_LOWER, P.W_EAST_OUTER, P.W_EAST_INNER]]) - [x, y]).T)) < 9: continue
+    for kk2 in range(int(rng.integers(1, 4))):
+        tmp = bmesh.new(); bmesh.ops.create_icosphere(tmp, subdivisions=2, radius=1)
+        sc = np.array([.6 + rng.random() * 1.6, .5 + rng.random() * 1.3, .45 + rng.random() * .9]); ox, oy = (rng.random(2) - .5) * 3; ang = rng.random() * np.pi
+        for v in tmp.verts:
+            q = np.array(v.co) * sc * (1 + rng.normal(0, .08)); ca, sa = math.cos(ang), math.sin(ang)
+            v.co = (x + ox + q[0] * ca - q[1] * sa, y + oy + q[0] * sa + q[1] * ca, 0); v.co.z = float(hz(v.co.x, v.co.y)) + q[2] - .25
+        m_ = bpy.data.meshes.new('t'); tmp.to_mesh(m_); tmp.free(); bm2.from_mesh(m_); bpy.data.meshes.remove(m_)
+    nb += 1
+me2 = bpy.data.meshes.new('boulders'); bm2.to_mesh(me2); bm2.free(); new_obj('boulders', me2, col_mat('granite2', (132, 128, 118), .95))
+me = bpy.data.meshes.new('rocks'); bm.to_mesh(me); bm.free(); rocks = new_obj('AB-R', me, rock_m); rocks['sid'] = 'R'; rocks['mode'] = 'AB'; rocks['ev'] = 'conf'
+item(id='R', name='Afloramentos graníticos', kind='Afloramento', phase='—', ev='conf', evB='conf', dims='formas simplificadas', note='Posição e extensão segundo a planta de 1930; alguns têm gravuras rupestres (n.º 2 a 4) e uma gruta (n.º 5). A forma 3D dos penedos é aproximada.', src=['cardozo1930', 'era2021'])
+
+# ---------- trees from the orthophoto canopy (dark green), kept off walls and houses
+a = np.asarray(crop.resize((512, 512))).astype(float); r_, g_, b_ = a[..., 0], a[..., 1], a[..., 2]
+lum = a.mean(-1); can = ((lum < 92) & (g_ >= r_ - 4) & (b_ < g_ + 10)).astype(float)
+can = gaussian_filter(can, 1.2)
+pk = (can == maximum_filter(can, 15)) & (can > .55)
+ys, xs = np.nonzero(pk); m_per = 2 * R / 512
+tp = [((x + .5) * m_per - R, (y + .5) * m_per - R) for x, y in zip(xs, ys)]
+tp = [(x, -y) for x, y in tp if math.hypot(x, y) < R - 2.5]   # image rows go south
+wallpts = np.vstack([dense(loc(L)) for L in [P.W_WEST, P.W_LOWER, P.W_EAST_OUTER, P.W_EAST_INNER]] + [np.array([[h[0], h[1]] for h in hpos])])
+from scipy.spatial import cKDTree
+kd = cKDTree(wallpts)
+from matplotlib.path import Path as MPath
+_encl = MPath(loc(P.W_WEST + P.W_LOWER + P.W_EAST_OUTER[::-1] + P.W_EAST_INNER[::-1]))
+tp = [p for p in tp if kd.query(p)[0] > 10 and not _encl.contains_point(p)]   # keep the archaeological site clear
+if len(tp) > 380: tp = [tp[i] for i in sorted(rng.choice(len(tp), 380, replace=False))]
+leaf = [col_mat('leaf1', (52, 86, 40)), col_mat('leaf2', (70, 104, 46)), col_mat('leaf3', (40, 70, 38))]
+trunk = col_mat('trunk', (92, 66, 44))
+def cone(cx, cy, z0, r, h, n=9):
+    V = [(cx, cy, z0 + h)] + [(cx + math.cos(k / n * 2 * np.pi) * r, cy + math.sin(k / n * 2 * np.pi) * r, z0) for k in range(n)]
+    F = [(0, 1 + k, 1 + (k + 1) % n) for k in range(n)] + [tuple(range(n, 0, -1))]
+    return V, F, [(0, 0)] * len(V)
+def blob(cx, cy, z0, r, h):
+    tmp = bmesh.new(); bmesh.ops.create_icosphere(tmp, subdivisions=1, radius=1); V = []
+    for v in tmp.verts: V.append((cx + v.co.x * r * (1 + rng.normal(0, .1)), cy + v.co.y * r * (1 + rng.normal(0, .1)), z0 + h / 2 + v.co.z * h / 2))
+    F = [tuple(v.index for v in f.verts) for f in tmp.faces]; tmp.free(); return V, F, [(0, 0)] * len(V)
+# unit prototypes (1 m tall) for the Minho hillside vegetation; three.js instances them
+def blobs(specs):
+    V = []; F = []
+    for (cx, cy, cz, r, h) in specs:
+        v, f, _ = blob(cx, cy, cz - h / 2, r, h); o = len(V); V += v; F += [tuple(i + o for i in q) for q in f]
+    return V, F, [(0, 0)] * len(V)
+def blades(n=6):
+    V = []; F = []
+    for k in range(n):
+        a = k / n * 2 * np.pi + rng.random() * .5; lean = .18 + rng.random() * .2; w = .045
+        bx, by = math.cos(a + 1.57) * w, math.sin(a + 1.57) * w; tx, ty = math.cos(a) * lean, math.sin(a) * lean
+        o = len(V); V += [(-bx, -by, 0), (bx, by, 0), (tx, ty, .75 + rng.random() * .25)]; F.append((o, o + 1, o + 2))
+    return V, F, [(0, 0)] * len(V)
+PROTO = {
+ 'oak': [('trunk', cone(0, 0, -.03, .035, .5, 6)), ('leaf', blobs([(0, 0, .66, .3, .42), (.17, .05, .58, .2, .3), (-.15, .08, .6, .21, .3), (.02, -.17, .62, .2, .3), (0, 0, .82, .2, .26)]))],
+ 'pine': [('trunk', cone(0, 0, -.03, .02, .6, 6)), ('leaf', blobs([(0, 0, .74, .26, .3), (.17, .06, .64, .19, .22), (-.16, -.07, .62, .19, .22), (.03, -.18, .58, .17, .2), (-.04, .16, .56, .16, .2), (0, 0, .9, .16, .16)]))],
+ 'shrub': [('leaf', blobs([(0, 0, .3, .42, .55), (.28, .1, .25, .3, .42), (-.25, -.12, .24, .28, .4)]))],
+ 'tuft': [('leaf', blades(7))],
+}
+PAL = {'oak': [(92, 124, 56), (108, 136, 62), (80, 112, 50)], 'pine': [(70, 100, 56), (80, 110, 60), (62, 92, 52)],
+       'shrub': [(128, 138, 62), (112, 128, 56), (196, 170, 60)], 'tuft': [(120, 132, 62), (138, 144, 70), (104, 120, 56)]}
+for nm, parts in PROTO.items():
+    for part, geo in parts:
+        A = Acc(); A.add(geo); o = A.obj(f'PROTO-{nm}-{part}-{len(bpy.data.objects)}', trunk if part == 'trunk' else leaf[1]); o.location = (0, 0, 0)
+TYPES = list(PROTO)
+TREES = []
+for (x, y) in tp:
+    g = float(hz(x, y)); pine = rng.random() < .45
+    TREES.append([round(x, 2), round(y, 2), round(g, 2), round((10 + rng.random() * 8) if pine else (7 + rng.random() * 5), 1), TYPES.index('pine' if pine else 'oak'), int(rng.integers(0, 3)), round(rng.random() * 6.28, 2)])
+# undergrowth: gorse/broom at the forest edges and on the slopes, grass tufts everywhere but the path and the structures
+canm = lambda x, y: can[min(511, max(0, int((R - y) / (2 * R) * 512))), min(511, max(0, int((x + R) / (2 * R) * 512)))]
+pathpts = dense(loc(P.PATH), 1.5); kp = cKDTree(pathpts)
+def free(x, y, dw, dp=2.5): return math.hypot(x, y) < R - 2 and kd.query((x, y))[0] > dw and kp.query((x, y))[0] > dp
+n_sh = 0
+for _ in range(9000):
+    x, y = (rng.random(2) * 2 - 1) * R; c = canm(x, y)
+    if n_sh > 320 or not free(x, y, 6) or _encl.contains_point((x, y)): continue
+    if rng.random() < (.9 if .12 < c < .6 else .08):
+        TREES.append([round(x, 2), round(y, 2), round(float(hz(x, y)), 2), round(1.6 + rng.random() * 1.8, 2), TYPES.index('shrub'), int(rng.integers(0, 3)), round(rng.random() * 6.28, 2)]); n_sh += 1
+n_tu = 0
+for _ in range(20000):
+    x, y = (rng.random(2) * 2 - 1) * R
+    if n_tu > 2600 or not free(x, y, 1.6, 1.8): continue
+    ins = _encl.contains_point((x, y))
+    if rng.random() < (.22 if ins else .8):
+        TREES.append([round(x, 2), round(y, 2), round(float(hz(x, y)), 2), round(.35 + rng.random() * .35, 2), TYPES.index('tuft'), int(rng.integers(0, 3)), round(rng.random() * 6.28, 2)]); n_tu += 1
+print('trees', len(tp), 'shrubs', n_sh, 'tufts', n_tu, 'R', R)
+
+# ---------- labels from the plan legend (empties named lbl:...)
+for t, x, y in P.LABELS:
+    c = loc([x, y]); e = bpy.data.objects.new(f'LBL-{t}-{len(bpy.data.objects)}', None); e.location = (c[0], c[1], float(hz(c[0], c[1])) + 3)
+    bpy.context.scene.collection.objects.link(e)
+for t, pts, k in [('Muralha', P.W_EAST_INNER, 3), ('Casas redondas', None, 0)]:
+    if pts is None:
+        c = np.mean([[h[0], h[1]] for h in hpos[:22]], 0)
+    else:
+        c = loc(pts[k])
+    e = bpy.data.objects.new(f'LBL-{t}-{len(bpy.data.objects)}', None); e.location = (c[0], c[1], float(hz(c[0], c[1])) + 4); bpy.context.scene.collection.objects.link(e)
+
+# ---------- stylised ground (the orthophoto only guides land cover): grass, dry grass in the enclosure, trodden earth, path
+TS = 3072; mpp = 2 * R / TS
+jj, ii = np.mgrid[0:TS, 0:TS]; GX = (ii + .5) * mpp - R; GY = R - (jj + .5) * mpp
+def noise(sig, seed):
+    return gaussian_filter(np.random.default_rng(seed).normal(0, 1, (TS, TS)), sig, mode='wrap')
+n1 = noise(40, 1); n1 /= n1.std(); n2 = noise(10, 2); n2 /= n2.std(); n3 = noise(2, 3); n3 /= n3.std()
+from PIL import ImageDraw
+def m2px(p): return [((x + R) / mpp, (R - y) / mpp) for x, y in p]
+def mask_draw(fn):
+    im = Image.new('L', (TS, TS), 0); fn(ImageDraw.Draw(im)); return np.asarray(im, float) / 255
+encl = loc(P.W_WEST + P.W_LOWER + P.W_EAST_OUTER[::-1] + P.W_EAST_INNER[::-1])
+inside = gaussian_filter(mask_draw(lambda d: d.polygon(m2px(encl), fill=255)), 6)
+def near(d):
+    for L in [P.W_WEST, P.W_LOWER, P.W_EAST_OUTER, P.W_EAST_INNER, P.W_SE] + P.W_INNER: d.line(m2px(loc(L)), fill=255, width=int(6 / mpp))
+    for (x, y, rad) in hpos:
+        X, Y = (x + R) / mpp, (R - y) / mpp; q = (rad + 1.6) / mpp; d.ellipse([X - q, Y - q, X + q, Y + q], fill=255)
+    for (x, y, r) in P.ROCKS:
+        c = loc([x, y]); X, Y = (c[0] + R) / mpp, (R - c[1]) / mpp; q = r * K * kk / mpp * 1.1; d.ellipse([X - q, Y - q, X + q, Y + q], fill=200)
+dirt = gaussian_filter(mask_draw(near), 5)
+path = gaussian_filter(mask_draw(lambda d: d.line(m2px(dense(loc(P.PATH), 2)), fill=255, width=int(3.2 / mpp), joint='curve')), 2.2)
+forest = gaussian_filter(np.asarray(Image.fromarray((can * 255).astype(np.uint8)).resize((TS, TS), Image.BILINEAR), float) / 255, 8)
+# slope from the height function
+zz = hz(GX[::8, ::8], GY[::8, ::8]); gy_, gx_ = np.gradient(zz, mpp * 8); slope = np.hypot(gx_, gy_)
+slope = np.asarray(Image.fromarray(slope.astype(np.float32)).resize((TS, TS), Image.BILINEAR))
+def lerp(a, b, t): t = np.clip(t, 0, 1)[..., None]; return a * (1 - t) + b * t
+C = lambda *c: np.array(c, float)
+col = lerp(C(96, 118, 52), C(132, 146, 68), .5 + .22 * n1 + .12 * n2)                 # meadow
+col = lerp(col, C(150, 154, 84), np.clip(inside * (.75 + .06 * n2), 0, 1))           # dry, cleared enclosure
+col = lerp(col, C(76, 96, 46), forest * .7 * (1 - inside))                                        # shaded forest floor
+col = lerp(col, C(128, 104, 72), np.clip((slope - .55) * 1.4, 0, .7))               # earthy steep slopes
+col = lerp(col, C(158, 140, 104), np.clip(dirt * 1.1, 0, .75))           # trodden earth by walls and houses
+col = lerp(col, C(200, 176, 128), np.clip(path * (1.1 + .25 * n3), 0, 1))            # sandy path
+hs_ = np.zeros_like(slope)
+zz2 = hz(GX[::4, ::4], GY[::4, ::4]); gy2, gx2 = np.gradient(zz2, mpp * 4)
+nx, ny, nz = -gx2, gy2, np.ones_like(gx2); nn = np.sqrt(nx * nx + ny * ny + 1); L_ = np.array([-.55, .45, .7]); L_ /= np.linalg.norm(L_)
+shade = (nx * L_[0] + ny * L_[1] + nz * L_[2]) / nn; shade = np.asarray(Image.fromarray(shade.astype(np.float32)).resize((TS, TS), Image.BILINEAR))
+col *= np.clip(.78 + .3 * (shade - shade.mean()) / (shade.std() + 1e-6) * .35 + .22, .7, 1.15)[..., None]
+clump = gaussian_filter(np.random.default_rng(5).normal(0, 1, (TS, TS)), 4); clump /= clump.std()
+col = lerp(col, col * C(.84, .9, .8) / 1, np.clip(clump * .35, 0, .6) * (1 - path))      # darker grass clumps
+spk = np.random.default_rng(6).random((TS, TS))
+col = np.where(((spk > .9965) & (path < .3))[..., None], C(176, 170, 158), col)               # pebbles
+col = np.where(((spk < .0012) & (inside < .3) & (forest < .3) & (path < .3))[..., None], C(232, 214, 96), col)   # wild flowers
+col *= (1 + .07 * n3[..., None]) ; col += n3[..., None] * 4
+rim = np.clip((np.hypot(GX, GY) - (R - 1.2)) / 1.2, 0, 1); col = lerp(col, C(84, 104, 46), rim)
+Image.fromarray(np.clip(col, 0, 255).astype(np.uint8)).save('blend/ground_raw.jpg', quality=92)
+gtex.image = bpy.data.images.load(os.path.abspath('blend/ground_raw.jpg'))
+
+# ---------- ambient occlusion baked into the ground texture (Cycles)
+sc = bpy.context.scene; sc.render.engine = 'CYCLES'; sc.cycles.samples = 48; sc.cycles.device = 'CPU'
+ao = bpy.data.images.new('ao', 1024, 1024, float_buffer=False)
+an = gmat.node_tree.nodes.new('ShaderNodeTexImage'); an.image = ao; gmat.node_tree.nodes.active = an
+for o in sc.objects: o.select_set(False)
+for o in sc.objects:
+    if o.name.startswith('B-'): o.hide_render = True
+terrain.select_set(True); bpy.context.view_layer.objects.active = terrain
+sc.world = sc.world or bpy.data.worlds.new('w')
+sc.render.bake.margin = 4
+bpy.ops.object.bake(type='AO')
+aopx = np.array(ao.pixels[:]).reshape(1024, 1024, 4)[::-1, :, 0]   # blender images are bottom-up
+aoi = Image.fromarray((np.clip(aopx, 0, 1) * 255).astype(np.uint8)).resize((TS, TS), Image.BILINEAR).filter(ImageFilter.GaussianBlur(1.5))
+A = np.asarray(aoi, float)[..., None] / 255
+G = np.asarray(Image.open('blend/ground_raw.jpg'), float) * (.68 + .32 * A)
+Image.fromarray(np.clip(G, 0, 255).astype(np.uint8)).save(f'blend/ground.jpg', quality=88)
+gmat.node_tree.nodes.remove(an); gtex.image = bpy.data.images.load(os.path.abspath('blend/ground.jpg'))
+for o in sc.objects: o.hide_render = False
+
+# ---------- export
+os.makedirs('app/dio', exist_ok=True)
+for o in sc.objects: o.select_set(True)
+bpy.ops.export_scene.gltf(filepath=os.path.abspath(f'app/dio/{SID}.glb'), export_format='GLB', export_apply=True, export_yup=True,
+                          export_image_format='JPEG', export_jpeg_quality=86, export_materials='EXPORT', use_selection=False, export_extras=True,
+                          export_draco_mesh_compression_enable=False)
+json.dump({'cat': CAT, 'sources': P.SOURCES, 'R': R, 'ex': EX, 'h0': H0, 'cx': CX, 'cz': CZ, 'trees': TREES, 'types': TYPES, 'pal': {k: [list(c) for c in v] for k, v in PAL.items()}}, open(f'app/dio/{SID}.json', 'w'))
+print('ok', os.path.getsize(f'app/dio/{SID}.glb'))

@@ -1,0 +1,17 @@
+import {chromium} from '/opt/node22/lib/node_modules/playwright/index.mjs';
+const D='./';
+const b=await chromium.launch({executablePath:'/opt/pw-browsers/chromium',args:['--use-angle=swiftshader','--enable-unsafe-swiftshader']});
+const p=await b.newPage({viewport:{width:1440,height:900}});
+p.on('pageerror',e=>console.log('ERR',e.message));p.on('console',m=>{if(m.type()==='error')console.log(m.type(),m.text().slice(0,200))});
+await p.goto('http://localhost:8765/test.html#guimaraes-citania-de-briteiros');
+await p.waitForTimeout(8000);
+await p.evaluate(()=>document.querySelector('#dio').scrollIntoView({block:'center'}));
+await p.waitForTimeout(20000);
+await p.screenshot({path:D+'dio1.png',clip:{x:780,y:0,width:660,height:900}});
+await p.click('#dioBar [data-m="B"]');await p.waitForTimeout(3000);
+const bx=await p.locator('#dioStage canvas').boundingBox();
+await p.mouse.click(bx.x+bx.width*.47,bx.y+bx.height*.42);await p.waitForTimeout(3500);
+await p.screenshot({path:D+'dio2.png',clip:{x:780,y:0,width:660,height:900}});
+await p.click('#dioBar [data-a="ev"]');await p.waitForTimeout(2500);
+await p.screenshot({path:D+'dio3.png',clip:{x:780,y:0,width:660,height:900}});
+await b.close();
