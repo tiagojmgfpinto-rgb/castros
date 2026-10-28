@@ -331,29 +331,39 @@ OAK_C = tblobs(crown(9, .13, .21, .52, .86, .27, 1) + [(.24, .1, .64, .16, .24),
 # sobreiro (Quercus suber): short thick trunk stripped to rusty-red at the base, broad dark umbrella crown
 COR_T = limbs([(0, 0, -.03, .03, 0, .2, .06)]); COR_L = limbs([(.03, 0, .18, .05, 0, .36, .05), (.05, 0, .33, .28, .06, .55, .026), (.05, 0, .33, -.26, -.04, .55, .026), (.05, 0, .33, .0, .24, .56, .022)])
 COR_C = tblobs(crown(10, .14, .22, .55, .72, .34, 2))
+def vase(n, seed, z0=.62):   # eucalyptus: few loose clumps in the upper third, spreading outwards with height, gaps between them
+    g = np.random.default_rng(seed); out = []
+    for k in range(n):
+        u = (k + g.random()) / n; a = k * 2.4 + g.random() * .6; d = .05 + .17 * u; r = .07 + .04 * g.random()
+        out.append((math.cos(a) * d, math.sin(a) * d, z0 + (.97 - z0) * u, r, r * .9))
+    return out
 PROTO = {
  'oak': [('trunk', OAK_L), ('leaf', OAK_C)],
  'cork': [('bark', COR_T), ('trunk', COR_L), ('leaf', COR_C)],
- 'pine': [('trunk', cone(0, 0, -.03, .02, .6, 6)), ('leaf', blobs([(0, 0, .74, .26, .3), (.17, .06, .64, .19, .22), (-.16, -.07, .62, .19, .22), (.03, -.18, .58, .17, .2), (-.04, .16, .56, .16, .2), (0, 0, .9, .16, .16)]))],
- # variants so the forest is not made of clones: broad low oak, narrow tall oak, second cork crown,
- # adult pinheiro-bravo (long bare trunk, crown high and flat) and a young, conical-ish pine
+ # the hill today (Tiago): mostly eucalyptus, then chestnut, oak and cork oak. Variants so the forest is not made of clones.
+ # eucalipto: tall, slender pale trunk forked high, open narrow crown of small drooping clumps
+ 'euc': [('pale', limbs([(0, 0, -.03, .01, 0, .62, .009), (.01, 0, .5, .08, .03, .84, .005), (.01, 0, .55, -.07, -.02, .86, .005)])), ('leaf', tblobs(vase(9, 6), 1))],
+ 'euc2': [('pale', limbs([(0, 0, -.03, -.01, .01, .72, .008), (-.01, .01, .62, .06, -.03, .9, .0045)])), ('leaf', tblobs(vase(7, 7, z0=.7), 1))],
+ # castanheiro: thick short trunk, broad dense rounded crown
+ 'chest': [('trunk', limbs([(0, 0, -.03, .02, 0, .32, .06), (.02, 0, .28, .24, .06, .55, .03), (.02, 0, .28, -.22, -.05, .56, .03), (.02, 0, .3, 0, .22, .58, .026)])), ('leaf', tblobs(crown(12, .16, .24, .44, .8, .32, 8)))],
+ 'chest2': [('trunk', limbs([(0, 0, -.03, 0, 0, .38, .055), (0, 0, .34, .18, .1, .6, .026), (0, 0, .34, -.16, -.1, .62, .026)])), ('leaf', tblobs(crown(10, .15, .22, .5, .84, .26, 9)))],
  'oak2': [('trunk', limbs([(0, 0, -.03, .03, 0, .34, .05), (.03, 0, .3, .26, .1, .56, .024), (.03, 0, .3, -.24, -.08, .58, .024), (.03, 0, .32, .04, .22, .6, .02)])), ('leaf', tblobs(crown(10, .15, .23, .44, .74, .36, 3)))],
  'oak3': [('trunk', limbs([(0, 0, -.03, .01, 0, .55, .04), (.01, 0, .45, .12, .05, .8, .018), (.01, 0, .45, -.1, -.04, .82, .018)])), ('leaf', tblobs(crown(8, .1, .16, .52, .92, .18, 4)))],
  'cork2': [('bark', COR_T), ('trunk', COR_L), ('leaf', tblobs(crown(8, .15, .24, .5, .66, .3, 5) + [(.2, -.12, .58, .17, .2)]))],
- 'pine2': [('trunk', cone(0, 0, -.03, .022, .84, 6)), ('leaf', blobs([(0, 0, .86, .3, .16), (.2, .08, .8, .2, .14), (-.19, -.06, .79, .2, .13), (.04, -.2, .78, .18, .12), (0, 0, .96, .16, .1)]))],
- 'pine3': [('trunk', cone(0, 0, -.03, .02, .5, 6)), ('leaf', blobs([(0, 0, .42, .27, .3), (0, 0, .62, .21, .26), (0, 0, .8, .14, .22), (.12, .05, .5, .16, .2)]))],
  'shrub': [('leaf', blobs([(0, 0, .3, .42, .55), (.28, .1, .25, .3, .42), (-.25, -.12, .24, .28, .4)]))],
  'tuft': [('leaf', blades(7))],
 }
 _oak = [(96, 128, 54), (112, 140, 60), (84, 116, 48), (122, 138, 58), (78, 108, 50), (104, 122, 52)]
 _cork = [(70, 88, 52), (80, 96, 56), (62, 80, 48), (88, 100, 58), (66, 84, 54)]
-_pine = [(70, 100, 56), (80, 110, 60), (62, 92, 52), (56, 84, 50), (86, 112, 66)]
-PAL = {'oak': _oak, 'oak2': _oak, 'oak3': _oak, 'cork': _cork, 'cork2': _cork, 'pine': _pine, 'pine2': _pine, 'pine3': _pine,
+_euc = [(124, 140, 100), (136, 148, 108), (116, 132, 96), (144, 152, 112), (120, 138, 106), (130, 142, 92)]
+_chest = [(92, 130, 50), (104, 140, 56), (84, 120, 46), (112, 146, 62), (98, 128, 52)]
+PAL = {'oak': _oak, 'oak2': _oak, 'oak3': _oak, 'cork': _cork, 'cork2': _cork, 'euc': _euc, 'euc2': _euc, 'chest': _chest, 'chest2': _chest,
        'shrub': [(128, 138, 62), (112, 128, 56), (196, 170, 60)], 'tuft': [(120, 132, 62), (138, 144, 70), (104, 120, 56)]}
-bark_m = col_mat('corkbark', (160, 78, 44), .9); trunk = col_mat('trunk', (88, 74, 60), .9)
+bark_m = col_mat('corkbark', (160, 78, 44), .9); pale_m = col_mat('eucbark', (196, 186, 166), .8); trunk = col_mat('trunk', (88, 74, 60), .9)
 for nm, parts in PROTO.items():
     for part, geo in parts:
-        A = Acc(); A.add(geo); o = A.obj(f'PROTO-{nm}-{part}-{len(bpy.data.objects)}', {'trunk': trunk, 'bark': bark_m}.get(part, leaf[1])); o.location = (0, 0, 0)
+        A = Acc(); A.add(geo); o = A.obj(f'PROTO-{nm}-{part}-{len(bpy.data.objects)}', {'trunk': trunk, 'bark': bark_m, 'pale': pale_m}.get(part, leaf[1])); o.location = (0, 0, 0)
+        _b = bmesh.new(); _b.from_mesh(o.data); bmesh.ops.recalc_face_normals(_b, faces=_b.faces); _b.to_mesh(o.data); _b.free()   # limbs() winds its tubes inwards
 TYPES = list(PROTO)
 TREES = []
 # crown width from the canopy model: mean radius (8 directions) where the canopy stays above half the tree height
@@ -365,8 +375,14 @@ def crown_r(x, y, h):
 CR = {p: 2 * crown_r(*p, TH[p]) / max(TH[p], 3) for p in tp}; cr0 = float(np.median(list(CR.values()))) if CR else 1
 for (x, y) in tp:
     g = float(hz(x, y)); h_ = TH[(x, y)]; rr = rng.random(); wf = float(np.clip(CR[(x, y)] / cr0, .7, 1.4))
-    sp = 'pine' if (h_ > 15 and rr < .35) else ('cork' if (h_ < 13 and rr < .45) else 'oak')
-    if sp == 'pine': kind = 'pine2' if h_ > 18 and rng.random() < .6 else ('pine3' if h_ < 10 else str(rng.choice(['pine', 'pine2'])))
+    # species are not in the LiDAR: tall narrow crowns are taken as eucalyptus (the commonest tree here), broad ones as chestnut
+    pe = (.8 if wf < 1.15 else .45) if h_ >= 12 else (.5 if h_ >= 8 else .15)
+    if rr < pe: sp = 'euc'
+    else:
+        w3 = [.45, .35, .2] if wf > 1.15 else ([.25, .35, .4] if h_ < 9 else [.3, .5, .2])
+        sp = str(rng.choice(['chest', 'oak', 'cork'], p=w3))
+    if sp == 'euc': kind = 'euc2' if wf < .85 or rng.random() < .3 else 'euc'
+    elif sp == 'chest': kind = str(rng.choice(['chest', 'chest2']))
     elif sp == 'cork': kind = str(rng.choice(['cork', 'cork2']))
     else: kind = 'oak2' if wf > 1.15 else ('oak3' if wf < .85 else str(rng.choice(['oak', 'oak2', 'oak3'], p=[.5, .25, .25])))
     TREES.append([round(x, 2), round(y, 2), round(g, 2), round(min(22, h_ * EX), 1), TYPES.index(kind), int(rng.integers(0, len(PAL[kind]))), round(rng.random() * 6.28, 2), round(wf * (.92 + .16 * rng.random()), 2)])
