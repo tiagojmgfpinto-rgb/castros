@@ -1,5 +1,7 @@
 # Builds a castillos-style disc diorama of one castro in Blender (bpy) and exports a GLB for three.js.
-# Usage: /opt/bvenv/bin/python blend/diorama.py <site-id>
+# Castro de Sabroso. Usage: /opt/bvenv/bin/python blend/dio_sab.py guimaraes-castro-de-sabroso
+# Terrain, wall footing and trees from the DGT LiDAR 2025 point cloud (lidar/sab_laz.py → lidar/sab_*25.npy);
+# 1930 plan georeferenced on the LiDAR rampart (lidar/sab_georef.py → blend/sab_fit.json).
 # Local frame: x east, y north (Blender Z up), metres, origin = disc centre.
 import sys, json, math, importlib, os
 import numpy as np
@@ -27,14 +29,19 @@ R = float(np.max(np.hypot(allw[:, 0] - CX, allw[:, 1] - CZ))) + 24
 def loc(p):  # plan px -> Blender xy
     m = plan2m(p); return np.stack([m[..., 0] - CX, -(m[..., 1] - CZ)], -1)
 
-# ---------- terrain heights (DEM 129x129 over 2 km), bicubic
-D = np.asarray(Image.open(f'app/t3/{SID}.png').convert('RGB')).astype(float)
-Hd = (D[..., 0] * 256 + D[..., 1]) / 10 - 100
-ax = np.linspace(-1000, 1000, Hd.shape[0])
-spl = RectBivariateSpline(ax, ax, Hd, kx=3, ky=3)           # rows = z (south), cols = x
-def hraw(x, y):  # Blender xy -> metres
-    return spl.ev(-np.asarray(y) + CZ, np.asarray(x) + CX)
-H0 = float(hraw(0, 0)); EX = 1.25
+# ---------- terrain heights: DGT LiDAR 2025 ground points (class 2), TIN on a 25 cm grid, lightly smoothed
+from scipy.ndimage import map_coordinates
+X0L, Y0L = -17399.0506, 204754.9092                     # site point in PT-TM06
+LB = json.load(open('lidar/sab_box.json'))
+DTM = gaussian_filter(np.load('lidar/sab_dtm25.npy').astype(np.float32), 1.)
+CHM = np.load('lidar/sab_dsm25.npy').astype(np.float32) - np.load('lidar/sab_dtm25.npy').astype(np.float32)
+def _rc(x, y):  # Blender xy -> grid row/col
+    lx = np.asarray(x, float) + CX; lz = CZ - np.asarray(y, float)
+    return (LB['y1'] - (Y0L - lz)) / LB['cs'] - .5, (X0L + lx - LB['x0']) / LB['cs'] - .5
+def _samp(A, x, y, order=1):
+    r, c = _rc(x, y); return map_coordinates(A, [np.atleast_1d(r).ravel(), np.atleast_1d(c).ravel()], order=order, mode='nearest').reshape(np.shape(r))
+def hraw(x, y): return _samp(DTM, x, y)
+H0 = float(hraw(0, 0)); EX = 1.15
 def hz(x, y): return (hraw(x, y) - H0) * EX
 
 def new_obj(name, me, mat=None):
@@ -67,7 +74,7 @@ crop.save('blend/ground_raw.jpg', quality=92)
 def uv_of(x, y): return np.stack([(x + R) / (2 * R), (y + R) / (2 * R)], -1)
 
 # ---------- terrain disc (polar grid)
-NR, NA = 80, 300
+NR, NA = 260, 800
 rr = np.linspace(0, R, NR + 1)[1:]; aa = np.linspace(0, 2 * np.pi, NA, endpoint=False)
 X = np.concatenate([[0], (rr[:, None] * np.cos(aa)[None]).ravel()]); Y = np.concatenate([[0], (rr[:, None] * np.sin(aa)[None]).ravel()])
 Z = hz(X, Y); V = np.stack([X, Y, Z], 1); F = []
@@ -157,13 +164,39 @@ WALLS = [  # id, plan line, name, phase, width, height now, height in reconstitu
  ('M3', P.W_LOWER, 'Muralha do alargamento sul', '3.ª fase', 2.6, 2.0, 3.5, 'hip'),
  ('M4', P.W_EAST_OUTER, 'Muralha do alargamento nascente', '3.ª fase', 2.6, 2.0, 3.5, 'hip'),
 ]
+# The LiDAR ground model already holds the rampart (the stone bank is classified as ground), so the wall is laid over the real
+# slope: current state = stone skin a little above the crest of the bank; reconstitution = outer face of hb metres above the outer foot.
+from scipy.ndimage import gaussian_filter1d
+def rampart(pts, w, hb=None, jitter=.2, sink=.8, taper=.85):
+    p = dense(pts); n = len(p)
+    d = np.gradient(p, axis=0); d /= np.linalg.norm(d, axis=1, keepdims=True) + 1e-9; nr = np.stack([-d[:, 1], d[:, 0]], 1)
+    o = np.linspace(-w / 2 - 1.5, w / 2 + 1.5, 9)
+    prof = hz(p[:, 0, None] + nr[:, 0, None] * o, p[:, 1, None] + nr[:, 1, None] * o)
+    crest = gaussian_filter1d(prof.max(1), 3, mode='nearest'); foot = gaussian_filter1d(prof.min(1), 3, mode='nearest')
+    jit = gaussian_filter1d(rng.normal(0, jitter, n), 2.5, mode='nearest')
+    top = crest + .35 + jit if hb is None else np.maximum(foot + hb, crest + 1.0) + jit * .3
+    s = np.concatenate([[0], np.cumsum(np.linalg.norm(np.diff(p, axis=0), axis=1))]); V = []; UV = []
+    for i in range(n):
+        for j, (oo, up) in enumerate([(-w / 2, 0), (-w / 2 * taper, 1), (w / 2 * taper, 1), (w / 2, 0)]):
+            q = p[i] + nr[i] * oo; z = top[i] if up else float(hz(q[0], q[1])) - sink
+            V.append((q[0], q[1], z)); UV.append((s[i] / 2.2, (z - foot[i]) / 2.2 + j * .37))
+    F = [(i * 4 + j, i * 4 + j + 4, i * 4 + j + 5, i * 4 + j + 1) for i in range(n - 1) for j in range(3)]
+    F += [(0, 1, 2, 3), ((n - 1) * 4 + 3, (n - 1) * 4 + 2, (n - 1) * 4 + 1, (n - 1) * 4)]
+    return V, F, UV
+def bank_drop(pts, half=4.0):   # median height drop (m, not exaggerated) across the wall line in the LiDAR ground model
+    p = dense(pts, 2); d = np.gradient(p, axis=0); d /= np.linalg.norm(d, axis=1, keepdims=True) + 1e-9; nr = np.stack([-d[:, 1], d[:, 0]], 1)
+    o = np.linspace(-half, half, 9); pr = hraw(p[:, 0, None] + nr[:, 0, None] * o, p[:, 1, None] + nr[:, 1, None] * o)
+    return float(np.median(pr.max(1) - pr.min(1)))
+WALL_DROP = {}
 for sid, L, name, ph, w, h, hb, evb in WALLS:
-    put(sid, name, stone_m, [sweep(loc(L), w, h, .35)], 'A', 'conf')
-    put(sid, name, stone_m, [sweep(loc(L), w, hb, .12, top_taper=.92)], 'B', evb)
+    put(sid, name, stone_m, [rampart(loc(L), w)], 'A', 'conf')
+    put(sid, name, stone_m, [rampart(loc(L), w, hb, .12, taper=.92)], 'B', evb)
+    dr = bank_drop(loc(L)); WALL_DROP[sid] = dr
     item(id=sid, name=name, kind='Muralha', phase=ph, ev='conf', evB=evb,
-         dims=f'largura ≈ {w:g} m · altura actual representada ≈ {h:g} m · reconstituição {hb:g} m',
-         note='Traçado da planta de 1930 (Cardozo), confirmado pelo painel de 2021. ' + ('Altura de reconstituição segundo Cardozo (1976): 3 a 5 m; face externa com 5,20 m medida em 2015.' if evb == 'doc' else 'A altura original deste troço não está publicada: valor hipotético, por comparação com o recinto superior.'),
-         src=['cardozo1930', 'era2021', 'cardozo1976' if evb == 'doc' else 'loureiro1999'] + (['cruz2015'] if sid == 'M2' else []))
+         dims=f'largura ≈ {w:g} m · desnível atual na linha da muralha ≈ {dr:.1f} m (LiDAR) · reconstituição: face externa com {hb:g} m',
+         note='Traçado da planta de 1930 (Cardozo), confirmado pelo painel de 2021 e pelo talude da muralha no modelo do terreno LiDAR da DGT (2025). No estado atual a pedra cobre o talude real. ' + ('Altura de reconstituição segundo Cardozo (1976): 3 a 5 m; face externa com 5,20 m medida em 2015.' if evb == 'doc' else 'A altura original deste troço não está publicada: valor hipotético, por comparação com o recinto superior.'),
+         src=['cardozo1930', 'era2021', 'lidar', 'cardozo1976' if evb == 'doc' else 'loureiro1999'] + (['cruz2015'] if sid == 'M2' else []))
+print('bank drop', {k: round(v, 1) for k, v in WALL_DROP.items()})
 # SE entrance: elbow corridor (3rd phase), drawn in the 1930 plan
 ent = [sweep(loc(P.W_SE), 1.6, 1.4, .25)] + [sweep(loc(L), 1.2, 1.4, .2) for L in P.W_INNER[:2]]
 put('E1', 'Entrada SE', stone_m, ent, 'A', 'conf'); put('E1', 'Entrada SE', stone_m, [sweep(loc(P.W_SE), 1.6, 3.0, .1)] + [sweep(loc(L), 1.2, 3.0, .1) for L in P.W_INNER[:2]], 'B', 'hip')
@@ -217,42 +250,35 @@ for (x, y, r) in P.ROCKS:
         for v in tmp.verts:
             p = np.array(v.co) * sc * (1 + rng.normal(0, .07)); ca, sa = math.cos(ang), math.sin(ang)
             v.co = (c[0] + off[0] + p[0] * ca - p[1] * sa, c[1] + off[1] + p[0] * sa + p[1] * ca, 0)
-            v.co.z = float(hz(v.co.x, v.co.y)) + max(-.6, p[2] * .8 - .4)
+            v.co.z = float(hz(v.co.x, v.co.y)) + max(-.6, p[2] * .4 - .5)   # low: the outcrop relief is already in the LiDAR ground
         me = bpy.data.meshes.new('t'); tmp.to_mesh(me); tmp.free(); bm.from_mesh(me); bpy.data.meshes.remove(me)
 from matplotlib.path import Path as MPath
 _encl0 = MPath(loc(P.W_WEST + P.W_LOWER + P.W_EAST_OUTER[::-1] + P.W_EAST_INNER[::-1]))
-bm2 = bmesh.new(); nb = 0
-for _ in range(4000):
-    x, y = (rng.random(2) * 2 - 1) * R
-    if nb >= 70 or math.hypot(x, y) > R - 4 or _encl0.contains_point((x, y)): continue
-    if min(np.hypot(*(np.vstack([loc(L) for L in [P.W_WEST, P.W_LOWER, P.W_EAST_OUTER, P.W_EAST_INNER]]) - [x, y]).T)) < 9: continue
-    for kk2 in range(int(rng.integers(1, 4))):
-        tmp = bmesh.new(); bmesh.ops.create_icosphere(tmp, subdivisions=2, radius=1)
-        sc = np.array([.6 + rng.random() * 1.6, .5 + rng.random() * 1.3, .45 + rng.random() * .9]); ox, oy = (rng.random(2) - .5) * 3; ang = rng.random() * np.pi
-        for v in tmp.verts:
-            q = np.array(v.co) * sc * (1 + rng.normal(0, .08)); ca, sa = math.cos(ang), math.sin(ang)
-            v.co = (x + ox + q[0] * ca - q[1] * sa, y + oy + q[0] * sa + q[1] * ca, 0); v.co.z = float(hz(v.co.x, v.co.y)) + q[2] - .25
-        m_ = bpy.data.meshes.new('t'); tmp.to_mesh(m_); tmp.free(); bm2.from_mesh(m_); bpy.data.meshes.remove(m_)
-    nb += 1
-me2 = bpy.data.meshes.new('boulders'); bm2.to_mesh(me2); bm2.free(); new_obj('boulders', me2, col_mat('granite2', (132, 128, 118), .95))
 me = bpy.data.meshes.new('rocks'); bm.to_mesh(me); bm.free(); rocks = new_obj('AB-R', me, rock_m); rocks['sid'] = 'R'; rocks['mode'] = 'AB'; rocks['ev'] = 'conf'
-item(id='R', name='Afloramentos graníticos', kind='Afloramento', phase='—', ev='conf', evB='conf', dims='formas simplificadas', note='Posição e extensão segundo a planta de 1930; alguns têm gravuras rupestres (n.º 2 a 4) e uma gruta (n.º 5). A forma 3D dos penedos é aproximada.', src=['cardozo1930', 'era2021'])
+item(id='R', name='Afloramentos graníticos', kind='Afloramento', phase='—', ev='conf', evB='conf', dims='formas simplificadas', note='Posição e extensão segundo a planta de 1930; alguns têm gravuras rupestres (n.º 2 a 4) e uma gruta (n.º 5). O relevo dos penedos vem do modelo do terreno LiDAR; a forma das pedras à superfície é aproximada.', src=['cardozo1930', 'era2021', 'lidar'])
 
-# ---------- trees from the orthophoto canopy (dark green), kept off walls and houses
-a = np.asarray(crop.resize((512, 512))).astype(float); r_, g_, b_ = a[..., 0], a[..., 1], a[..., 2]
-lum = a.mean(-1); can = ((lum < 92) & (g_ >= r_ - 4) & (b_ < g_ + 10)).astype(float)
-can = gaussian_filter(can, 1.2)
-pk = (can == maximum_filter(can, 15)) & (can > .55)
-ys, xs = np.nonzero(pk); m_per = 2 * R / 512
-tp = [((x + .5) * m_per - R, (y + .5) * m_per - R) for x, y in zip(xs, ys)]
-tp = [(x, -y) for x, y in tp if math.hypot(x, y) < R - 2.5]   # image rows go south
+# ---------- trees from the LiDAR canopy height model (MDS − MDT, 25 cm): local maxima above 3 m, real heights
+from scipy.ndimage import maximum_filter as _mf
+rS, cS = _rc(np.array([-R, R]), np.array([R, -R])); r0_, r1_ = int(rS.min()), int(rS.max()) + 1; c0_, c1_ = int(cS.min()), int(cS.max()) + 1
+CH = gaussian_filter(CHM[r0_:r1_, c0_:c1_], 2.4)
+pk = (CH == _mf(CH, 13)) & (CH > 3)
+ys, xs = np.nonzero(pk); tp = []; TH = {}
+for yy_, xx_ in zip(ys, xs):
+    lx = LB['x0'] + (c0_ + xx_ + .5) * LB['cs'] - X0L; lz = Y0L - (LB['y1'] - (r0_ + yy_ + .5) * LB['cs'])
+    x, y = lx - CX, -(lz - CZ)
+    if math.hypot(x, y) < R - 2.5: tp.append((x, y)); TH[(x, y)] = float(CHM[r0_ + yy_ - 2:r0_ + yy_ + 3, c0_ + xx_ - 2:c0_ + xx_ + 3].max())
+# canopy cover (for undergrowth and ground colour), 512² over the disc
+_cg = np.linspace(-R, R, 512)
+can = gaussian_filter((_samp(CHM, *np.meshgrid(_cg, -_cg)) > 2.5).astype(float), 1.2)
 wallpts = np.vstack([dense(loc(L)) for L in [P.W_WEST, P.W_LOWER, P.W_EAST_OUTER, P.W_EAST_INNER]] + [np.array([[h[0], h[1]] for h in hpos])])
 from scipy.spatial import cKDTree
 kd = cKDTree(wallpts)
 from matplotlib.path import Path as MPath
 _encl = MPath(loc(P.W_WEST + P.W_LOWER + P.W_EAST_OUTER[::-1] + P.W_EAST_INNER[::-1]))
-tp = [p for p in tp if kd.query(p)[0] > 10 and not _encl.contains_point(p)]   # keep the archaeological site clear
-if len(tp) > 380: tp = [tp[i] for i in sorted(rng.choice(len(tp), 380, replace=False))]
+_upper = MPath(loc(P.W_WEST + P.W_EAST_INNER[::-1]))
+ntp0 = len(tp)
+tp = [p for p in tp if (kd.query(p)[0] > 5 and not _encl.contains_point(p)) or (kd.query(p)[0] > 6 and rng.random() < (.1 if _upper.contains_point(p) else .15))]   # real trees, thinned inside the walls so the ruins stay readable
+print('lidar trees', ntp0, 'kept', len(tp))
 leaf = [col_mat('leaf1', (52, 86, 40)), col_mat('leaf2', (70, 104, 46)), col_mat('leaf3', (40, 70, 38))]
 trunk = col_mat('trunk', (92, 66, 44))
 def cone(cx, cy, z0, r, h, n=9):
@@ -276,22 +302,90 @@ def blades(n=6):
         bx, by = math.cos(a + 1.57) * w, math.sin(a + 1.57) * w; tx, ty = math.cos(a) * lean, math.sin(a) * lean
         o = len(V); V += [(-bx, -by, 0), (bx, by, 0), (tx, ty, .75 + rng.random() * .25)]; F.append((o, o + 1, o + 2))
     return V, F, [(0, 0)] * len(V)
+def tblobs(specs, sub=2):
+    V = []; F = []
+    for (cx, cy, cz, r, h) in specs:
+        tmp = bmesh.new(); bmesh.ops.create_icosphere(tmp, subdivisions=sub, radius=1); o = len(V)
+        for v in tmp.verts:
+            k = 1 + rng.normal(0, .09); V.append((cx + v.co.x * r * k, cy + v.co.y * r * k, cz + v.co.z * h / 2 * (1 + rng.normal(0, .06))))
+        F += [tuple(o + v.index for v in f.verts) for f in tmp.faces]; tmp.free()
+    return V, F, [(0, 0)] * len(V)
+def limbs(specs):   # trunk and branches as thin tapered cones from (x0,y0,z0) to (x1,y1,z1)
+    V = []; F = []
+    for (x0, y0, z0, x1, y1, z1, r0) in specs:
+        a = np.array([x0, y0, z0]); b_ = np.array([x1, y1, z1]); ax = b_ - a; L = np.linalg.norm(ax); ax /= L
+        u = np.cross(ax, [0, 0, 1] if abs(ax[2]) < .9 else [1, 0, 0]); u /= np.linalg.norm(u); w_ = np.cross(ax, u); o = len(V)
+        for k in range(7):
+            t = k / 7 * 2 * np.pi; V.append(tuple(a + (u * math.cos(t) + w_ * math.sin(t)) * r0)); V.append(tuple(b_ + (u * math.cos(t) + w_ * math.sin(t)) * r0 * .45))
+        for k in range(7): k2 = (k + 1) % 7; F.append((o + 2 * k, o + 2 * k2, o + 2 * k2 + 1, o + 2 * k + 1))
+    return V, F, [(0, 0)] * len(V)
+def crown(n, rmin, rmax, zlo, zhi, spread, seed):
+    g = np.random.default_rng(seed); out = []
+    for k in range(n):
+        a = k / n * 2 * np.pi + g.random() * .7; d = spread * (.35 + .65 * g.random()); z = zlo + (zhi - zlo) * g.random()
+        out.append((math.cos(a) * d, math.sin(a) * d, z, rmin + (rmax - rmin) * g.random(), (rmin + (rmax - rmin) * g.random()) * 1.5))
+    return out + [(0, 0, zhi, rmax * 1.1, rmax * 1.3)]
+# carvalho (Quercus robur/pyrenaica): open, lobed, irregular crown on a forked trunk
+OAK_L = limbs([(0, 0, -.03, .02, 0, .42, .045), (.02, 0, .38, .2, .08, .66, .022), (.02, 0, .38, -.17, -.05, .7, .022), (.02, 0, .4, .0, -.16, .74, .018)])
+OAK_C = tblobs(crown(9, .13, .21, .52, .86, .27, 1) + [(.24, .1, .64, .16, .24), (-.22, -.06, .7, .16, .24)])
+# sobreiro (Quercus suber): short thick trunk stripped to rusty-red at the base, broad dark umbrella crown
+COR_T = limbs([(0, 0, -.03, .03, 0, .2, .06)]); COR_L = limbs([(.03, 0, .18, .05, 0, .36, .05), (.05, 0, .33, .28, .06, .55, .026), (.05, 0, .33, -.26, -.04, .55, .026), (.05, 0, .33, .0, .24, .56, .022)])
+COR_C = tblobs(crown(10, .14, .22, .55, .72, .34, 2))
+def vase(n, seed, z0=.62):   # eucalyptus: few loose clumps in the upper third, spreading outwards with height, gaps between them
+    g = np.random.default_rng(seed); out = []
+    for k in range(n):
+        u = (k + g.random()) / n; a = k * 2.4 + g.random() * .6; d = .05 + .17 * u; r = .07 + .04 * g.random()
+        out.append((math.cos(a) * d, math.sin(a) * d, z0 + (.97 - z0) * u, r, r * .9))
+    return out
 PROTO = {
- 'oak': [('trunk', cone(0, 0, -.03, .035, .5, 6)), ('leaf', blobs([(0, 0, .66, .3, .42), (.17, .05, .58, .2, .3), (-.15, .08, .6, .21, .3), (.02, -.17, .62, .2, .3), (0, 0, .82, .2, .26)]))],
- 'pine': [('trunk', cone(0, 0, -.03, .02, .6, 6)), ('leaf', blobs([(0, 0, .74, .26, .3), (.17, .06, .64, .19, .22), (-.16, -.07, .62, .19, .22), (.03, -.18, .58, .17, .2), (-.04, .16, .56, .16, .2), (0, 0, .9, .16, .16)]))],
+ 'oak': [('trunk', OAK_L), ('leaf', OAK_C)],
+ 'cork': [('bark', COR_T), ('trunk', COR_L), ('leaf', COR_C)],
+ # the hill today (Tiago): mostly eucalyptus, then chestnut, oak and cork oak. Variants so the forest is not made of clones.
+ # eucalipto: tall, slender pale trunk forked high, open narrow crown of small drooping clumps
+ 'euc': [('pale', limbs([(0, 0, -.03, .01, 0, .62, .009), (.01, 0, .5, .08, .03, .84, .005), (.01, 0, .55, -.07, -.02, .86, .005)])), ('leaf', tblobs(vase(9, 6), 1))],
+ 'euc2': [('pale', limbs([(0, 0, -.03, -.01, .01, .72, .008), (-.01, .01, .62, .06, -.03, .9, .0045)])), ('leaf', tblobs(vase(7, 7, z0=.7), 1))],
+ # castanheiro: thick short trunk, broad dense rounded crown
+ 'chest': [('trunk', limbs([(0, 0, -.03, .02, 0, .32, .06), (.02, 0, .28, .24, .06, .55, .03), (.02, 0, .28, -.22, -.05, .56, .03), (.02, 0, .3, 0, .22, .58, .026)])), ('leaf', tblobs(crown(12, .16, .24, .44, .8, .32, 8)))],
+ 'chest2': [('trunk', limbs([(0, 0, -.03, 0, 0, .38, .055), (0, 0, .34, .18, .1, .6, .026), (0, 0, .34, -.16, -.1, .62, .026)])), ('leaf', tblobs(crown(10, .15, .22, .5, .84, .26, 9)))],
+ 'oak2': [('trunk', limbs([(0, 0, -.03, .03, 0, .34, .05), (.03, 0, .3, .26, .1, .56, .024), (.03, 0, .3, -.24, -.08, .58, .024), (.03, 0, .32, .04, .22, .6, .02)])), ('leaf', tblobs(crown(10, .15, .23, .44, .74, .36, 3)))],
+ 'oak3': [('trunk', limbs([(0, 0, -.03, .01, 0, .55, .04), (.01, 0, .45, .12, .05, .8, .018), (.01, 0, .45, -.1, -.04, .82, .018)])), ('leaf', tblobs(crown(8, .1, .16, .52, .92, .18, 4)))],
+ 'cork2': [('bark', COR_T), ('trunk', COR_L), ('leaf', tblobs(crown(8, .15, .24, .5, .66, .3, 5) + [(.2, -.12, .58, .17, .2)]))],
  'shrub': [('leaf', blobs([(0, 0, .3, .42, .55), (.28, .1, .25, .3, .42), (-.25, -.12, .24, .28, .4)]))],
  'tuft': [('leaf', blades(7))],
 }
-PAL = {'oak': [(92, 124, 56), (108, 136, 62), (80, 112, 50)], 'pine': [(70, 100, 56), (80, 110, 60), (62, 92, 52)],
+_oak = [(96, 128, 54), (112, 140, 60), (84, 116, 48), (122, 138, 58), (78, 108, 50), (104, 122, 52)]
+_cork = [(70, 88, 52), (80, 96, 56), (62, 80, 48), (88, 100, 58), (66, 84, 54)]
+_euc = [(124, 140, 100), (136, 148, 108), (116, 132, 96), (144, 152, 112), (120, 138, 106), (130, 142, 92)]
+_chest = [(92, 130, 50), (104, 140, 56), (84, 120, 46), (112, 146, 62), (98, 128, 52)]
+PAL = {'oak': _oak, 'oak2': _oak, 'oak3': _oak, 'cork': _cork, 'cork2': _cork, 'euc': _euc, 'euc2': _euc, 'chest': _chest, 'chest2': _chest,
        'shrub': [(128, 138, 62), (112, 128, 56), (196, 170, 60)], 'tuft': [(120, 132, 62), (138, 144, 70), (104, 120, 56)]}
+bark_m = col_mat('corkbark', (160, 78, 44), .9); pale_m = col_mat('eucbark', (196, 186, 166), .8); trunk = col_mat('trunk', (88, 74, 60), .9)
 for nm, parts in PROTO.items():
     for part, geo in parts:
-        A = Acc(); A.add(geo); o = A.obj(f'PROTO-{nm}-{part}-{len(bpy.data.objects)}', trunk if part == 'trunk' else leaf[1]); o.location = (0, 0, 0)
+        A = Acc(); A.add(geo); o = A.obj(f'PROTO-{nm}-{part}-{len(bpy.data.objects)}', {'trunk': trunk, 'bark': bark_m, 'pale': pale_m}.get(part, leaf[1])); o.location = (0, 0, 0)
+        _b = bmesh.new(); _b.from_mesh(o.data); bmesh.ops.recalc_face_normals(_b, faces=_b.faces); _b.to_mesh(o.data); _b.free()   # limbs() winds its tubes inwards
 TYPES = list(PROTO)
 TREES = []
+# crown width from the canopy model: mean radius (8 directions) where the canopy stays above half the tree height
+_ang = np.linspace(0, 2 * np.pi, 8, endpoint=False); _rad = np.arange(.5, 8.01, .5)
+def crown_r(x, y, h):
+    px = x + np.cos(_ang)[:, None] * _rad[None]; py = y + np.sin(_ang)[:, None] * _rad[None]
+    c = _samp(CHM, px.ravel(), py.ravel()).reshape(px.shape) > h * .5
+    return float(np.mean([_rad[np.argmin(r)] if not r.all() else _rad[-1] for r in c]))
+CR = {p: 2 * crown_r(*p, TH[p]) / max(TH[p], 3) for p in tp}; cr0 = float(np.median(list(CR.values()))) if CR else 1
 for (x, y) in tp:
-    g = float(hz(x, y)); pine = rng.random() < .45
-    TREES.append([round(x, 2), round(y, 2), round(g, 2), round((10 + rng.random() * 8) if pine else (7 + rng.random() * 5), 1), TYPES.index('pine' if pine else 'oak'), int(rng.integers(0, 3)), round(rng.random() * 6.28, 2)])
+    g = float(hz(x, y)); h_ = TH[(x, y)]; rr = rng.random(); wf = float(np.clip(CR[(x, y)] / cr0, .7, 1.4))
+    # species are not in the LiDAR: tall narrow crowns are taken as eucalyptus (the commonest tree here), broad ones as chestnut
+    pe = (.8 if wf < 1.15 else .45) if h_ >= 12 else (.5 if h_ >= 8 else .15)
+    if rr < pe: sp = 'euc'
+    else:
+        w3 = [.45, .35, .2] if wf > 1.15 else ([.25, .35, .4] if h_ < 9 else [.3, .5, .2])
+        sp = str(rng.choice(['chest', 'oak', 'cork'], p=w3))
+    if sp == 'euc': kind = 'euc2' if wf < .85 or rng.random() < .3 else 'euc'
+    elif sp == 'chest': kind = str(rng.choice(['chest', 'chest2']))
+    elif sp == 'cork': kind = str(rng.choice(['cork', 'cork2']))
+    else: kind = 'oak2' if wf > 1.15 else ('oak3' if wf < .85 else str(rng.choice(['oak', 'oak2', 'oak3'], p=[.5, .25, .25])))
+    TREES.append([round(x, 2), round(y, 2), round(g, 2), round(min(22, h_ * EX), 1), TYPES.index(kind), int(rng.integers(0, len(PAL[kind]))), round(rng.random() * 6.28, 2), round(wf * (.92 + .16 * rng.random()), 2)])
 # undergrowth: gorse/broom at the forest edges and on the slopes, grass tufts everywhere but the path and the structures
 canm = lambda x, y: can[min(511, max(0, int((R - y) / (2 * R) * 512))), min(511, max(0, int((x + R) / (2 * R) * 512)))]
 pathpts = dense(loc(P.PATH), 1.5); kp = cKDTree(pathpts)

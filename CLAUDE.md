@@ -20,7 +20,7 @@ Escreve em português (muitas vezes no telemóvel); responder sempre em portugu�
 | `app/dio/<id>.glb.png`, `<id>.json` | maquetas 3D por sítio (GLB dentro de PNG) + catálogo de estruturas/fontes/árvores |
 | `app/maq-*.jpg`, `app/maq-h.png` | textura e alturas da maqueta do noroeste (gerados por `tools/maquette.py`) |
 | `blend/` | scripts Blender das maquetas por sítio e dados georreferenciados (plantas, ajustes, casas, muros) |
-| `lidar/` | LiDAR DGT 2025 de Briteiros (`raw/*.tif`) e scripts de vetorização |
+| `lidar/` | LiDAR DGT 2025 (`raw/*.tif`: Briteiros 184507/185507, Sabroso 182505) e scripts. Sabroso: `sab_laz.py` (nuvem LAZ → terreno e copas de 25 cm), `sab_georef.py` (planta de 1930 ajustada ao talude da muralha) |
 | `dig/`, `tools/` | digitalizações antigas e scripts de dados; **nunca** usar `tools/merge_rev_OLD_do_not_use.py` |
 | `geo/`, `osm/` | limites (CAOP, geoBoundaries), rios, OSM (`braga.pbf`, `mask_sites.json` = estradas/água por sítio) |
 | `tests/` | scripts Playwright de captura (`mock.html` simula o runtime `window.claude`) |
@@ -30,7 +30,8 @@ Escreve em português (muitas vezes no telemóvel); responder sempre em portugu�
 
 ```sh
 python3 -m venv /opt/bvenv && /opt/bvenv/bin/pip install bpy==5.1.2 numpy pillow scipy matplotlib opencv-python-headless scikit-image rasterio pyproj osmium
-python3 lidar/mosaic.py          # → lidar/mdt.npy, lidar/mds.npy
+python3 lidar/mosaic.py          # → lidar/mdt.npy, lidar/mds.npy (Briteiros)
+/opt/bvenv/bin/python lidar/sab_laz.py   # Sabroso: precisa de /mnt/project-files/LO-182505-07-2025_v05.laz (128 MB, fora do repo)
 sh tools/fetch_dem.sh            # só para refazer a maqueta do noroeste
 ```
 - bpy 5.1 exige Python 3.13. gltf-transform: `npx -y @gltf-transform/cli@4.1.1` (ou definir `GLTF_TRANSFORM`).
@@ -47,7 +48,7 @@ sh tools/fetch_dem.sh            # só para refazer a maqueta do noroeste
 3. **LiDAR DGT (MDT + MDS 50 cm)**: o servidor da DGT (stor-002.a.acnca.pt:9000) está **bloqueado** pelo proxy; o Tiago descarrega
    e envia os blocos. Nome do bloco: `200+floor(x/1000)` e `301+floor(y/1000)` em PT-TM06. **Não** lhe dar scripts para correr no PC.
    MDT = relevo; MDS−MDT nas clareiras = muros (`lidar/walls.py`); ajuste de círculos = casas (`lidar/houses.py`); máximos do MDS−MDT = árvores.
-4. **Blender** (`blend/dio_brit.py <id>` como modelo): disco com saia estratificada, terreno + plataformas das casas, muralhas, casas,
+4. **Blender** (`blend/dio_brit.py <id>` como modelo; Sabroso: `blend/dio_sab.py`): disco com saia estratificada, terreno + plataformas das casas, muralhas, casas,
    muros, ruas, edifícios modernos (só no estado atual), estrada com textura pintada, árvores instanciadas (carvalho, sobreiro, pinheiro),
    AO cozido no solo. Cada estrutura é um objeto `A-<sid>` / `B-<sid>` / `AB-<sid>` com `extras` (sid, mode, ev) e entrada no catálogo.
 5. **Exportar**: `bash mkparts.sh <id>` (weld + quantize, **sem Draco**: o descodificador não corre no artifact) → `app/dio/<id>.glb.png`.
@@ -65,7 +66,9 @@ sh tools/fetch_dem.sh            # só para refazer a maqueta do noroeste
 
 ## Estado e próximos passos
 
-- Feito com nível máximo: **Citânia de Briteiros** (LiDAR, levantamento geral da U. Minho, painel, fotografias), **Castro de Sabroso** (planta de 1930, sem LiDAR).
+- Feito com nível máximo: **Citânia de Briteiros** (LiDAR, levantamento geral da U. Minho, painel, fotografias), **Castro de Sabroso**
+  (planta de 1930 + LiDAR 2025 bloco 182505 com nuvem de pontos; a muralha do recinto superior está no MDT, por isso no estado atual a pedra
+  cobre o talude real em vez de assentar por cima). A nuvem de pontos (LAZ, quando o Tiago a envia) dá terreno de 25 cm, melhor que o MDT de 50 cm.
 - O Tiago quer este nível em **todos** os sítios, um a um. Próximo: **Citânia de Sanfins** (blocos 178484, 178485, 179484, 179485),
-  depois Santa Luzia, Bagunte, Cossourado; atualizar Sabroso com LiDAR (182505, 182506). Ver `docs/blocos_lidar_castros.md`.
+  depois Santa Luzia, Bagunte, Cossourado. (Sabroso já tem LiDAR: o bloco 182506 não é preciso, o disco cabe todo no 182505.) Ver `docs/blocos_lidar_castros.md`.
 - Por confirmar com o Tiago: classificação de Roriz e de N.ª Sr.ª da Graça; Ázere MN 1910.

@@ -3535,6 +3535,10 @@
 "cmg": {
 "t": "Câmara Municipal de Guimarães (2021). Trabalhos de reabilitação do Castro de Sabroso.",
 "u": "https://www.cm-guimaraes.pt/noticia-45/trabalhos-de-reabilitacao-do-castro-de-sabroso"
+},
+"lid": {
+"t": "DGT (2025). LiDAR 2025, bloco 182505: nuvem de pontos classificada, MDT e MDS com 50 cm de resolução. Direção-Geral do Território.",
+"u": "https://cdd.dgterritorio.gov.pt"
 }
 },
 "med": [
@@ -3571,6 +3575,13 @@
 "≈ 5,20 m (face interna: 2,50 m escavados)",
 [
 "cru"
+]
+],
+[
+"Desnível atual do talude da muralha do recinto superior (LiDAR 2025)",
+"≈ 3 a 3,7 m",
+[
+"lid"
 ]
 ],
 [
