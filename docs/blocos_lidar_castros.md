@@ -17,7 +17,7 @@ Ordem: Monumentos Nacionais primeiro, citânias e cividades antes dos castros.
 | 10 | Castro de Melgaço | Melgaço | MN | 187570, 187571, 188570, 188571 |
 | 11 | Castro de Monte Padrão | Santo Tirso | MN | 173483 |
 | 12 | Castro de Monte Redondo | Braga | MN | 173501 |
-| 13 | Castro de Sabroso | Guimarães | MN | 182505, 182506 |
+| 13 | Castro de Sabroso | Guimarães | MN | 182505 (feito; 182506 desnecessário) |
 | 14 | Castro de São Caetano | Monção | MN | 174564 |
 | 15 | Castro de Ázere | Arcos de Valdevez | MN | 177543, 177544 |
 | 16 | Castro do Freixo | Marco de Canaveses | MN | 198466, 198467, 199466, 199467 |

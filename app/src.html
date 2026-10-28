@@ -2355,7 +2355,7 @@ const TOURS={"guimaraes-citania-de-briteiros":[
  ["CC","A «Casa do Conselho»","Grande edifício circular com banco corrido no interior, interpretado como lugar de reunião da comunidade."],
  ["CH","Capela de São Romão","Construída muito depois do abandono do povoado, no ponto mais alto do monte."]],
  "guimaraes-castro-de-sabroso":[
- ["M2","A muralha do recinto superior","Aparelho poligonal na face externa, que chega a 5,20 m de altura (Cruz & Antunes 2015)."],
+ ["M2","A muralha do recinto superior","Aparelho poligonal na face externa, que chega a 5,20 m de altura (Cruz & Antunes 2015). No LiDAR de 2025 o talude da muralha ainda tem 3 a 3,7 m de desnível."],
  ["H01","As casas circulares","Sarmento contou 35 casas redondas, com cerca de 4,7 m de diâmetro; 29 no tabuleiro norte e 6 no sul."],
  ["C1","A cisterna","Assinalada na legenda da planta de Mário Cardozo, de 1930."],
  ["E1","A entrada sudeste","Corredor em cotovelo do último alargamento da muralha, segundo Hawkes (1958)."],
@@ -2376,9 +2376,10 @@ const DIOS={"guimaraes-citania-de-briteiros":{gaps:[
   "Pracetas lajeadas e arruamentos: referidos nas fontes, mas sem traçado publicado com precisão suficiente; não modelados.",
   "Altura original das muralhas do alargamento (3.ª fase) e dos muros interiores: não publicada; valores da reconstituição hipotéticos.",
   "Cobertura das casas: cónica por paralelo com as reconstituições de Martins Sarmento; material desconhecido.",
-  "Relevo: modelo de elevação com cerca de 15 m de resolução (sem LiDAR); plataformas e taludes finos não aparecem no terreno.",
+  "Relevo: terreno de 25 cm interpolado dos pontos de solo do LiDAR da DGT (2025, bloco 182505), exagerado 1,15×. A muralha do recinto superior já está no terreno (o talude de pedra foi classificado como solo); no estado atual a pedra cobre esse talude.",
+  "Árvores: posições e alturas reais do modelo de copas do LiDAR (MDS − MDT); dentro das muralhas ficam só 10 % (recinto superior) a 15 % das árvores, e nenhuma a menos de 5 m das muralhas, para se lerem as ruínas. A espécie de cada árvore não vem do LiDAR e é atribuída pela altura.",
   "A planta de 1930 regista 33 casas e uma cisterna; Sarmento contou 35 casas.",
-  "Georreferenciação: planta de 1930 ajustada aos marcos da zona de proteção (erro médio ≈ 8 m). Validação: recinto superior com 0,73 ha (publicado: 0,7 ha)."]}};
+  "Georreferenciação: planta de 1930 ajustada ao talude da muralha do recinto superior visível no LiDAR (erro médio ≈ 0,9 m; o ajuste anterior, pelos marcos da zona de proteção, deixava a planta cerca de 20 m a norte). Validação: recinto superior com 0,73 ha (publicado: 0,7 ha). As casas e os muros interiores seguem a planta; nos troços com floresta (alargamento sul e nascente) a muralha não foi verificada no LiDAR."]}};
 const EVL={conf:"Confirmado",doc:"Reconstituído com fundamento documental",hip:"Hipotético"},EVC={conf:"#6d7f4f",doc:"#3f74a8",hip:"#c4772f"};
 const DIO={mods:null,cur:null};
 const TJ="https://cdn.jsdelivr.net/npm/three@0.160.0/";

@@ -27,7 +27,8 @@ SOURCES={
  "cardozo1976":"Cardozo, M. (1976), citado em Loureiro (1999): muralha em talude com 3 a 5 m de altura e 4 m de largura.",
  "hawkes1958":"Hawkes, C. (1958; publ. 1971), citado em Loureiro (1999): fases da muralha e entradas N, SO e SE.",
  "sarmento1909":"Sarmento, F. M. (1909), citado em Loureiro (1999): 35 casas circulares, diâmetro médio 4,70 m; placas de xisto como possível cobertura.",
- "dgt":"DGT — Ortofotomapa 2021 (25 cm) e modelo de elevação; relevo exagerado 1,25×.",
+ "dgt":"DGT — Ortofotomapa 2021 (25 cm), usado só para orientar a cor do solo.",
+ "lidar":"DGT — LiDAR 2025, bloco 182505: nuvem de pontos classificada (LO-182505-07-2025, ≈ 12 pontos de solo por m²), MDT e MDS de 50 cm. Terreno de 25 cm interpolado dos pontos de solo; árvores com a altura real do modelo de copas (MDS − MDT); planta de 1930 georreferenciada pelo talude da muralha do recinto superior (erro médio ≈ 0,9 m). Relevo exagerado 1,15×.",
 }
 CISTERN_HOUSE=(1006,372)   # the "1" (cisterna) of the 1930 legend sits on this circle
 FILLED=[(710,435),(965,565)]  # filled circles in the 1930 plan, function not identified
