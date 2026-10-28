@@ -2956,7 +2956,7 @@ const DIOS={"guimaraes-citania-de-briteiros":{gaps:[
   "Altura original das muralhas do alargamento (3.ª fase) e dos muros interiores: não publicada; valores da reconstituição hipotéticos.",
   "Cobertura das casas: cónica por paralelo com as reconstituições de Martins Sarmento; material desconhecido.",
   "Relevo: terreno de 25 cm interpolado dos pontos de solo do LiDAR da DGT (2025, bloco 182505), exagerado 1,15×. A muralha do recinto superior já está no terreno (o talude de pedra foi classificado como solo); no estado atual a pedra cobre esse talude.",
-  "Árvores: posições e alturas reais do modelo de copas do LiDAR (MDS − MDT); dentro das muralhas ficam só 10 % (recinto superior) a 15 % das árvores, e nenhuma a menos de 5 m das muralhas, para se lerem as ruínas. A espécie de cada árvore não vem do LiDAR e é atribuída pela altura.",
+  "Árvores: posições e alturas reais do modelo de copas do LiDAR (MDS − MDT); dentro das muralhas ficam só 10 % (recinto superior) a 15 % das árvores, e nenhuma a menos de 5 m das muralhas, para se lerem as ruínas. A largura da copa de cada árvore vem do LiDAR; a espécie e a forma (carvalho, sobreiro, pinheiro, em várias variantes) não vêm do LiDAR e são atribuídas pela altura e pela largura da copa.",
   "A planta de 1930 regista 33 casas e uma cisterna; Sarmento contou 35 casas.",
   "Georreferenciação: planta de 1930 ajustada ao talude da muralha do recinto superior visível no LiDAR (erro médio ≈ 0,9 m; o ajuste anterior, pelos marcos da zona de proteção, deixava a planta cerca de 20 m a norte). Validação: recinto superior com 0,73 ha (publicado: 0,7 ha). As casas e os muros interiores seguem a planta; nos troços com floresta (alargamento sul e nascente) a muralha não foi verificada no LiDAR."]}};
 const EVL={conf:"Confirmado",doc:"Reconstituído com fundamento documental",hip:"Hipotético"},EVC={conf:"#6d7f4f",doc:"#3f74a8",hip:"#c4772f"};
@@ -3015,7 +3015,7 @@ async function dioBuild(s){
   if(meta&&meta.trees){const tr=meta.trees,m4=new T.Matrix4(),q=new T.Quaternion(),c=new T.Color(),up=new T.Vector3(0,1,0);
     const TY=meta.types||["oak","pine"];for(const k of TY){const ti=TY.indexOf(k),list=tr.filter(t=>t[4]===ti);if(!list.length||!protos[k])continue;
       protos[k].forEach(pp=>{const mat=pp.m.clone();if(pp.p==="leaf")mat.color.set(0xffffff);const im=new T.InstancedMesh(pp.g,mat,list.length);im.castShadow=true;im.receiveShadow=true;
-        list.forEach((t,i)=>{q.setFromAxisAngle(up,t[6]);m4.compose(new T.Vector3(t[0],t[2],-t[1]),q,new T.Vector3(t[3]*(.85+.3*((i*7)%10)/10),t[3],t[3]));im.setMatrixAt(i,m4);
+        list.forEach((t,i)=>{q.setFromAxisAngle(up,t[6]);m4.compose(new T.Vector3(t[0],t[2],-t[1]),q,new T.Vector3(t[3]*(t[7]||(.85+.3*((i*7)%10)/10)),t[3],t[3]*(t[7]||1)));im.setMatrixAt(i,m4);
           if(pp.p==="leaf"){const L=(meta.pal?meta.pal[k]:meta.leaf)[t[5]];c.setRGB(L[0]/255,L[1]/255,L[2]/255,T.SRGBColorSpace);im.setColorAt(i,c)}});
         if(k==="tuft"){im.castShadow=false;mat.side=T.DoubleSide}scene.add(im);trees.push(im)})}}
   const st={mode:"A",ev:false,L:{walls:true,houses:true,roofs:true,rocks:true,modern:true,trees:true,lbl:true},sel:null};

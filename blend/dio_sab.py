@@ -335,10 +335,20 @@ PROTO = {
  'oak': [('trunk', OAK_L), ('leaf', OAK_C)],
  'cork': [('bark', COR_T), ('trunk', COR_L), ('leaf', COR_C)],
  'pine': [('trunk', cone(0, 0, -.03, .02, .6, 6)), ('leaf', blobs([(0, 0, .74, .26, .3), (.17, .06, .64, .19, .22), (-.16, -.07, .62, .19, .22), (.03, -.18, .58, .17, .2), (-.04, .16, .56, .16, .2), (0, 0, .9, .16, .16)]))],
+ # variants so the forest is not made of clones: broad low oak, narrow tall oak, second cork crown,
+ # adult pinheiro-bravo (long bare trunk, crown high and flat) and a young, conical-ish pine
+ 'oak2': [('trunk', limbs([(0, 0, -.03, .03, 0, .34, .05), (.03, 0, .3, .26, .1, .56, .024), (.03, 0, .3, -.24, -.08, .58, .024), (.03, 0, .32, .04, .22, .6, .02)])), ('leaf', tblobs(crown(10, .15, .23, .44, .74, .36, 3)))],
+ 'oak3': [('trunk', limbs([(0, 0, -.03, .01, 0, .55, .04), (.01, 0, .45, .12, .05, .8, .018), (.01, 0, .45, -.1, -.04, .82, .018)])), ('leaf', tblobs(crown(8, .1, .16, .52, .92, .18, 4)))],
+ 'cork2': [('bark', COR_T), ('trunk', COR_L), ('leaf', tblobs(crown(8, .15, .24, .5, .66, .3, 5) + [(.2, -.12, .58, .17, .2)]))],
+ 'pine2': [('trunk', cone(0, 0, -.03, .022, .84, 6)), ('leaf', blobs([(0, 0, .86, .3, .16), (.2, .08, .8, .2, .14), (-.19, -.06, .79, .2, .13), (.04, -.2, .78, .18, .12), (0, 0, .96, .16, .1)]))],
+ 'pine3': [('trunk', cone(0, 0, -.03, .02, .5, 6)), ('leaf', blobs([(0, 0, .42, .27, .3), (0, 0, .62, .21, .26), (0, 0, .8, .14, .22), (.12, .05, .5, .16, .2)]))],
  'shrub': [('leaf', blobs([(0, 0, .3, .42, .55), (.28, .1, .25, .3, .42), (-.25, -.12, .24, .28, .4)]))],
  'tuft': [('leaf', blades(7))],
 }
-PAL = {'oak': [(96, 128, 54), (112, 140, 60), (84, 116, 48)], 'cork': [(70, 88, 52), (80, 96, 56), (62, 80, 48)], 'pine': [(70, 100, 56), (80, 110, 60), (62, 92, 52)],
+_oak = [(96, 128, 54), (112, 140, 60), (84, 116, 48), (122, 138, 58), (78, 108, 50), (104, 122, 52)]
+_cork = [(70, 88, 52), (80, 96, 56), (62, 80, 48), (88, 100, 58), (66, 84, 54)]
+_pine = [(70, 100, 56), (80, 110, 60), (62, 92, 52), (56, 84, 50), (86, 112, 66)]
+PAL = {'oak': _oak, 'oak2': _oak, 'oak3': _oak, 'cork': _cork, 'cork2': _cork, 'pine': _pine, 'pine2': _pine, 'pine3': _pine,
        'shrub': [(128, 138, 62), (112, 128, 56), (196, 170, 60)], 'tuft': [(120, 132, 62), (138, 144, 70), (104, 120, 56)]}
 bark_m = col_mat('corkbark', (160, 78, 44), .9); trunk = col_mat('trunk', (88, 74, 60), .9)
 for nm, parts in PROTO.items():
@@ -346,9 +356,20 @@ for nm, parts in PROTO.items():
         A = Acc(); A.add(geo); o = A.obj(f'PROTO-{nm}-{part}-{len(bpy.data.objects)}', {'trunk': trunk, 'bark': bark_m}.get(part, leaf[1])); o.location = (0, 0, 0)
 TYPES = list(PROTO)
 TREES = []
+# crown width from the canopy model: mean radius (8 directions) where the canopy stays above half the tree height
+_ang = np.linspace(0, 2 * np.pi, 8, endpoint=False); _rad = np.arange(.5, 8.01, .5)
+def crown_r(x, y, h):
+    px = x + np.cos(_ang)[:, None] * _rad[None]; py = y + np.sin(_ang)[:, None] * _rad[None]
+    c = _samp(CHM, px.ravel(), py.ravel()).reshape(px.shape) > h * .5
+    return float(np.mean([_rad[np.argmin(r)] if not r.all() else _rad[-1] for r in c]))
+CR = {p: 2 * crown_r(*p, TH[p]) / max(TH[p], 3) for p in tp}; cr0 = float(np.median(list(CR.values()))) if CR else 1
 for (x, y) in tp:
-    g = float(hz(x, y)); h_ = TH[(x, y)]; rr = rng.random(); kind = 'pine' if (h_ > 15 and rr < .35) else ('cork' if (h_ < 13 and rr < .45) else 'oak')
-    TREES.append([round(x, 2), round(y, 2), round(g, 2), round(min(22, h_ * EX), 1), TYPES.index(kind), int(rng.integers(0, 3)), round(rng.random() * 6.28, 2)])
+    g = float(hz(x, y)); h_ = TH[(x, y)]; rr = rng.random(); wf = float(np.clip(CR[(x, y)] / cr0, .7, 1.4))
+    sp = 'pine' if (h_ > 15 and rr < .35) else ('cork' if (h_ < 13 and rr < .45) else 'oak')
+    if sp == 'pine': kind = 'pine2' if h_ > 18 and rng.random() < .6 else ('pine3' if h_ < 10 else str(rng.choice(['pine', 'pine2'])))
+    elif sp == 'cork': kind = str(rng.choice(['cork', 'cork2']))
+    else: kind = 'oak2' if wf > 1.15 else ('oak3' if wf < .85 else str(rng.choice(['oak', 'oak2', 'oak3'], p=[.5, .25, .25])))
+    TREES.append([round(x, 2), round(y, 2), round(g, 2), round(min(22, h_ * EX), 1), TYPES.index(kind), int(rng.integers(0, len(PAL[kind]))), round(rng.random() * 6.28, 2), round(wf * (.92 + .16 * rng.random()), 2)])
 # undergrowth: gorse/broom at the forest edges and on the slopes, grass tufts everywhere but the path and the structures
 canm = lambda x, y: can[min(511, max(0, int((R - y) / (2 * R) * 512))), min(511, max(0, int((x + R) / (2 * R) * 512)))]
 pathpts = dense(loc(P.PATH), 1.5); kp = cKDTree(pathpts)
