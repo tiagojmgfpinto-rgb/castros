@@ -2571,7 +2571,7 @@ async function mqInit(){
   })().catch(e=>{MQ.loading=null;const l=$("#maq .maq-load");if(l)l.textContent="Não foi possível carregar a maqueta. A mostrar o mapa plano.";setTimeout(()=>setMapMode("plano"),1500)});
   return MQ.loading;
 }
-/* miniature models (unit ≈ 1 km tall before scaling); white stone and ochre thatch, a coloured pennant per site type */
+/* miniature models (unit ≈ 1 km tall before scaling); white stone and ochre thatch, no pennants */
 function mqModels(T){
   // procedural textures: polygonal granite masonry, thatch, and the carved face of the Pedra Formosa
   const cvt=(w,h,f,rep)=>{const c=document.createElement("canvas");c.width=w;c.height=h;f(c.getContext("2d"),w,h);const t=new T.CanvasTexture(c);t.colorSpace=T.SRGBColorSpace;t.anisotropy=4;if(rep){t.wrapS=t.wrapT=T.RepeatWrapping;t.repeat.set(rep[0],rep[1])}return t};
@@ -2594,8 +2594,7 @@ function mqModels(T){
   pedra.repeat.set(1,1/.82);pedra.offset.set(.5,0);
   const L=new T.DirectionalLight(0xfff4e6,2.4);L.position.set(-.6,1,.5);MQ.scene.add(L,new T.HemisphereLight(0xffffff,0x5a4a38,.8));
   const M_={stone:new T.MeshLambertMaterial({map:masonry,side:T.DoubleSide}),plain:new T.MeshLambertMaterial({color:0xe9e3d6}),thatch:new T.MeshLambertMaterial({map:thatchT,side:T.DoubleSide}),
-    dark:new T.MeshLambertMaterial({color:0x45423e}),base:new T.MeshBasicMaterial({color:0x140e08,transparent:true,opacity:.34,depthWrite:false,polygonOffset:true,polygonOffsetFactor:-2}),pedra:new T.MeshLambertMaterial({map:pedra}),white:new T.MeshLambertMaterial({color:0xf3f0ea}),
-    flag:new T.MeshBasicMaterial({color:0xa3431f,side:T.DoubleSide}),flagM:new T.MeshBasicMaterial({color:0x24375a,side:T.DoubleSide})};
+    dark:new T.MeshLambertMaterial({color:0x45423e}),base:new T.MeshBasicMaterial({color:0x140e08,transparent:true,opacity:.34,depthWrite:false,polygonOffset:true,polygonOffsetFactor:-2}),pedra:new T.MeshLambertMaterial({map:pedra}),white:new T.MeshLambertMaterial({color:0xf3f0ea})};
   const merge=gs=>{const ps=[],ns=[],us=[];gs.forEach(g0=>{const g=g0.index?g0.toNonIndexed():g0;if(!g.attributes.normal)g.computeVertexNormals();ps.push(...g.attributes.position.array);ns.push(...g.attributes.normal.array);
       const n=g.attributes.position.count;if(g.attributes.uv)us.push(...g.attributes.uv.array);else for(let i=0;i<n;i++)us.push(0,0)});
     const o=new T.BufferGeometry();o.setAttribute("position",new T.Float32BufferAttribute(ps,3));o.setAttribute("normal",new T.Float32BufferAttribute(ns,3));o.setAttribute("uv",new T.Float32BufferAttribute(us,2));return o};
@@ -2608,19 +2607,17 @@ function mqModels(T){
     const fin=new T.ConeGeometry(r*.12,r*.25,8).translate(0,h+r*1.2,0).translate(dx,0,dz);
     const floor=new T.CircleGeometry(r*.88,20).rotateX(-Math.PI/2).translate(dx,.01,dz);
     return{w,roof:[roof,fin],dark:[floor]}};
-  const pole=h=>new T.CylinderGeometry(.018,.018,.5,6).translate(0,h+.25,0);
-  const pen=h=>{const g=new T.BufferGeometry().setFromPoints([new T.Vector3(0,h+.5,0),new T.Vector3(0,h+.3,0),new T.Vector3(.3,h+.42,0)]);g.computeVertexNormals();return g};
   const base=(r,seg=28)=>new T.CircleGeometry(r*.78,seg).rotateX(-Math.PI/2).scale(1,1,.8).translate(.06,.015,.05);
   const M={};
-  const def=(k,parts,top,flag="flag")=>{M[k]=[...Object.entries(parts).filter(([,gs])=>gs.length).map(([m,gs])=>({g:merge(gs),m:M_[m]})),{g:merge([pole(top)]),m:M_.dark},{g:merge([pen(top)]),m:M_[flag]}]};
-  {const h=house(.36,.4);def("castro",{stone:h.w,thatch:h.roof,dark:h.dark,base:[base(.46)]},.86)}
-  {const h=house(.34,.36),wall=[new T.CylinderGeometry(.62,.66,.18,20,1,true,2.2,1.9).translate(0,.09,0)];def("povoado",{stone:[...h.w,...wall],thatch:h.roof,dark:h.dark,base:[base(.6)]},.8)}
+  const def=(k,parts)=>{M[k]=Object.entries(parts).filter(([,gs])=>gs.length).map(([m,gs])=>({g:merge(gs),m:M_[m]}))};
+  {const h=house(.36,.4);def("castro",{stone:h.w,thatch:h.roof,dark:h.dark,base:[base(.46)]})}
+  {const h=house(.34,.36),wall=[new T.CylinderGeometry(.62,.66,.18,20,1,true,2.2,1.9).translate(0,.09,0)];def("povoado",{stone:[...h.w,...wall],thatch:h.roof,dark:h.dark,base:[base(.6)]})}
   // citânia: houses inside a walled enclosure with a gate
   {const gap=.5,ring=[new T.CylinderGeometry(1,1.04,.26,40,1,true,gap/2,Math.PI*2-gap),new T.CylinderGeometry(.86,.88,.26,40,1,true,gap/2,Math.PI*2-gap)].map(g=>g.translate(0,.13,0));
     const top=new T.RingGeometry(.86,1,40,1,Math.PI/2+gap/2,Math.PI*2-gap).rotateX(-Math.PI/2).rotateY(Math.PI).translate(0,.26,0);
     const hs=[house(.24,.27,-.34,.16,.4),house(.22,.25,.33,.2,-.5),house(.25,.28,.0,-.38,0),house(.19,.22,.32,-.3,-.9),house(.18,.21,-.36,-.3,.9)];
     const parts={stone:[...ring,top,...hs.flatMap(h=>h.w)],thatch:hs.flatMap(h=>h.roof),dark:hs.flatMap(h=>h.dark),base:[base(1.12,40)]};
-    def("citania",parts,.72);def("cividade",parts,.72);
+    def("citania",parts);def("cividade",parts);
     // compact footprint: the enclosure reads as one marker, not a plate
     ["citania","cividade"].forEach(k=>M[k].forEach(p=>p.g.scale(.5,.82,.5)))}
   // Pedra Formosa (after the Briteiros stone): slab with a domed top and the low arched opening
@@ -2628,24 +2625,27 @@ function mqModels(T){
     sh.lineTo(.1,0);sh.lineTo(.1,.1);sh.absarc(0,.1,.1,0,Math.PI,false);sh.lineTo(-.1,0);sh.lineTo(-.5,0);
     const slab=new T.ExtrudeGeometry(sh,{depth:.13,bevelEnabled:true,bevelThickness:.015,bevelSize:.015,bevelSegments:1,curveSegments:16}).translate(0,.06,-.065);
     const plinth=new T.BoxGeometry(1.15,.06,.42).translate(0,.03,0);
-    M.balneario=[{g:merge([slab]),m:M_.pedra},{g:merge([plinth]),m:M_.base},{g:merge([pole(.9).translate(.42,0,0)]),m:M_.dark},{g:merge([pen(.9).translate(.42,0,0)]),m:M_.flag}]}
+    M.balneario=[{g:merge([slab]),m:M_.pedra},{g:merge([plinth]),m:M_.base}]}
   // museum: stepped podium, portico with columns and pediment
   {const steps=[new T.BoxGeometry(1.16,.05,.86).translate(0,.025,0),new T.BoxGeometry(1.06,.05,.78).translate(0,.075,0)];
     const body=new T.BoxGeometry(.86,.46,.5).translate(0,.33,-.1),cols=[-.36,-.12,.12,.36].map(x=>new T.CylinderGeometry(.035,.04,.42,10).translate(x,.31,.25));
     const ent=new T.BoxGeometry(.96,.06,.74).translate(0,.55,0),tri=new T.Shape([new T.Vector2(-.5,0),new T.Vector2(.5,0),new T.Vector2(0,.2)]);
     const ped=new T.ExtrudeGeometry(tri,{depth:.74,bevelEnabled:false}).translate(0,.58,-.37),door=new T.BoxGeometry(.16,.26,.01).translate(0,.23,.155);
-    M.museu=[{g:merge([...steps,body,...cols,ent,ped]),m:M_.white},{g:merge([door]),m:M_.dark},{g:merge([pole(.78).translate(.38,0,-.2)]),m:M_.dark},{g:merge([pen(.78).translate(.38,0,-.2)]),m:M_.flagM}]}
+    M.museu=[{g:merge([...steps,body,...cols,ent,ped]),m:M_.white},{g:merge([door]),m:M_.dark}]}
   MQ.baseMat=M_.base;
-  {const st=new T.CylinderGeometry(.12,.17,.7,7).translate(0,.35,0);def("outro",{plain:[st],base:[base(.32,16)]},.72)}
+  {const st=new T.CylinderGeometry(.12,.17,.7,7).translate(0,.35,0);def("outro",{plain:[st],base:[base(.32,16)]})}
   return M}
 
-/* miniatures keep a constant size on screen, small like the castillos.site towers (≈ 22 px tall with the pennant) */
-const MQ_PIN=12;
+/* miniatures have a fixed size on the map (≈ 4 km), so they shrink with the whole map when zooming out;
+   close up they stop growing at ≈ 30 px and far away they keep ≈ 5 px so they stay clickable */
+const MQ_SZ=4;
+const mqSz=()=>{const d=MQ.v.dist,H=Math.max(500,innerHeight);return Math.max(3*d/H,Math.min(MQ_SZ,18*d/H))};
+const mqPx=sz=>sz*1.67*Math.max(500,innerHeight)/MQ.v.dist;
 function mqSync(){
   if(!MQ.ready)return;const T=window.THREE,vis=new Set(filtered().map(s=>s.id)),m4=new T.Matrix4(),q=new T.Quaternion().setFromAxisAngle(new T.Vector3(0,1,0),-MQ.v.az),sc=new T.Vector3(),p=new T.Vector3();MQ.lastAz=MQ.v.az;
-  const sz=Math.max(.3,Math.min(9,MQ.v.dist*MQ_PIN/Math.max(500,innerHeight)*(1+Math.max(0,(300-MQ.v.dist)/300)*.6)));
+  const sz=mqSz();
   // declutter in screen space: by importance, a marker that would overlap a larger one shrinks (still visible and clickable)
-  const small=new Set(),cam=MQ.cam;cam.updateMatrixWorld();const V=new T.Vector3(),W=innerWidth,H=innerHeight,placed=[],R2=11*11;
+  const small=new Set(),cam=MQ.cam;cam.updateMatrixWorld();const V=new T.Vector3(),W=innerWidth,H=innerHeight,placed=[],R2=Math.max(5,mqPx(sz)*.7)**2;
   const pr=o=>(S.sel===o.s.id?100:0)+(TYPES[o.s.kind].big?6:0)+(o.s.cls&&o.s.cls.c==="MN"?4:o.s.cls&&o.s.cls.c==="IP"?2:0)+(o.s.kind==="museu"?-1:0)+(o.s.ph?.5:0);
   MQ.marks.filter(o=>vis.has(o.s.id)||S.tab!=="explore").sort((a,b)=>pr(b)-pr(a)).forEach(o=>{V.set(o.X,o.Y,o.Z).project(cam);const x=(V.x+1)/2*W,y=(1-V.y)/2*H;
     if(placed.some(q=>(q[0]-x)**2+(q[1]-y)**2<R2))small.add(o.s.id);else placed.push([x,y])});
@@ -2677,7 +2677,8 @@ function mqRender(){
   const m=MQ.meta,[la,lo]=TM.inv(v.tx*1000+(m.x0+m.x1)/2,-v.tz*1000+(m.y0+m.y1)/2),co=$("#mqcoord");
   if(co)co.textContent=`${dms(la,"N","S")} · ${dms(lo,"E","O")}`;
 }
-function mqHome(animate=true){const ph=innerWidth<=760,t={tx:ph?-40:-34,tz:ph?95:42,dist:ph?900:560,az:0,tilt:ph?.92:.8};animate?mqFly(t,1100):(Object.assign(MQ.v,t),MQ.g={...MQ.v});MQ.needs=true}
+/* start close over the Minho and Douro Litoral, where most castros are (between Viana, Braga, Guimarães and Porto) */
+function mqHome(animate=true){const ph=innerWidth<=760,[cx,cz]=mqXY(41.47,-8.38),t={tx:cx+(ph?16:0),tz:cz+(ph?14:4),dist:ph?470:300,az:0,tilt:ph?.95:.85};animate?mqFly(t,1100):(Object.assign(MQ.v,t),MQ.g={...MQ.v});MQ.needs=true}
 function mqDamp(dt){const v=MQ.v,g=MQ.g;if(!g)return;const k=1-Math.exp(-dt*11);let moving=false;
   for(const key of["tx","tz","dist","az","tilt"]){const d=g[key]-v[key];if(Math.abs(d)>(key==="dist"?v.dist*1e-4:key==="tx"||key==="tz"?v.dist*2e-5:1e-4)){v[key]+=d*k;moving=true}else v[key]=g[key]}if(moving)MQ.needs=true}
 function mqFly(t,ms=900){MQ.anim={from:{...MQ.v},to:{...MQ.v,...t},t0:performance.now(),ms};MQ.needs=true}
@@ -2733,7 +2734,7 @@ function mqHover(s,e){
   if(!e||!MQ.ready)return clear();
   const b=MQ.r.domElement.getBoundingClientRect(),cx=e.clientX-b.left,cy=e.clientY-b.top;
   if(HL.box&&cx>HL.box.l-14&&cx<HL.box.r+14&&cy>HL.box.t-14&&cy<HL.box.b+14)return;
-  const V=new window.THREE.Vector3(),vis=new Set(filtered().map(x=>x.id)),lift=MQ.v.dist*MQ_PIN/Math.max(500,innerHeight)*(1+Math.max(0,(300-MQ.v.dist)/300)*.6)*.55,near=[];
+  const V=new window.THREE.Vector3(),vis=new Set(filtered().map(x=>x.id)),lift=mqSz()*.4,near=[];
   MQ.marks.forEach(o=>{if(!(vis.has(o.s.id)||S.tab!=="explore"))return;V.set(o.X,o.Y+lift,o.Z).project(MQ.cam);if(V.z>1)return;
     const x=(V.x+1)/2*b.width,y=(1-V.y)/2*b.height,d=Math.hypot(x-cx,y-cy);if(d<34)near.push({o,x,y,d})});
   if(!near.length)return clear();
