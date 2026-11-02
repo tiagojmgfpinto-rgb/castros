@@ -1962,7 +1962,226 @@
 "r": "M46.9 47Q61.9 44 76.8 47M52.9 43.5Q61.9 40.5 70.8 43.5",
 "u": "M58.6 39h6.4v-3.2h-6.4zM57.6 35.8L61.9 31L66 35.8z"
 },
-"mk": 19
+"mk": 19,
+"fic": {
+"refs": {
+"tes": {
+"t": "Pinto, T. — Castros do Noroeste de Portugal (tese de doutoramento, Univ. de Santiago de Compostela). Visitas em 2022 e 2025.",
+"u": "https://www.castrosdonoroestedeportugal.pt/braga/"
+},
+"bar": {
+"t": "Barroca, M. J.; Arezes, A.; Morais, R. A basílica paleocristã e o edifício palatino de St.ª Marta das Cortiças (Falperra): as escavações de F. Russell Cortez e de J. J. Rigaud de Sousa, pp. 129-148.",
+"u": "https://repositorio-aberto.up.pt/bitstream/10216/146219/2/286103.pdf"
+},
+"wik": {
+"t": "Wikipédia. Estação Arqueológica de Santa Marta das Cortiças (consultada em 2026-11).",
+"u": "https://pt.wikipedia.org/wiki/Esta%C3%A7%C3%A3o_Arqueol%C3%B3gica_de_Santa_Marta_das_Corti%C3%A7as"
+},
+"sip": {
+"t": "Direção-Geral do Património Cultural (1994). Povoado do Monte da Falperra / Estação arqueológica de Santa Marta das Cortiças, SIPA n.º 1062.",
+"u": "https://www.monumentos.gov.pt/Site/APP_PagesUser/SIPA.aspx?id=1062"
+},
+"osm": {
+"t": "OpenStreetMap (2026): capela, monumento, vértice geodésico Santa Marta, posto de vigia, torre de telecomunicações, baloiço, caminhos.",
+"u": "https://www.openstreetmap.org/#map=18/41.5144/-8.3950"
+},
+"lid": {
+"t": "DGT (2025). LiDAR 2025, blocos 177505, 177506, 178505 e 178506: nuvens de pontos classificadas, MDT e MDS com 50 cm de resolução. Direção-Geral do Território.",
+"u": "https://cdd.dgterritorio.gov.pt"
+}
+},
+"med": [
+[
+"Cota máxima",
+"561,84 m (vértice geodésico Santa Marta)",
+[
+"osm"
+]
+],
+[
+"Linhas de muralha",
+"duas (Martins Sarmento) ou três (Wikipédia); duas identificadas no LiDAR",
+[
+"bar",
+"wik",
+"lid"
+]
+],
+[
+"Recinto da primeira muralha (LiDAR 2025)",
+"≈ 2,2 ha",
+[
+"lid"
+]
+],
+[
+"Basílica paleocristã",
+"25 × 16 m; nave central de 7,2 m e laterais de 3,5 m",
+[
+"bar",
+"wik"
+]
+],
+[
+"Edifício palatino",
+"34,2 × 12,6 m; sala de duas naves com sete pilares",
+[
+"bar",
+"wik"
+]
+],
+[
+"Monumento a Nossa Senhora da Assunção (LiDAR 2025)",
+"≈ 16 m de altura sobre o penedo",
+[
+"lid"
+]
+]
+],
+"sab": [
+[
+"Sobrepõem-se no mesmo monte um castro, uma basílica paleocristã, um edifício interpretado como palácio suevo, as referências a um castelo medieval e a capela de 1520.",
+[
+"wik",
+"bar"
+]
+],
+[
+"Russell Cortez considerou a basílica a melhor igreja paleocristã do Norte de Portugal.",
+[
+"wik",
+"bar"
+]
+],
+[
+"A destruição violenta do edifício palatino, talvez em 585, na conquista visigoda do reino suevo, apoia a sua atribuição a um palácio suevo.",
+[
+"wik",
+"bar"
+]
+],
+[
+"O monte de Santa Marta aparece nos documentos desde 900; entre 900 e 1147 há 46 referências a um castelo.",
+[
+"bar"
+]
+]
+],
+"cro": [
+[
+"Bronze Final",
+"Níveis identificados na zona superior nas escavações da Universidade do Minho.",
+[
+"wik",
+"bar"
+]
+],
+[
+"Séc. V-VI",
+"Basílica paleocristã de três naves.",
+[
+"bar",
+"wik"
+]
+],
+[
+"585",
+"Possível destruição do edifício palatino na conquista visigoda.",
+[
+"wik"
+]
+],
+[
+"900-1147",
+"46 referências escritas a um castelo no monte.",
+[
+"bar"
+]
+],
+[
+"1520",
+"Capela de Santa Marta das Cortiças, mandada construir por D. Diogo de Sousa.",
+[
+"wik"
+]
+],
+[
+"1899",
+"Escavações de Albano Belino, pelo lado sul, entre a primeira e a segunda muralhas.",
+[
+"bar"
+]
+],
+[
+"1953-56",
+"Escavações de Arlindo da Cunha e Russell Cortez: descoberta da basílica.",
+[
+"bar",
+"wik"
+]
+],
+[
+"1955",
+"Classificado como Imóvel de Interesse Público.",
+[
+"sip",
+"wik"
+]
+],
+[
+"1966-70",
+"Escavações de Rigaud de Sousa: edifício palatino.",
+[
+"bar",
+"wik"
+]
+],
+[
+"1984-86",
+"Trabalhos e escavações da Universidade do Minho, dirigidas por Manuela Martins.",
+[
+"bar",
+"wik"
+]
+],
+[
+"2023",
+"Inauguração do baloiço panorâmico; o espaço museológico prometido não foi feito.",
+[
+"tes"
+]
+],
+[
+"2025",
+"Voo LiDAR da DGT; na visita do autor o mato tapava todas as ruínas.",
+[
+"lid",
+"tes"
+]
+]
+],
+"ver": [
+[
+"A capela de Santa Marta, o monumento a Nossa Senhora da Assunção sobre o penedo e a paisagem até ao Sameiro.",
+[
+"tes",
+"osm"
+]
+],
+[
+"As ruínas da basílica e do palácio, hoje tapadas pelo mato (em 2022 ainda se via uma parede do palácio com uma coluna).",
+[
+"tes"
+]
+],
+[
+"Os taludes das muralhas à volta da plataforma do cume.",
+[
+"lid"
+]
+]
+]
+}
 },
 {
 "id": "braga-castro-do-monte-da-consolacao",
