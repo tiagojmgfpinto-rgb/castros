@@ -3904,7 +3904,154 @@
 "r": "M48.7 47Q63.7 44 78.7 47M54.7 43.5Q63.7 40.5 72.7 43.5",
 "u": "M60.5 39h6.4v-3.2h-6.4zM59.5 35.8L63.7 31L67.9 35.8z"
 },
-"mk": 34
+"mk": 34,
+"fic": {
+"refs": {
+"tes": {
+"t": "Pinto, T. — Castros do Noroeste de Portugal (tese de doutoramento, Univ. de Santiago de Compostela). Visitas em 2022 e 2025.",
+"u": "https://www.castrosdonoroestedeportugal.pt/guimaraes/"
+},
+"sip": {
+"t": "Direção-Geral do Património Cultural (2001). Povoado fortificado de São Miguel-o-Anjo, SIPA n.º 9581.",
+"u": "https://www.monumentos.gov.pt/Site/APP_PagesUser/SIPA.aspx?id=9581"
+},
+"aap": {
+"t": "All About Portugal. Castro de São Miguel-o-Anjo (Guimarães).",
+"u": "https://www.allaboutportugal.pt/en/guimaraes/monuments/castro-de-sao-miguel-o-anjo"
+},
+"osm": {
+"t": "OpenStreetMap (2026): «Muro Celta», Capela de São Miguel, vértice geodésico Anjo.",
+"u": "https://www.openstreetmap.org/#map=18/41.4583/-8.3858"
+},
+"lid": {
+"t": "DGT (2025). LiDAR 2025, blocos 178499 e 179499: nuvens de pontos classificadas, MDT e MDS com 50 cm de resolução. Direção-Geral do Território.",
+"u": "https://cdd.dgterritorio.gov.pt"
+}
+},
+"med": [
+[
+"Cota máxima",
+"384,87 m (vértice geodésico Anjo)",
+[
+"osm"
+]
+],
+[
+"Linhas de muralha",
+"três",
+[
+"aap",
+"lid"
+]
+],
+[
+"Recinto da muralha intermédia (LiDAR 2025)",
+"≈ 1,36 ha",
+[
+"lid"
+]
+],
+[
+"Plataforma do cume, dentro da linha interior (LiDAR 2025)",
+"≈ 0,74 ha",
+[
+"lid"
+]
+],
+[
+"Desnível atual do talude da muralha intermédia (LiDAR 2025)",
+"≈ 3 a 6 m (mediana ≈ 3,8 m)",
+[
+"lid"
+]
+],
+[
+"Troço de muralha posto a descoberto pelos escuteiros",
+"≈ 43 m de comprimento e 2 m de altura",
+[
+"tes"
+]
+]
+],
+"sab": [
+[
+"As ruínas já eram conhecidas como obra «dos mouros» no século XVIII.",
+[
+"tes"
+]
+],
+[
+"O troço de muralha mais bem conservado foi posto a descoberto pelo agrupamento de escuteiros local, que lhe colocou uma placa comemorativa; fica dentro da área vedada dos escuteiros, que só abre para atividades escutistas.",
+[
+"tes"
+]
+],
+[
+"Não deve ser confundido com o Castro de São Miguel-o-Anjo de Vila Nova de Famalicão.",
+[
+"tes"
+]
+]
+],
+"cro": [
+[
+"Séc. XVIII",
+"As ruínas são referidas como obra «dos mouros».",
+[
+"tes"
+]
+],
+[
+"Séc. XIX",
+"Pequenos trabalhos de Francisco Martins Sarmento.",
+[
+"tes"
+]
+],
+[
+"2001",
+"Ficha no inventário do património arquitetónico (SIPA); o sítio não está classificado.",
+[
+"sip"
+]
+],
+[
+"2022 e 2025",
+"Visitas do autor: a muralha dos escuteiros não estava acessível.",
+[
+"tes"
+]
+],
+[
+"2025",
+"Voo LiDAR da DGT: as três linhas de muralha ficam visíveis no modelo do terreno, sob o eucaliptal.",
+[
+"lid"
+]
+]
+],
+"ver": [
+[
+"O cume, com a capela de São Miguel, as mesas de piquenique e o vértice geodésico Anjo.",
+[
+"tes",
+"osm"
+]
+],
+[
+"Os taludes das muralhas, cobertos de mato, à volta do monte.",
+[
+"lid"
+]
+],
+[
+"O troço de muralha dos escuteiros só se vê durante as atividades escutistas (área vedada).",
+[
+"tes"
+]
+]
+]
+}
 },
 {
 "id": "guimaraes-citania-de-briteiros",

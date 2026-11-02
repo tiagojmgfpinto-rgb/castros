@@ -3411,8 +3411,14 @@ const TOURS={"guimaraes-citania-de-briteiros":[
  ["H01","As casas circulares","Sarmento contou 35 casas redondas, com cerca de 4,7 m de diâmetro; 29 no tabuleiro norte e 6 no sul."],
  ["C1","A cisterna","Assinalada na legenda da planta de Mário Cardozo, de 1930."],
  ["E1","A entrada sudeste","Corredor em cotovelo do último alargamento da muralha, segundo Hawkes (1958)."],
- ["R","Os afloramentos","Penedos de granito com gravuras rupestres e uma gruta, assinalados na planta de 1930."]]};
-const DIOS={"guimaraes-citania-de-briteiros":{gaps:[
+ ["R","Os afloramentos","Penedos de granito com gravuras rupestres e uma gruta, assinalados na planta de 1930."]],
+ "guimaraes-castro-de-sao-miguel-o-anjo":[
+ ["M2","A muralha intermédia","O talude mais forte do monte, com 3 a 6 m de desnível no LiDAR de 2025, cinge um recinto de cerca de 1,4 ha à volta do cume."],
+ ["S1","O troço dos escuteiros","Cerca de 43 m de muralha com 2 m de altura, postos a descoberto pelo agrupamento de escuteiros local, numa área vedada que não se pode visitar."],
+ ["M1","A plataforma do cume","No alto, junto ao vértice geodésico Anjo (385 m), uma plataforma com penedos de granito, rodeada por um talude mais baixo."],
+ ["M3","A linha exterior","Um segundo talude a poente e a norte, 15 a 30 m para fora: com as outras duas, as «três linhas de muralhas» referidas para este castro."],
+ ["CH","A capela de São Miguel","Fora das muralhas, a sul, junto ao parque de merendas e à área dos escuteiros."]]};
+const DIOS={"guimaraes-citania-de-briteiros":{cap:"Estruturas georreferenciadas a partir do levantamento geral da Unidade de Arqueologia da U. Minho, do painel interpretativo do sítio, das muralhas registadas no OpenStreetMap, da ortofoto de 2021 e do LiDAR da DGT (2025, 50 cm); relevo LiDAR exagerado 1,15×; árvores nas posições e alturas medidas pelo LiDAR, rareadas dentro das muralhas.",gaps:[
   "Casas e muros: 150 casas redondas (97 da planta do levantamento geral da U. Minho, 43 ajustadas a muros do LiDAR, 8 da ortofoto e as 2 reconstruídas) e os muros dos quarteirões vetorizados da planta. A deteção automática numa imagem de ≈ 0,43 m por píxel deixa escapar algumas casas e fragmenta alguns muros; as casas retangulares aparecem como muros, sem cobertura.",
   "Muralhas 1 e 2: traçado do painel validado pelo OpenStreetMap (erro médio ≈ 8 m). Muralha 3: traçado esquemático do painel, não verificado no terreno. A quarta muralha e os fossos ficam fora do disco.",
   "Ruas principais, portas, Casa do Conselho e balneário nascente: posições do painel, esquemáticas.",
@@ -3422,7 +3428,7 @@ const DIOS={"guimaraes-citania-de-briteiros":{gaps:[
   "Árvores: 50 % ou menos das árvores reais dentro das muralhas, para se lerem as ruínas.",
   "Setores S1–S16: atribuídos pela planta do levantamento geral; os setores exteriores, onde as linhas da planta não fecham, estão marcados como aproximados.",
   "Fases cronológicas: não há datas publicadas por setor nas fontes consultadas, por isso o modelo não separa o castro antigo do povoado romanizado."],layers:[["walls","Muralhas e muros"],["houses","Casas e edifícios"],["roofs","Coberturas"],["modern","Estrada, estacionamento, capela e centro de receção"],["trees","Vegetação"],["lbl","Rótulos"]]},
-  "guimaraes-castro-de-sabroso":{gaps:[
+  "guimaraes-castro-de-sabroso":{cap:"Estruturas georreferenciadas a partir da planta de Mário Cardozo (1930), ajustada ao talude da muralha no LiDAR da DGT (2025), e do painel do sítio (2021); relevo LiDAR de 25 cm exagerado 1,15×; árvores nas posições e alturas medidas pelo LiDAR, rareadas dentro das muralhas.",gaps:[
   "Portas das casas: a orientação não está documentada na planta de 1930 e não foi representada.",
   "A única casa com vestíbulo referida por Loureiro (1999) não está identificada na planta; nenhuma casa tem vestíbulo no modelo.",
   "Pracetas lajeadas e arruamentos: referidos nas fontes, mas sem traçado publicado com precisão suficiente; não modelados.",
@@ -3431,7 +3437,19 @@ const DIOS={"guimaraes-citania-de-briteiros":{gaps:[
   "Relevo: terreno de 25 cm interpolado dos pontos de solo do LiDAR da DGT (2025, bloco 182505), exagerado 1,15×. A muralha do recinto superior já está no terreno (o talude de pedra foi classificado como solo); no estado atual a pedra cobre esse talude.",
   "Árvores: posições e alturas reais do modelo de copas do LiDAR (MDS − MDT); dentro das muralhas ficam só 10 % (recinto superior) a 15 % das árvores, e nenhuma a menos de 5 m das muralhas, para se lerem as ruínas. A largura da copa de cada árvore vem do LiDAR; a espécie não vem do LiDAR: segundo o Tiago, a mata atual é sobretudo de eucalipto, com castanheiros, carvalhos e sobreiros; as copas altas e estreitas são tratadas como eucaliptos e as largas como castanheiros (cerca de 60 % eucaliptos, 16 % castanheiros, 16 % carvalhos, 8 % sobreiros).",
   "A planta de 1930 regista 33 casas e uma cisterna; Sarmento contou 35 casas.",
-  "Georreferenciação: planta de 1930 ajustada ao talude da muralha do recinto superior visível no LiDAR (erro médio ≈ 0,9 m; o ajuste anterior, pelos marcos da zona de proteção, deixava a planta cerca de 20 m a norte). Validação: recinto superior com 0,73 ha (publicado: 0,7 ha). As casas e os muros interiores seguem a planta; nos troços com floresta (alargamento sul e nascente) a muralha não foi verificada no LiDAR."]}};
+  "Georreferenciação: planta de 1930 ajustada ao talude da muralha do recinto superior visível no LiDAR (erro médio ≈ 0,9 m; o ajuste anterior, pelos marcos da zona de proteção, deixava a planta cerca de 20 m a norte). Validação: recinto superior com 0,73 ha (publicado: 0,7 ha). As casas e os muros interiores seguem a planta; nos troços com floresta (alargamento sul e nascente) a muralha não foi verificada no LiDAR."]},
+  "guimaraes-castro-de-sao-miguel-o-anjo":{cap:"Sem planta publicada: as três linhas de muralha foram traçadas no relevo do LiDAR da DGT (2025, nuvem de pontos, terreno de 25 cm); capela, estrada e ponto do troço dos escuteiros do OpenStreetMap; relevo exagerado 1,15×; árvores nas posições e alturas medidas pelo LiDAR, rareadas dentro das muralhas.",gaps:[
+  "Não há planta publicada nem escavações conhecidas. As três linhas de muralha foram traçadas no modelo do terreno do LiDAR da DGT (2025) e ajustadas ao ponto de maior declive de cada talude; não foram verificadas no terreno.",
+  "A ficha do SIPA (n.º 9581) não pôde ser lida (o site está bloqueado ao acesso automático). As «três linhas de muralhas» vêm de um resumo sem fonte (All About Portugal); no LiDAR identificam-se três taludes, mas a linha interior (rebordo do cume) é pouco marcada e pode não ser uma muralha.",
+  "A linha exterior só se segue a poente e a norte; a nascente e a sul perde-se entre os caminhos florestais e não foi desenhada.",
+  "Portas e entradas: não identificadas nas fontes nem com segurança no LiDAR (os cortes nos taludes coincidem com caminhos modernos); não representadas.",
+  "Casas: há referência a vestígios de estruturas de planta circular, mas sem posições publicadas; sob o eucaliptal (≈ 3,6 pontos de solo por m²) o LiDAR não as distingue. Nenhuma casa foi representada.",
+  "Troço de muralha dos escuteiros (43 m, cerca de 2 m de altura): posição pelo ponto «Muro Celta» do OpenStreetMap, não verificada; fica numa área vedada que o Tiago não pôde visitar em 2022 nem em 2025. Faltam fotografias e a planta do troço.",
+  "Alturas da reconstituição: 2 m acima do terraço na muralha intermédia (altura conservada do troço dos escuteiros); 1,2 m nas outras duas, valor hipotético.",
+  "Capela de São Miguel: planta simplificada do OpenStreetMap, alturas aproximadas e data de construção não apurada. A paliçada e as instalações dos escuteiros não foram representadas (traçado desconhecido).",
+  "Cronologia: sem dados publicados; o modelo não separa fases.",
+  "Árvores: posições, alturas e largura da copa reais do LiDAR (MDS − MDT); dentro da muralha intermédia ficam só 10 a 15 % das árvores, e nenhuma a menos de 5 m das linhas, para se lerem os taludes. A espécie não vem do LiDAR: copas altas e estreitas como eucaliptos, largas como castanheiros, carvalhos e sobreiros.",
+  "Falta o MDT de 50 cm do bloco 179499 (não está nos ficheiros do projeto); não fez falta, porque o terreno foi calculado diretamente da nuvem de pontos LO-179499."]}};
 const EVL={conf:"Confirmado",doc:"Reconstituído com fundamento documental",hip:"Hipotético"},EVC={conf:"#6d7f4f",doc:"#3f74a8",hip:"#c4772f"};
 const DIO={mods:null,cur:null};
 const TJ="https://cdn.jsdelivr.net/npm/three@0.160.0/";
@@ -3445,7 +3463,7 @@ function dioHtml(s){const d=DIOS[s.id];if(!d)return"";return `<figure class="dio
       ${(d.layers||[["walls","Muralhas e muros"],["houses","Casas e estruturas"],["roofs","Coberturas (reconstituição)"],["rocks","Afloramentos"],["trees","Vegetação"],["lbl","Rótulos"]]).map(([k,l])=>`<label><input type="checkbox" data-l="${k}" checked> ${l}</label>`).join("")}</div></div>
     ${TOURS[s.id]?`<button data-a="tour" aria-pressed="false">Visita guiada</button>`:""}<button data-a="fit">Enquadrar</button><button data-a="full">Ampliar</button></div>
   <div class="dio-legend" id="dioLegend" hidden>${Object.keys(EVL).map(k=>`<span><i style="background:${EVC[k]}"></i>${EVL[k]}</span>`).join("")}</div>
-  <figcaption>Maqueta interpretativa em 3D. Toque numa estrutura para ver a sua ficha. Estruturas georreferenciadas a partir ${s.id==="guimaraes-citania-de-briteiros"?"do levantamento geral da Unidade de Arqueologia da U. Minho, do painel interpretativo do sítio, das muralhas registadas no OpenStreetMap, da ortofoto de 2021 e do LiDAR da DGT (2025, 50 cm)":"da planta de Mário Cardozo (1930) e do painel do sítio (2021)"}; ${s.id==="guimaraes-citania-de-briteiros"?"relevo LiDAR exagerado 1,15×; árvores nas posições e alturas medidas pelo LiDAR, rareadas dentro das muralhas":"relevo DGT exagerado 1,25×; vegetação simplificada"}.
+  <figcaption>Maqueta interpretativa em 3D. Toque numa estrutura para ver a sua ficha. ${d.cap||""}
     <details class="dio-src"><summary>Fontes e lacunas</summary><div id="dioSrc"></div><h4>O que ainda falta documentar</h4><ul>${d.gaps.map(g=>`<li>${esc(g)}</li>`).join("")}</ul></details></figcaption></figure>`}
 async function dioMount(s){
   const stage=$("#dioStage");if(!stage)return;
