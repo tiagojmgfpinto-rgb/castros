@@ -20,7 +20,7 @@ Escreve em português (muitas vezes no telemóvel); responder sempre em portugu�
 | `app/dio/<id>.glb.png`, `<id>.json` | maquetas 3D por sítio (GLB dentro de PNG) + catálogo de estruturas/fontes/árvores |
 | `app/maq-*.jpg`, `app/maq-h.png` | textura e alturas da maqueta do noroeste (gerados por `tools/maquette.py`) |
 | `blend/` | scripts Blender das maquetas por sítio e dados georreferenciados (plantas, ajustes, casas, muros) |
-| `lidar/` | LiDAR DGT 2025 (`raw/*.tif`: Briteiros 184507/185507, Sabroso 182505) e scripts. Sabroso: `sab_laz.py` (nuvem LAZ → terreno e copas de 25 cm), `sab_georef.py` (planta de 1930 ajustada ao talude da muralha) |
+| `lidar/` | LiDAR DGT 2025 (`raw/*.tif`: Briteiros 184507/185507, Sabroso 182505, S. Miguel-o-Anjo 178499/178500/179499/179500) e scripts. S. Miguel-o-Anjo: `sma_laz.py` (LAZ 178499+179499 → terreno 25 cm), `sma_lines.py` (linhas de `blend/sma_trace.py` ajustadas ao talude). Sabroso: `sab_laz.py` (nuvem LAZ → terreno e copas de 25 cm), `sab_georef.py` (planta de 1930 ajustada ao talude da muralha) |
 | `dig/`, `tools/` | digitalizações antigas e scripts de dados; **nunca** usar `tools/merge_rev_OLD_do_not_use.py` |
 | `geo/`, `osm/` | limites (CAOP, geoBoundaries), rios, OSM (`braga.pbf`, `mask_sites.json` = estradas/água por sítio) |
 | `tests/` | scripts Playwright de captura (`mock.html` simula o runtime `window.claude`) |
@@ -68,7 +68,8 @@ sh tools/fetch_dem.sh            # só para refazer a maqueta do noroeste
 
 - Feito com nível máximo: **Citânia de Briteiros** (LiDAR, levantamento geral da U. Minho, painel, fotografias), **Castro de Sabroso**
   (planta de 1930 + LiDAR 2025 bloco 182505 com nuvem de pontos; a muralha do recinto superior está no MDT, por isso no estado atual a pedra
-  cobre o talude real em vez de assentar por cima). A nuvem de pontos (LAZ, quando o Tiago a envia) dá terreno de 25 cm, melhor que o MDT de 50 cm.
+  cobre o talude real em vez de assentar por cima), **Castro de S. Miguel-o-Anjo** (Guimarães; sem planta publicada: três linhas
+  de muralha traçadas no LiDAR 2025, troço dos escuteiros pelo ponto «Muro Celta» do OSM, capela; `blend/dio_sma.py`; falta o MDT 179499, não preciso). A nuvem de pontos (LAZ, quando o Tiago a envia) dá terreno de 25 cm, melhor que o MDT de 50 cm.
 - O Tiago quer este nível em **todos** os sítios, um a um. Próximo: **Citânia de Sanfins** (blocos 178484, 178485, 179484, 179485),
   depois Santa Luzia, Bagunte, Cossourado. (Sabroso já tem LiDAR: o bloco 182506 não é preciso, o disco cabe todo no 182505.) Ver `docs/blocos_lidar_castros.md`.
 - Por confirmar com o Tiago: classificação de Roriz e de N.ª Sr.ª da Graça; Ázere MN 1910.
