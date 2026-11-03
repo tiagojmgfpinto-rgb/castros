@@ -2339,7 +2339,183 @@
 "r": "M52.4 55.3Q67.4 52.3 82.4 55.3M58.4 51.8Q67.4 48.8 76.4 51.8",
 "u": "M64.2 47.3h6.4v-3.2h-6.4zM63.2 44.1L67.4 39.3L71.6 44.1z"
 },
-"mk": 21
+"mk": 21,
+"fic": {
+"refs": {
+"tes": {
+"t": "Pinto, T. — Castros do Noroeste de Portugal (tese de doutoramento, Univ. de Santiago de Compostela). Visitas em 2022 e 2025.",
+"u": "https://www.castrosdonoroestedeportugal.pt/braga/"
+},
+"sip": {
+"t": "Sereno, I.; Dordio, P. (1994). Castro Máximo / Monte de Castro, SIPA n.º 1721. Direção-Geral do Património Cultural.",
+"u": "https://www.monumentos.gov.pt/Site/APP_PagesUser/SIPA.aspx?id=1721"
+},
+"mor": {
+"t": "Morais, R. (2020). Transition from the Pre-Roman World to the Roman World in the Northwest of the Iberian Peninsula: the example of Bracara Augusta. Repositório Aberto da U. Porto.",
+"u": "https://repositorio-aberto.up.pt/bitstream/10216/130140/2/429255.pdf"
+},
+"roc": {
+"t": "Rocha, D. (2017). O Castro Máximo: contributo para o estudo do povoamento proto-histórico da região de Braga. Dissertação de mestrado, Universidade do Minho.",
+"u": "https://hdl.handle.net/1822/53245"
+},
+"avc": {
+"t": "Avenida Central (2008). O Castro Máximo (blogue).",
+"u": "http://avenidacentral.blogspot.com/2008/07/o-castro-mximo-sms-este-caracterstico.html"
+},
+"osm": {
+"t": "OpenStreetMap (2026): estádio, parques de estacionamento, rocha da pedreira, ruas, ponto «Castro Máximo».",
+"u": "https://www.openstreetmap.org/#map=18/41.5612/-8.4285"
+},
+"lid": {
+"t": "DGT (2025). LiDAR 2025, bloco 175511: nuvem de pontos classificada, MDT e MDS com 50 cm de resolução. Direção-Geral do Território.",
+"u": "https://cdd.dgterritorio.gov.pt"
+}
+},
+"med": [
+[
+"Cota máxima",
+"198,2 m (SIPA); 199,8 m no LiDAR de 2025",
+[
+"sip",
+"lid"
+]
+],
+[
+"Distância a Bracara Augusta",
+"≈ 2 km em linha reta",
+[
+"mor"
+]
+],
+[
+"Linhas de muralha",
+"duas, reforçadas por fossos do lado da cidade (Teixeira, anos 1930); três segundo outras fontes; nenhuma identificável hoje",
+[
+"sip",
+"mor",
+"avc"
+]
+],
+[
+"Frentes da pedreira (LiDAR 2025)",
+"desnível de mais de 50 m entre o alto e o relvado do estádio",
+[
+"lid"
+]
+]
+],
+"sab": [
+[
+"Terá sido o principal povoado castrejo da zona onde se fundou Bracara Augusta, e foi abandonado com a fundação da cidade romana.",
+[
+"tes",
+"mor"
+]
+],
+[
+"A escavação de 2001 encontrou unidades habitacionais e áreas de circulação organizadas por vários cruzamentos de ruas.",
+[
+"mor"
+]
+],
+[
+"Cerâmica e moedas romanas indicam que coexistiu com a primeira ocupação romana da Cividade, o núcleo inicial de Bracara Augusta.",
+[
+"sip"
+]
+],
+[
+"Entre os achados há uma peça de importação mediterrânica, estudada por N. Oliveira (2018).",
+[
+"tes"
+]
+]
+],
+"cro": [
+[
+"Fim do séc. XIX",
+"Investigações de Albano Belino, amigo de Martins Sarmento.",
+[
+"avc"
+]
+],
+[
+"1935",
+"Prospeção e escavação de Carlos Teixeira: fossos, talvez duas linhas de muralha e casas circulares de pedra.",
+[
+"sip",
+"mor"
+]
+],
+[
+"1953-54",
+"Prospeção e escavação de Russell Cortez.",
+[
+"sip"
+]
+],
+[
+"1976-78",
+"Sondagens da Unidade de Arqueologia da U. Minho: um muro com paramento externo aparelhado e um piso de argila batida.",
+[
+"sip"
+]
+],
+[
+"1984-85",
+"Classificado como Imóvel de Interesse Público (Decreto n.º 29/84) e criada a zona especial de proteção (Portaria n.º 281/85).",
+[
+"sip"
+]
+],
+[
+"2001",
+"Escavação de emergência de cinco meses nas obras do estádio, pelo Gabinete de Arqueologia da Câmara de Braga com a U. Minho; as casas são destruídas.",
+[
+"tes",
+"mor",
+"roc"
+]
+],
+[
+"2003",
+"Inauguração do Estádio Municipal de Braga, para o Euro 2004.",
+[
+"tes"
+]
+],
+[
+"2021",
+"A Junta de São Vicente propõe comprar os terrenos e musealizar o sítio; o projeto não avançou.",
+[
+"tes"
+]
+],
+[
+"2025",
+"Voo LiDAR da DGT (sem dados na zona da prisão); na visita do autor não havia ruínas visíveis.",
+[
+"lid",
+"tes"
+]
+]
+],
+"ver": [
+[
+"O alto do Monte Castro, com vista sobre Braga e o vale do Cávado; não há ruínas visíveis.",
+[
+"tes",
+"sip"
+]
+],
+[
+"As frentes da antiga pedreira, vistas do lado do estádio (parte da zona está vedada).",
+[
+"tes"
+]
+]
+]
+}
 },
 {
 "id": "braga-fonte-do-idolo",

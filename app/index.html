@@ -3424,7 +3424,12 @@ const TOURS={"guimaraes-citania-de-briteiros":[
  ["PA","O edifício palatino","A sul da basílica, uma grande sala de duas naves com sete pilares, 34,2 × 12,6 m, interpretada como um palácio suevo, talvez destruído em 585."],
  ["MN","O monumento a Nossa Senhora da Assunção","Coluna de granito com cerca de 16 m sobre um penedo, com a imagem branca da Senhora no topo. Junto à base apareceram muros de função desconhecida."],
  ["CH","A capela de Santa Marta","Mandada construir por D. Diogo de Sousa em 1520, num monte já referido em 900. A zona da capela nunca foi escavada: é aí que se admite que estivesse o castelo medieval."],
- ["M2","A segunda muralha","Um segundo talude a norte e a nascente. Foi entre a primeira e a segunda muralhas, pelo lado sul, que Albano Belino escavou em 1899."]]};
+ ["M2","A segunda muralha","Um segundo talude a norte e a nascente. Foi entre a primeira e a segunda muralhas, pelo lado sul, que Albano Belino escavou em 1899."]],
+ "braga-castro-maximo":[
+ ["CU","O alto do Monte Castro","O que resta do povoado ocupa o topo do monte, a 198 m, um dos pontos mais altos de Braga, a cerca de 2 km de Bracara Augusta. Hoje não se vê nenhuma ruína."],
+ ["PD","A pedreira","As pedreiras abertas nas encostas desfiguraram o povoado: as frentes de rocha descem mais de 50 m até ao relvado do estádio. Parte da zona está vedada pelo perigo de queda."],
+ ["EX","As casas escavadas em 2001","Nas obras do estádio, sobretudo nos estacionamentos da bancada poente, apareceram casas circulares e ruas. Foram estudadas durante cinco meses e depois destruídas; duas lareiras estão no Museu D. Diogo de Sousa."],
+ ["ST","O Estádio Municipal","Construído para o Euro 2004 dentro da antiga pedreira e da zona de proteção do castro, criada em 1985."]]};
 const DIOS={"guimaraes-citania-de-briteiros":{cap:"Estruturas georreferenciadas a partir do levantamento geral da Unidade de Arqueologia da U. Minho, do painel interpretativo do sítio, das muralhas registadas no OpenStreetMap, da ortofoto de 2021 e do LiDAR da DGT (2025, 50 cm); relevo LiDAR exagerado 1,15×; árvores nas posições e alturas medidas pelo LiDAR, rareadas dentro das muralhas.",gaps:[
   "Casas e muros: 150 casas redondas (97 da planta do levantamento geral da U. Minho, 43 ajustadas a muros do LiDAR, 8 da ortofoto e as 2 reconstruídas) e os muros dos quarteirões vetorizados da planta. A deteção automática numa imagem de ≈ 0,43 m por píxel deixa escapar algumas casas e fragmenta alguns muros; as casas retangulares aparecem como muros, sem cobertura.",
   "Muralhas 1 e 2: traçado do painel validado pelo OpenStreetMap (erro médio ≈ 8 m). Muralha 3: traçado esquemático do painel, não verificado no terreno. A quarta muralha e os fossos ficam fora do disco.",
@@ -3470,7 +3475,16 @@ const DIOS={"guimaraes-citania-de-briteiros":{cap:"Estruturas georreferenciadas 
   "Monumento a Nossa Senhora da Assunção: data e autor não apurados; proporções dos andares tiradas de uma fotografia, com a base e a altura total medidas no LiDAR.",
   "Torre de telecomunicações, posto de vigia, mastro, baloiço e cruzeiro: posições do OpenStreetMap e alturas do LiDAR; formas simplificadas.",
   "Cronologia: o modelo junta numa só cena o castro (Bronze Final à época romana), a basílica e o palácio (séculos V a VII) e a capela (1520); não separa fases.",
-  "Árvores: posições, alturas e largura da copa reais do LiDAR (MDS − MDT); dentro da primeira muralha fica só 10 % das árvores, e nenhuma a menos de 6 m das estruturas, para se lerem as ruínas; mantêm-se as árvores do adro da capela, que se veem na fotografia. A espécie não vem do LiDAR."]}};
+  "Árvores: posições, alturas e largura da copa reais do LiDAR (MDS − MDT); dentro da primeira muralha fica só 10 % das árvores, e nenhuma a menos de 6 m das estruturas, para se lerem as ruínas; mantêm-se as árvores do adro da capela, que se veem na fotografia. A espécie não vem do LiDAR."]},
+  "braga-castro-maximo":{noB:true,cap:"Do castro não resta nada à vista: a maqueta mostra o Monte Castro como está hoje, com o terreno, as frentes da pedreira, o estádio e as casas do LiDAR da DGT (2025, nuvem de pontos, terreno de 25 cm), sem exagero do relevo. A zona à volta do Estabelecimento Prisional não tem dados LiDAR: aí o relevo é aproximado e as casas vêm da ortofoto. Sem planta consultada, não se desenhou nenhuma muralha nem casa castreja.",layers:[["houses","Cume, pedreira e zona escavada"],["modern","Estádio e casas"],["trees","Vegetação"],["lbl","Rótulos"]],gaps:[
+  "Não há reconstituição: nenhuma planta do castro pôde ser consultada. A dissertação de D. Rocha (2017, U. Minho), que estuda a escavação de 2001, está num repositório bloqueado ao acesso automático; com as suas plantas, as casas e as ruas escavadas podem ser georreferenciadas e reconstituídas.",
+  "Muralhas e fossos: Carlos Teixeira (1935-36) descreveu fossos do lado da cidade e talvez duas linhas de muralha (três segundo outras fontes); as sondagens da U. Minho (1976-78) só encontraram um muro com paramento externo aparelhado e um piso de argila batida. Sem traçado nem posição publicados que se pudessem consultar, e sem sinal no LiDAR (as encostas a sul estão urbanizadas e as do norte foram desmontadas pela pedreira): nada foi representado.",
+  "Escavação de 2001: só se sabe que foi sobretudo nos estacionamentos da bancada poente; a linha ocre marca o limite dos parques de estacionamento (OpenStreetMap), não a área escavada. Faltam a planta, o número e o diâmetro das casas, e as fotografias tiradas pelos trabalhadores das obras.",
+  "Sondagens de 1976-78 e escavações de 1935 e 1953-54: posições desconhecidas.",
+  "Zona sem dados LiDAR: a DGT não publicou pontos num círculo de cerca de 190 m de raio à volta do Estabelecimento Prisional, que apanha a encosta nascente do cume e o fim da Rua do Castro Máximo, onde está o ponto «Castro Máximo» do OpenStreetMap e o mato visível na ortofoto. Aí o relevo vem dos AWS Terrain Tiles (SRTM, ≈ 30 m, anterior ao estádio), ajustado à borda do LiDAR, e as casas foram tiradas dos telhados da ortofoto com dois pisos assumidos; as árvores dessa zona não foram representadas.",
+  "Cume: o LiDAR dá 199,8 m no ponto mais alto (o SIPA indica 198,2 m); a linha creme é a curva de nível dos 195 m e marca só o alto do monte, não um limite do povoado.",
+  "Edifícios do LiDAR: blocos de 1 m com a altura do MDS, sem forma de telhado; o estádio aparece simplificado e só o seu topo sudeste cabe no disco.",
+  "Árvores: posições, alturas e largura da copa reais do LiDAR (MDS − MDT); no alto do monte fica só cerca de um terço, para se ler o relevo. A espécie não vem do LiDAR."]}};
 const EVL={conf:"Confirmado",doc:"Reconstituído com fundamento documental",hip:"Hipotético"},EVC={conf:"#6d7f4f",doc:"#3f74a8",hip:"#c4772f"};
 const DIO={mods:null,cur:null};
 const TJ="https://cdn.jsdelivr.net/npm/three@0.160.0/";
@@ -3478,7 +3492,7 @@ function dioMods(){if(!DIO.mods)DIO.mods=Promise.all([import(TJ+"build/three.mod
 function dioHtml(s){const d=DIOS[s.id];if(!d)return"";return `<figure class="dio" id="dio">
   <div class="dio-stage" id="dioStage"><div class="dio-load">A preparar a maqueta…</div></div>
   <div class="dio-bar" id="dioBar">
-    <div class="dio-seg" role="group" aria-label="Modo"><button data-m="A" aria-pressed="true">Estado atual</button><button data-m="B" aria-pressed="false">Reconstituição</button></div>
+    <div class="dio-seg" role="group" aria-label="Modo"><button data-m="A" aria-pressed="true">Estado atual</button>${d.noB?"":`<button data-m="B" aria-pressed="false">Reconstituição</button>`}</div>
     <button data-a="spin" aria-pressed="false">Giro</button><button data-a="ev" aria-pressed="false">Evidência</button>
     <div class="dio-dd"><button data-a="layers" aria-expanded="false">Camadas ▾</button><div class="dio-menu" id="dioLayers" hidden>
       ${(d.layers||[["walls","Muralhas e muros"],["houses","Casas e estruturas"],["roofs","Coberturas (reconstituição)"],["rocks","Afloramentos"],["trees","Vegetação"],["lbl","Rótulos"]]).map(([k,l])=>`<label><input type="checkbox" data-l="${k}" checked> ${l}</label>`).join("")}</div></div>
