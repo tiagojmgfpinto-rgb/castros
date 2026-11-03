@@ -1,7 +1,7 @@
 # Castro Máximo (Braga): products from the DGT LiDAR 2025 point cloud LO-175511
 # (LO-175511-07-2025_v05.laz, 110 MB, too big for the repo: in the project files, /mnt/project-files/).
 # Usage: /opt/bvenv/bin/python lidar/cmx_laz.py [dir with the .laz]
-# Box of 400 m (PT-TM06) holding the summit, the west car parks of the stadium, the quarry face and the east slope (the east half of the hill is a void: the prison is masked). Outputs (lidar/, row 0 = north, 0.25 m):
+# Box of 480 m (PT-TM06) holding the summit, the whole stadium, the west car parks, the quarry face and the east slope (the east half of the hill is a void: the prison is masked). Outputs (lidar/, row 0 = north, 0.25 m):
 #   cmx_dtm25.npy  ground (class 2) TIN-interpolated
 #   cmx_dsm25.npy  highest return per cell (gaps filled from the TIN ground)
 #   cmx_cnt25.npy  points per cell (the DGT left a void of ≈ 190 m radius over the prison and the houses east of the summit)
@@ -9,7 +9,7 @@
 import sys, json, numpy as np, laspy
 from scipy.interpolate import LinearNDInterpolator
 D = sys.argv[1] if len(sys.argv) > 1 else '/mnt/project-files'
-XC, YC, HALF, CS = -24670.0, 210221.0, 200.0, .25
+XC, YC, HALF, CS = -24710.0, 210301.0, 240.0, .25
 x0, y1 = XC - HALF, YC + HALF; N = int(2 * HALF / CS)
 X = []; Y = []; Z = []; C = []
 for b in ('175511',):

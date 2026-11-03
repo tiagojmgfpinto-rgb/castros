@@ -3,7 +3,7 @@
 import json, osmium
 from pyproj import Transformer
 T = Transformer.from_crs(4326, 3763, always_xy=True)
-X0, Y0, CX, CY, R = -24590.1, 210181.1, -80.0, 40.0, 240.0
+X0, Y0, CX, CY, R = -24590.1, 210181.1, -120.0, 120.0, 280.0
 KEEP = ('highway', 'building', 'leisure', 'landuse', 'natural', 'amenity', 'barrier', 'historic', 'man_made')
 class H(osmium.SimpleHandler):
     def __init__(s): super().__init__(); s.ways = []; s.nodes = []

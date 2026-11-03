@@ -27,14 +27,14 @@ PITCH = way(166248899); STADIUM = way(116650252); PITCH2 = way(149578802)
 PARK_W, PARK_NW = way(1266855373), way(1266855372)          # car parks west of the stadium («estacionamentos da bancada poente»)
 PARKS = [way(i) for i in (1266855373, 1266855372, 152233150, 485158330, 485158331)]
 ROCKS = [way(485203843), way(1305558276)]                    # natural=bare_rock: the quarry floor and faces
-GRASS = [way(i) for i in (485199233, 1429211145, 1495303882)]
-ALLOT = way(1470431193)                                      # Horta Urbana de São Vicente
+GRASS = [way(i) for i in (485199233, 1429211145, 1495303882) if i in W_]
+ALLOT = way(1470431193) if 1470431193 in W_ else None                                     # Horta Urbana de São Vicente
 ROOFS = json.load(open('blend/cmx_roofs.json'))
 ORTO = np.asarray(Image.open('blend/cmx_orto.png').convert('RGB'), float)
 OS_, OX_, OY_ = 1.07, 305.0, 212.0                           # orthophoto px = OX + (x + 160)·S, OY − (y − 232)·S (local metres)
 
-# ---------- disc: holds the summit, the quarry faces, the south-east end of the stadium and the west car parks
-CX, CY, R = -80.0, 40.0, 185.0
+# ---------- disc: holds the summit, the quarry faces, the whole stadium and the west car parks
+CX, CY, R = -120.0, 120.0, 225.0
 def loc(p): p = np.asarray(p, float); return np.stack([p[..., 0] - CX, p[..., 1] - CY], -1)
 
 # ---------- terrain heights: DGT LiDAR 2025 ground points (class 2), TIN on a 25 cm grid, the prison hole filled, lightly smoothed
@@ -214,7 +214,7 @@ def inside_any(polys, x, y):
     for q in polys: m |= MPath(q).contains_points(P)
     return m.reshape(np.shape(x))
 ochre_m = col_mat('ochre', (204, 142, 58), .8); cream_m = col_mat('cream', (240, 232, 208), .8)
-conc_m = col_mat('concrete', (206, 204, 198), .85); conc2_m = col_mat('concrete2', (172, 170, 164), .9); rock_m = col_mat('rock', (124, 118, 108), .95)
+conc_m = col_mat('concrete', (206, 204, 198), .85); conc2_m = col_mat('concrete2', (172, 170, 164), .9); seat_m = col_mat('seats', (96, 100, 108), .7); rock_m = col_mat('rock', (124, 118, 108), .95)
 
 # ---------- 1 m working grid over the disc (Blender xy), heights not exaggerated
 K = 4; nB = LB['n'] // K
@@ -252,14 +252,88 @@ def hfield(G):   # heightfield blocks: one top quad per 1 m cell, walls where th
         WV.append(np.stack([np.stack(v, 1) for v in q], 1).reshape(-1, 3))
     WV = np.vstack(WV); WF = np.arange(len(WV)).reshape(-1, 4)
     return (TV.tolist(), TF.tolist(), [(0, 0)] * len(TV)), (WV.tolist(), WF.tolist(), [(0, 0)] * len(WV))
-tS, wS = hfield(STM); tH, wH = hfield(bm & ~STM)
-put('ST', 'Coberturas do estádio', conc_m, [tS], 'A', 'conf'); put('ST', 'Estádio', conc2_m, [wS], 'A', 'conf')
+# ---------- the stadium: the two stands are built from their measured outline and roof heights (the LiDAR sees only the roofs);
+# the lower stadium buildings stay as 1 m heightfield blocks
+SA = math.radians(-40.3)                                     # long axis of the pitch (OpenStreetMap pitch, minAreaRect)
+PC = loc([-164.3, 210.3]); PZ = float(hz(*PC))               # pitch centre and level
+_ca, _sa = math.cos(SA), math.sin(SA)
+GU = (GXc - PC[0]) * _ca + (GYc - PC[1]) * _sa; GV = -(GXc - PC[0]) * _sa + (GYc - PC[1]) * _ca
+tall = STM & (top > PZ + 25)
+STANDS = []
+for side in (1, -1):
+    m = tall & (GV * side > 30)
+    w_ = GV[m] * side; u_ = GU[m]; z_ = top[m]
+    wf, wb = np.percentile(w_, 1.5), np.percentile(w_, 98.5); u0, u1 = np.percentile(u_, 1), np.percentile(u_, 99)
+    A_ = np.stack([np.ones_like(w_), w_], 1); cf = np.linalg.lstsq(A_, z_, rcond=None)[0]
+    zf, zb_ = cf[0] + cf[1] * wf, cf[0] + cf[1] * wb
+    STANDS.append(dict(side=side, wf=float(wf), wb=float(wb), u0=float(u0), u1=float(u1), zf=float(zf), zb=float(zb_)))
+    print('stand', side, 'w %.1f–%.1f u %.1f–%.1f roof %.1f–%.1f m' % (wf, wb, u0, u1, zf + H0, zb_ + H0))
+STAND = np.zeros_like(bm)
+for S_ in STANDS: STAND |= (GV * S_['side'] > S_['wf'] - 3) & (GV * S_['side'] < S_['wb'] + 3) & (GU > S_['u0'] - 3) & (GU < S_['u1'] + 3)
+STAND &= STM
+tS, wS = hfield(STM & ~STAND); tH, wH = hfield(bm & ~STM)
+TP = T2(*PC, SA)
+def P3(u, w, side, z): x, y = TP(u, w * side); return (x, y, z)
+def slab(S_, u0, u1, w0, w1, z0f, z0b, th):   # sloped box: top from (w0, z0f) to (w1, z0b), thickness th
+    s_ = S_['side']; V = []
+    for (u, w, z) in ((u0, w0, z0f), (u1, w0, z0f), (u1, w1, z0b), (u0, w1, z0b)): V.append(P3(u, w, s_, z))
+    V += [(x, y, z - th) for x, y, z in V]
+    F = [(0, 1, 2, 3), (7, 6, 5, 4), (0, 4, 5, 1), (1, 5, 6, 2), (2, 6, 7, 3), (3, 7, 4, 0)]
+    if s_ < 0: F = [f[::-1] for f in F]
+    return V, F, [(0, 0)] * 8
+RAKE = .5; TREAD = .8; ZG = PZ - 4
+canopy, treads, risers, walls = [], [], [], []
+for S_ in STANDS:
+    s_ = S_['side']; u0, u1, wf, wb = S_['u0'], S_['u1'], S_['wf'], S_['wb']
+    roof = lambda w: S_['zf'] + (S_['zb'] - S_['zf']) * (w - wf) / (wb - wf)
+    canopy.append(slab(S_, u0, u1, wf, wb, S_['zf'], S_['zb'], 1.2))
+    w0 = 45.0; ns = int((wb - 5 - w0) / TREAD); wt = w0 + ns * TREAD; zt = PZ + 1 + ns * TREAD * RAKE
+    TV, TF, RV, RF = [], [], [], []
+    for k in range(ns):
+        wa, wb_ = w0 + k * TREAD, w0 + (k + 1) * TREAD; za = PZ + 1 + k * TREAD * RAKE; zr = za + TREAD * RAKE
+        o = len(RV); RV += [P3(u0, wa, s_, za), P3(u1, wa, s_, za), P3(u1, wa, s_, zr), P3(u0, wa, s_, zr)]; RF.append((o, o + 1, o + 2, o + 3) if s_ > 0 else (o + 3, o + 2, o + 1, o))
+        o = len(TV); TV += [P3(u0, wa, s_, zr), P3(u1, wa, s_, zr), P3(u1, wb_, s_, zr), P3(u0, wb_, s_, zr)]; TF.append((o, o + 1, o + 2, o + 3) if s_ > 0 else (o + 3, o + 2, o + 1, o))
+    treads.append((TV, TF, [(0, 0)] * len(TV))); risers.append((RV, RF, [(0, 0)] * len(RV)))
+    walls.append(slab(S_, u0, u1, w0 - .6, w0, PZ + 1, PZ + 1, 1 + 4))                        # front wall to the pitch
+    walls.append(slab(S_, u0, u1, wt, wb - 1, zt, zt, zt - ZG))                               # concourse block behind the seats
+    walls.append(slab(S_, u0, u1, wb - 1, wb, roof(wb - 1) - 1.2, roof(wb) - 1.2, roof(wb) - 1.2 - ZG))   # back wall up to the roof
+    for ue, du in ((u0, 1), (u1, -1)):                                                          # end walls under the seats
+        for k in range(0, ns, 4):
+            wa = w0 + k * TREAD; wz = min(wt, wa + 4 * TREAD); zr = PZ + 1 + min(ns, k + 4) * TREAD * RAKE
+            walls.append(slab(S_, min(ue, ue + du * .6), max(ue, ue + du * .6), wa, wz, zr, zr, zr - ZG))
+# the cables that hang the two roofs across the pitch: the LiDAR point cloud has returns on them at 133.6–134.8 m (classes 6 and 7),
+# 34 cables from u = −63.5 to 60.5 m (one every 3.76 m), about 0.8 m of sag in the middle
+def tube(pts, r):
+    V = []; F = []; pts = np.asarray(pts, float)
+    for i, p in enumerate(pts):
+        d = pts[min(i + 1, len(pts) - 1)] - pts[max(i - 1, 0)]; d /= np.linalg.norm(d)
+        a = np.cross(d, [0, 0, 1]); a /= np.linalg.norm(a); b = np.cross(a, d)
+        for k in range(4): t_ = k * math.pi / 2; V.append(tuple(p + (a * math.cos(t_) + b * math.sin(t_)) * r))
+    for i in range(len(pts) - 1):
+        for k in range(4): k2 = (k + 1) % 4; F.append((i * 4 + k, i * 4 + k2, (i + 1) * 4 + k2, (i + 1) * 4 + k))
+    return V, F, [(0, 0)] * len(V)
+SN, SS_ = STANDS
+cu0, cu1, ncab = -63.5, 60.5, 34
+cables = []
+for uc in np.linspace(cu0, cu1, ncab):
+    pa = np.array(P3(uc, SN['wf'] + .3, 1, SN['zf'] - .3)); pb = np.array(P3(uc, SS_['wf'] + .3, -1, SS_['zf'] - .3))
+    tt = np.linspace(0, 1, 17); pts = pa[None] * (1 - tt[:, None]) + pb[None] * tt[:, None]; pts[:, 2] -= .8 * 4 * tt * (1 - tt)
+    cables.append(tube(pts, .18))
+goals = []
+for e in (-1, 1):
+    ug = e * 52.5
+    for vv in (-3.66, 3.66): goals.append(boxv(*TP(ug, vv), SA, .14, .14, PZ, PZ + 2.44))
+    goals.append(boxv(*TP(ug, 0), SA, .14, 7.46, PZ + 2.3, PZ + 2.44))
+print('stadium: %d cables, %d steps per stand' % (ncab, ns))
+put('ST', 'Coberturas do estádio', conc_m, [tS] + canopy, 'A', 'conf'); put('ST', 'Estádio', conc2_m, [wS] + walls, 'A', 'conf')
+put('ST', 'Degraus das bancadas', conc_m, treads, 'A', 'doc'); put('ST', 'Cadeiras das bancadas', seat_m, risers, 'A', 'doc')
+put('ST', 'Cabos das coberturas', steel_m, cables, 'A', 'conf'); put('ST', 'Balizas', white_m, goals, 'A', 'conf')
 put('ED', 'Telhados das casas', tile_m, [tH], 'A', 'conf'); put('ED', 'Paredes das casas', lime_m, [wH], 'A', 'conf')
 print('building cells: stadium', int(STM.sum()), 'houses', int((bm & ~STM).sum()))
-item(id='ST', name='Estádio Municipal de Braga', kind='Edifício moderno', phase='2003', ev='conf', evB='conf',
-     dims='bancadas e coberturas com a altura medida no LiDAR (MDS)',
-     note='Construído para o Euro 2004 na antiga pedreira do Monte Castro, dentro da zona de proteção do castro criada em 1985, que não foi respeitada. Nas obras, sobretudo na zona dos estacionamentos da bancada poente, apareceram casas de planta circular, estudadas numa escavação de emergência de cinco meses e depois destruídas (tese). Só está no disco o topo sudeste do estádio. Forma simplificada: blocos de 1 m com a altura do LiDAR.',
-     src=['tese', 'osm', 'lidar'])
+item(id='ST', name='Estádio Municipal de Braga («A Pedreira»)', kind='Edifício moderno', phase='Euro 2004', ev='conf', evB='conf',
+     dims=f'duas bancadas laterais com coberturas de {STANDS[0]["zf"] + H0:.0f} a {STANDS[0]["zb"] + H0:.0f} m de altitude (relvado a {PZ + H0:.0f} m); {ncab} cabos sobre o relvado, um a cada 3,8 m (LiDAR)',
+     note='Projeto de Eduardo Souto de Moura com o engenheiro Rui Furtado, para o Euro 2004: só duas bancadas laterais, e nos topos os anfiteatros de rocha da encosta (Wikipédia). Foi construído na antiga pedreira do Monte Castro, dentro da zona de proteção do castro criada em 1985, que não foi respeitada. Nas obras, sobretudo na zona dos estacionamentos da bancada poente, apareceram casas de planta circular, estudadas numa escavação de emergência de cinco meses e depois destruídas (tese). Planta, altura e inclinação das coberturas e posição dos cabos medidas no LiDAR de 2025, que tem pontos nos próprios cabos. O LiDAR não vê debaixo das coberturas: os degraus das bancadas (inclinação de cerca de 27°) e as paredes são esquemáticos; as cores das cadeiras não estão representadas. As construções mais baixas do estádio são blocos de 1 m com a altura do LiDAR.',
+     src=['wiki', 'tese', 'osm', 'lidar'])
 item(id='ED', name='Casas do bairro', kind='Edifício moderno', phase='atual', ev='conf', evB='conf',
      dims='telhados com a altura medida no LiDAR (MDS), em blocos de 1 m',
      note='Casas a sul e a poente do cume, na Rua da Pedreira, na Rua do Muro e no Bairro de Nossa Senhora do Monte, sobre as encostas que Carlos Teixeira descreveu nos anos 1930 com fossos do lado da cidade. Só no estado atual.', src=['lidar', 'osm', 'sipa'])
@@ -466,7 +540,7 @@ for (x, y) in tp:
 # undergrowth: gorse/broom at the forest edges and on the scrubby slopes, grass tufts on the open ground (not on paving)
 canm = lambda x, y: can[min(511, max(0, int((R - y) / (2 * R) * 512))), min(511, max(0, int((x + R) / (2 * R) * 512)))]
 pathpts = np.vstack([dense(loc(r), 1.5) for r in ROADS]); kp = cKDTree(pathpts)
-PAVED = [loc(q) for q in PARKS] + [loc(PITCH), loc(PITCH2)]
+PAVED = [loc(q) for q in PARKS] + [loc(PITCH), loc(PITCH2), loc(STADIUM)]
 def free(x, y, dw, dp=2.5): return math.hypot(x, y) < R - 2 and kd.query((x, y))[0] > dw and kp.query((x, y))[0] > dp and not inside_any(PAVED, x, y) and not fq[min(nB - 1, max(0, int((gyl[0] + .5 - y)))), min(nB - 1, max(0, int(x - gxl[0] + .5)))]
 n_sh = 0
 for _ in range(9000):
@@ -489,14 +563,14 @@ def lbl(t, p, dz=3):
 lbl('Cume do Monte Castro · 198 m', SUM, 5)
 lbl('Frentes da antiga pedreira', loc(ROCKS[1].mean(0)), 6)
 lbl('Estacionamento poente · casas escavadas em 2001', loc(PARK_W.mean(0)), 5)
-lbl('Estádio Municipal de Braga', loc([-150, 150]), 30)
+lbl('Estádio Municipal de Braga', PC, 44)
 _vc = np.array([60.0, 30.0]) - [CX, CY]
 lbl('Zona sem dados LiDAR (prisão)', _vc, 8)
-lbl('Rua da Pedreira', loc([-125, -118]), 6)
+lbl('Bairro de Nossa Senhora do Monte', loc([-133.3, -48.8]), 6)
 
 # ---------- stylised ground: scrub and grass, forest floor, granite of the quarry, asphalt car parks, pitch, streets;
 # in the LiDAR hole the colours come from the orthophoto (gardens, lawns, yards)
-TS = 3072; mpp = 2 * R / TS
+TS = 4096; mpp = 2 * R / TS
 jj, ii = np.mgrid[0:TS, 0:TS]; GX = (ii + .5) * mpp - R; GY = R - (jj + .5) * mpp
 def noise(sig, seed):
     return gaussian_filter(np.random.default_rng(seed).normal(0, 1, (TS, TS)), sig, mode='wrap')
@@ -512,11 +586,53 @@ def polys(L_, fill=255):
 park = gaussian_filter(mask_draw(polys(PARKS)), 1.2)
 pitch = mask_draw(polys([PITCH, PITCH2]))
 rockp = gaussian_filter(mask_draw(polys(ROCKS)), 4)
-grass = gaussian_filter(mask_draw(polys(GRASS + [ALLOT])), 3)
+grass = gaussian_filter(mask_draw(polys(GRASS + ([ALLOT] if ALLOT is not None else []))), 3)
 inside = gaussian_filter(mask_draw(lambda d: d.polygon(m2px(CU), fill=255)), 6)
-def _roads(d):
-    for r, w in zip(ROADS, ROADW): d.line(m2px(dense(loc(r), 2)), fill=255, width=max(2, int(w / mpp)), joint='curve')
-path = gaussian_filter(mask_draw(_roads), 1.4)
+# streets by kind and surface (OpenStreetMap): granite setts or asphalt with lighter pavements, car park aisles, paths
+RD = [w for w in OSM['ways'] if w['tags'].get('highway') in RW]
+def rclass(t):
+    h = t['highway']; sf = t.get('surface', '')
+    if h == 'residential': return 'asph' if sf == 'asphalt' else 'sett'
+    if h == 'service': return 'aisle' if t.get('service') == 'parking_aisle' or sf == 'asphalt' else 'serv'
+    if h in ('pedestrian', 'footway', 'steps'): return 'walk'
+    return 'earth'
+def _rd(cls, extra=0.):
+    def f(d):
+        for w in RD:
+            if rclass(w['tags']) in cls: d.line(m2px(dense(loc(w['pts']), 2)), fill=255, width=max(2, int((RW[w['tags']['highway']] + extra) / mpp)), joint='curve')
+    return f
+path = gaussian_filter(mask_draw(_rd(('sett', 'asph', 'aisle', 'serv', 'walk', 'earth'))), 1.4)
+pave = gaussian_filter(mask_draw(_rd(('sett', 'asph'), 3.2)), 1.0)                    # pavements either side of the streets
+r_sett = gaussian_filter(mask_draw(_rd(('sett',))), .8); r_asph = gaussian_filter(mask_draw(_rd(('asph', 'aisle'))), .8)
+r_serv = gaussian_filter(mask_draw(_rd(('serv',))), .8); r_walk = gaussian_filter(mask_draw(_rd(('walk',))), .8); r_earth = gaussian_filter(mask_draw(_rd(('earth',))), 1.2)
+# car park bays: white lines every 2.5 m, 2.8 to 8 m either side of each aisle, kept inside the car park outlines (schematic)
+def _bays(d):
+    for w in RD:
+        if w['tags'].get('service') != 'parking_aisle': continue
+        p = loc(np.array(w['pts'], float))
+        for a, b in zip(p[:-1], p[1:]):
+            L = np.linalg.norm(b - a)
+            if L < 6: continue
+            t_ = (b - a) / L; n_ = np.array([-t_[1], t_[0]])
+            for s_ in np.arange(1.5, L - 1.4, 2.5):
+                q = a + t_ * s_
+                for sd in (1, -1): d.line(m2px([q + n_ * sd * 2.8, q + n_ * sd * 8.0]), fill=255, width=2)
+            for sd in (1, -1): d.line(m2px([a + t_ * 1.5 + n_ * sd * 8.0, b - t_ * 1.4 + n_ * sd * 8.0]), fill=255, width=2)
+park_in = mask_draw(polys(PARKS))
+bays = mask_draw(_bays) * park_in * (1 - mask_draw(_rd(('aisle',), -.4)))
+stad = gaussian_filter(mask_draw(polys([STADIUM])), 1.5)
+# pitch markings of a 105 × 68 m field on the pitch centre (Laws of the Game; the real size of this field is not in the sources)
+def _lines(d):
+    def L(pts): d.line(m2px([TP(u, v) for u, v in pts]), fill=255, width=2)
+    def circ(cu, cv, r, a0=0, a1=2 * math.pi, n=72): L([(cu + r * math.cos(a0 + (a1 - a0) * k / n), cv + r * math.sin(a0 + (a1 - a0) * k / n)) for k in range(n + 1)])
+    L([(-52.5, -34), (52.5, -34), (52.5, 34), (-52.5, 34), (-52.5, -34)]); L([(0, -34), (0, 34)]); circ(0, 0, 9.15)
+    for e in (-1, 1):
+        L([(e * 52.5, -20.16), (e * (52.5 - 16.5), -20.16), (e * (52.5 - 16.5), 20.16), (e * 52.5, 20.16)])
+        L([(e * 52.5, -9.16), (e * (52.5 - 5.5), -9.16), (e * (52.5 - 5.5), 9.16), (e * 52.5, 9.16)])
+        ang = math.acos(5.5 / 9.15); c_ = e * (52.5 - 11); circ(c_, 0, 9.15, (math.pi if e > 0 else 0) - ang, (math.pi if e > 0 else 0) + ang, 24)
+        circ(c_, 0, .25, n=8); circ(e * 52.5, -34, 1, n=8); circ(e * 52.5, 34, 1, n=8)
+    circ(0, 0, .25, n=8)
+marks = mask_draw(_lines)
 forest = gaussian_filter(np.asarray(Image.fromarray((can * 255).astype(np.uint8)).resize((TS, TS), Image.BILINEAR), float) / 255, 8)
 _vi = np.clip(((gyl[0] + .5) - GY) / 1.0, 0, nB - 1).astype(int); _vj = np.clip((GX - (gxl[0] - .5)) / 1.0, 0, nB - 1).astype(int)
 hole = gaussian_filter(VOID1[_vi, _vj].astype(float), 6)
@@ -540,10 +656,20 @@ _ox = OX_ + (GX + CX + 160) * OS_; _oy = OY_ - (GY + CY - 232) * OS_
 orto = np.stack([map_coordinates(ORTO[..., k], [_oy, _ox], order=1, mode='nearest') for k in range(3)], -1)
 orto = orto * .75 + orto.mean(-1, keepdims=True) * .25 + 6
 col = lerp(col, orto, hole * .85)
-col = lerp(col, C(126, 126, 124), np.clip(park * (1 + .1 * n3), 0, 1))                # asphalt car parks
-_str = (np.sin(((GX + CX) * .76 - (GY + CY) * .65) / 5.5 * np.pi) > 0).astype(float)    # mowing stripes
-col = lerp(col, lerp(C(74, 142, 64), C(92, 160, 76), _str), pitch)                    # pitches
-col = lerp(col, C(150, 146, 138), np.clip(path * (1.1 + .15 * n3), 0, 1))            # streets (granite setts, asphalt)
+col = lerp(col, C(182, 178, 170) + 6 * n2[..., None], stad * .8)                     # paved ground of the stadium
+col = lerp(col, C(150, 142, 128), np.clip(rockp * .8, 0, 1) * stad)                   # the rock amphitheatres at the ends
+grain = np.random.default_rng(8).normal(0, 1, (TS, TS))
+asph = C(88, 90, 93) + (4 * n2 + 3 * grain)[..., None]
+col = lerp(col, asph, np.clip(park * 1.05, 0, 1))                                      # asphalt car parks
+col = lerp(col, C(232, 232, 226), bays * .9)                                           # bay lines
+_u = (GX - PC[0]) * _ca + (GY - PC[1]) * _sa
+_str = (np.sin(_u / 5.25 * np.pi) > 0).astype(float)                                   # mowing stripes across the long axis
+col = lerp(col, lerp(C(70, 138, 60), C(92, 160, 76), _str), pitch)                    # pitches
+col = lerp(col, C(240, 242, 236), marks * pitch * .95)                                 # field markings
+col = lerp(col, C(192, 186, 174) + (5 * grain)[..., None], pave * (1 - park_in))       # pavements (calçada)
+col = lerp(col, C(140, 134, 124) + (14 * grain)[..., None], r_sett)                   # granite setts
+col = lerp(col, asph, r_asph); col = lerp(col, C(112, 112, 110) + (6 * grain)[..., None], r_serv)
+col = lerp(col, C(184, 178, 166), r_walk); col = lerp(col, C(164, 148, 116), r_earth)
 col = lerp(col, C(120, 116, 110), bld_t * .8)                                         # under the buildings
 zz2 = hz(GX[::4, ::4], GY[::4, ::4]); gy2, gx2 = np.gradient(zz2, mpp * 4)
 nx, ny, nz = -gx2, gy2, np.ones_like(gx2); nn = np.sqrt(nx * nx + ny * ny + 1); L_ = np.array([-.55, .45, .7]); L_ /= np.linalg.norm(L_)
@@ -585,6 +711,7 @@ SOURCES = {
  "rocha": "Rocha, D. (2017). O Castro Máximo: contributo para o estudo do povoamento proto-histórico da região de Braga. Dissertação de mestrado, U. Minho (resumo): escavação de 2001 antes do novo estádio, pelo Gabinete de Arqueologia da Câmara com a Unidade de Arqueologia da U. Minho; abandono entre o séc. I a.C. e o início do séc. I d.C. O texto e as plantas não puderam ser consultados.",
  "blog": "Avenida Central (blogue, 2008). O Castro Máximo: o que resta (a acrópole) ocupa o topo do monte primitivo, com acesso pela Av. Artur Soares; três linhas de muralha e fossos do lado da cidade; Albano Belino (fim do séc. XIX), Teixeira (1935-36), Cortez (anos 1950), sondagens da U. Minho (1977-78) e escavação de 2001.",
  "tese": "Pinto, T. — Castros do Noroeste de Portugal (tese de doutoramento, Univ. de Santiago de Compostela); visitas em 2022 e 2025: nenhuma ruína visível; as casas circulares apareceram na construção do estádio, sobretudo nos estacionamentos da bancada poente, e foram estudadas numa escavação de emergência de cinco meses; duas lareiras no Museu D. Diogo de Sousa; parte da zona vedada pela ravina da pedreira; evento Nómadas num estacionamento dentro da zona de proteção.",
+ "wiki": "Estádio Municipal de Braga, Wikipédia em português (ligada no OpenStreetMap): projeto do arquiteto Eduardo Souto de Moura e do engenheiro Rui Furtado; 30 286 lugares; apenas duas bancadas laterais, com os topos formados pelos anfiteatros rupestres da encosta do monte; a cobertura inspira-se nas pontes incas; alcunha «A Pedreira».",
  "osm": "OpenStreetMap (extrato de 2026): estádio e relvado, parques de estacionamento, rocha nua da pedreira (escarpas de 15 e 30 m), ruas e caminhos, Estabelecimento Prisional, ponto «Castro Máximo».",
  "orto": "Ortofotografia enviada pelo Tiago (2026-11), ajustada aos dois relvados do OpenStreetMap (≈ 0,93 m por píxel): telhados das casas e cores do terreno na zona sem LiDAR.",
  "photo": "Fotografia enviada pelo Tiago (2026-11): o alto do monte com erva e um pequeno monte de terra, com a cidade de Braga ao fundo.",

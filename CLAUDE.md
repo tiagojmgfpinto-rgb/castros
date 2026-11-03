@@ -73,7 +73,7 @@ sh tools/fetch_dem.sh            # só para refazer a maqueta do noroeste
   basílica e palácio com as medidas de Barroca, Arezes e Morais em posição aproximada (as coordenadas dos núcleos A e B parecem trocadas),
   capela pela classe edifício do LiDAR + fotografia, monumento de N.ª Sr.ª da Assunção 16 m; faltam as plantas do artigo, fig. 2-6, que o proxy bloqueia), **Castro Máximo** (Braga; `blend/dio_cmx.py`: só estado atual, `DIOS[id].noB` esconde a reconstituição;
   nada visível nem planta consultada, por isso sem muralhas nem casas castrejas; terreno, pedreira, estádio e casas do LiDAR 175511
-  (edifícios = classe 6 + MDS em blocos de 1 m); a DGT **não tem pontos num círculo de ≈ 190 m à volta da prisão**, que tapa a encosta
+  (edifícios = classe 6 + MDS em blocos de 1 m; o estádio inteiro no disco, com bancadas procedimentais, coberturas medidas e os 34 cabos que o LAZ apanha sobre o relvado); a DGT **não tem pontos num círculo de ≈ 190 m à volta da prisão**, que tapa a encosta
   nascente do cume: relevo por SRTM ajustado à borda e casas pela ortofoto; falta a dissertação de D. Rocha 2017, com as plantas de 2001). A nuvem de pontos (LAZ, quando o Tiago a envia) dá terreno de 25 cm, melhor que o MDT de 50 cm.
 - O Tiago quer este nível em **todos** os sítios, um a um. Próximo: **Citânia de Sanfins** (blocos 178484, 178485, 179484, 179485),
   depois Santa Luzia, Bagunte, Cossourado. (Sabroso já tem LiDAR: o bloco 182506 não é preciso, o disco cabe todo no 182505.) Ver `docs/blocos_lidar_castros.md`.
