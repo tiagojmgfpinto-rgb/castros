@@ -10,3 +10,4 @@ dem11/
 node_modules/
 __pycache__/
 *.pyc
+_site/
