@@ -8,6 +8,9 @@ Escreve em português (muitas vezes no telemóvel); responder sempre em portugu�
   Para atualizar: Artifact `publish` com `file_path` = `app/index.html` e `url` = esse link; ficheiros de apoio em `files`
   (`{"caminho/publicado": {"from": "app/..."}}`). Ler o artifact primeiro (`action: read`) numa conversa nova.
   As `capabilities` (user, db com coleções comments/history/extra, assets) passam de versão para versão: omitir o campo.
+- **Site público (GitHub Pages):** https://tiagojmgfpinto-rgb.github.io/castros/ — o workflow `.github/workflows/publicar.yml`
+  corre `python3 build.py` e `python3 tools/site.py` (→ `_site/`, com esqueleto HTML e metas) a cada push no `main`, como no castelos-site.
+  Sem `window.claude` a app corre só em leitura (sem comentários, histórico editado nem castros acrescentados pela base de dados do artifact).
 - Estilo visual pedido: como **castillos.site** (maqueta 3D inclinada do noroeste, miniaturas brancas, título Cinzel com escudo).
 
 ## Estrutura
