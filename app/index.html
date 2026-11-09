@@ -3590,11 +3590,14 @@ async function dioBuild(s){
   // target and distance refined in a few passes by projecting the corners of the scene box
   const HDIR=(()=>{const c=(DIOS[s.id]||{}).cam;if(c&&c.az!=null){const a=c.az*Math.PI/180,e=(c.el??32)*Math.PI/180;return new T.Vector3(Math.sin(a)*Math.cos(e),Math.sin(e),Math.cos(a)*Math.cos(e))}return new T.Vector3(-R*.35,R*1.75+4,R*2.75).normalize()})();
   // silhouette points: a sample of the model's vertices (≤ 20 000), so the round disc is framed by its outline and not by its bounding box
-  const SIL=[];{const ms=[];let nv=0;root.traverse(o=>{if(o.isMesh&&o.visible&&!o.name.startsWith("PROTO-")&&o.geometry.attributes.position){ms.push(o);nv+=o.geometry.attributes.position.count}});
-    root.traverse(o=>{if(o.name&&o.name.startsWith("LBL-"))SIL.push(o.getWorldPosition(new T.Vector3()).add(new T.Vector3(0,R*.14,0)))});
+  // framing target, as in castillos.site's showcase: the archaeological structures (walls, houses, roofs) fill the frame and the
+  // terrain runs off its edges; sites with none of these (Castro Máximo) are framed by the whole disc and its labels
+  const CORE=objs.filter(o=>o.visible&&/walls|houses|roofs/.test(layerOf(o.userData.sid)));
+  const SIL=[];{const ms=[];let nv=0;(CORE.length?CORE:(()=>{const a=[];root.traverse(o=>{if(o.isMesh&&o.visible&&!o.name.startsWith("PROTO-"))a.push(o)});return a})()).forEach(o=>{if(o.geometry&&o.geometry.attributes.position){ms.push(o);nv+=o.geometry.attributes.position.count}});
+    if(!CORE.length)root.traverse(o=>{if(o.name&&o.name.startsWith("LBL-"))SIL.push(o.getWorldPosition(new T.Vector3()).add(new T.Vector3(0,R*.14,0)))});
     const step=Math.max(1,Math.ceil(nv/20000));ms.forEach(o=>{const P=o.geometry.attributes.position;for(let i=0;i<P.count;i+=step)SIL.push(new T.Vector3().fromBufferAttribute(P,i).applyMatrix4(o.matrixWorld))})}
-  const fitView=(fill=.88)=>{const c=BOXF.getCenter(new T.Vector3()),pts=SIL.length?SIL:[];
-    let d=BOXF.getSize(new T.Vector3()).length()*1.2;const c0=cam.position.clone(),q0=cam.quaternion.clone();
+  const fitView=(fill=CORE.length?.92:.88)=>{const pts=SIL.length?SIL:[],c=(SIL.length?new T.Box3().setFromPoints(SIL):BOXF).getCenter(new T.Vector3());
+    let d=(SIL.length?new T.Box3().setFromPoints(SIL):BOXF).getSize(new T.Vector3()).length()*1.2;const c0=cam.position.clone(),q0=cam.quaternion.clone();
     for(let k=0;k<5;k++){cam.position.copy(c).addScaledVector(HDIR,d);cam.lookAt(c);cam.updateMatrixWorld();let x0=1e9,x1=-1e9,y0=1e9,y1=-1e9;
       pts.forEach(p=>{const q=p.clone().project(cam);x0=Math.min(x0,q.x);x1=Math.max(x1,q.x);y0=Math.min(y0,q.y);y1=Math.max(y1,q.y)});
       const h=d*Math.tan(cam.fov*Math.PI/360),rt=new T.Vector3(1,0,0).applyQuaternion(cam.quaternion),up=new T.Vector3(0,1,0).applyQuaternion(cam.quaternion);
