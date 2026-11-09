@@ -1,0 +1,8 @@
+{
+ "_": "Luz comum a todas as maquetas no visualizador (app/src.html, dioMount). Uma maqueta pode mudar qualquer valor com \"luz\": {...} no seu ficheiro. Direção do sol em múltiplos do raio R do disco (x = este, y = cima, z = sul).",
+ "exposure": 1.05,
+ "hemi": {"sky": "#dfe8ff", "ground": "#5d4a36", "i": 0.95},
+ "sun": {"color": "#ffd9a8", "i": 2.9, "dir": [-1.25, 0.95, 0.55], "radius": 2.5, "bias": -0.0003, "normalBias": 0.35, "map": 4096, "mapTouch": 1024},
+ "env": 0.15,
+ "gtao": {"radius": 4, "distanceExponent": 1.5, "thickness": 4, "scale": 1, "samples": 16}
+}

@@ -1,0 +1,79 @@
+{
+ "id": "guimaraes-citania-de-briteiros",
+ "order": 1,
+ "cap": "Estruturas georreferenciadas a partir do levantamento geral da Unidade de Arqueologia da U. Minho, do painel interpretativo do sítio, das muralhas registadas no OpenStreetMap, da ortofoto de 2021 e do LiDAR da DGT (2025, 50 cm); relevo LiDAR exagerado 1,15×; árvores nas posições e alturas medidas pelo LiDAR, rareadas dentro das muralhas.",
+ "layers": [
+  [
+   "walls",
+   "Muralhas e muros"
+  ],
+  [
+   "houses",
+   "Casas e edifícios"
+  ],
+  [
+   "roofs",
+   "Coberturas"
+  ],
+  [
+   "modern",
+   "Estrada, estacionamento, capela e centro de receção"
+  ],
+  [
+   "trees",
+   "Vegetação"
+  ],
+  [
+   "lbl",
+   "Rótulos"
+  ]
+ ],
+ "tour": [
+  {
+   "sid": "CR",
+   "title": "Centro de receção",
+   "text": "A visita começa junto à estrada EN 309, onde se compram os bilhetes. O Museu da Cultura Castreja, no Solar da Ponte, completa a visita."
+  },
+  {
+   "sid": "BS",
+   "title": "Balneário Sul",
+   "text": "Posto a descoberto em 1930, ao abrir-se a estrada. Um corredor lajeado leva à pedra formosa; atrás dela ficava a câmara aquecida dos banhos de vapor. A água chegava por uma conduta em pedra de 320 m."
+  },
+  {
+   "sid": "M2",
+   "title": "As muralhas",
+   "text": "Três cintas com cerca de 2 m de espessura, e uma quarta a norte. Afastam-se onde a encosta é íngreme e aproximam-se a norte, o lado mais fácil de atacar (Cardoso 1938)."
+  },
+  {
+   "sid": "S1",
+   "title": "As ruas principais",
+   "text": "Ruas lajeadas dividem o povoado em quarteirões; uma delas é acompanhada pela conduta de água do Balneário Sul."
+  },
+  {
+   "sid": "RH1",
+   "title": "As casas reconstruídas",
+   "text": "Martins Sarmento reconstruiu duas casas redondas no século XIX, junto à «Casa da Espiral»: paredes de pedra seca e cobertura cónica de colmo."
+  },
+  {
+   "sid": "CC",
+   "title": "A «Casa do Conselho»",
+   "text": "Grande edifício circular com banco corrido no interior, interpretado como lugar de reunião da comunidade."
+  },
+  {
+   "sid": "CH",
+   "title": "Capela de São Romão",
+   "text": "Construída muito depois do abandono do povoado, no ponto mais alto do monte."
+  }
+ ],
+ "gaps": [
+  "Casas e muros: 150 casas redondas (97 da planta do levantamento geral da U. Minho, 43 ajustadas a muros do LiDAR, 8 da ortofoto e as 2 reconstruídas) e os muros dos quarteirões vetorizados da planta. A deteção automática numa imagem de ≈ 0,43 m por píxel deixa escapar algumas casas e fragmenta alguns muros; as casas retangulares aparecem como muros, sem cobertura.",
+  "Muralhas 1 e 2: traçado do painel validado pelo OpenStreetMap (erro médio ≈ 8 m). Muralha 3: traçado esquemático do painel, não verificado no terreno. A quarta muralha e os fossos ficam fora do disco.",
+  "Ruas principais, portas, Casa do Conselho e balneário nascente: posições do painel, esquemáticas.",
+  "Alturas das muralhas e das casas na reconstituição: não publicadas, hipotéticas. Coberturas: colmo segundo Cardoso (1938); na fase romanizada também houve telha.",
+  "Balneário Sul: posição pelo ponto do Wikiloc, confirmada no LiDAR; a forma segue fotografias atuais e as medidas são aproximadas. A câmara de forno está representada só como o monte de pedras atual.",
+  "Conduta de água de 320 m que abastecia o Balneário Sul: descrita, mas sem traçado publicado com precisão suficiente; não modelada.",
+  "Árvores: 50 % ou menos das árvores reais dentro das muralhas, para se lerem as ruínas.",
+  "Setores S1–S16: atribuídos pela planta do levantamento geral; os setores exteriores, onde as linhas da planta não fecham, estão marcados como aproximados.",
+  "Fases cronológicas: não há datas publicadas por setor nas fontes consultadas, por isso o modelo não separa o castro antigo do povoado romanizado."
+ ]
+}
