@@ -1,0 +1,43 @@
+{
+ "id": "guimaraes-castro-de-sabroso",
+ "order": 2,
+ "cap": "Estruturas georreferenciadas a partir da planta de Mário Cardozo (1930), ajustada ao talude da muralha no LiDAR da DGT (2025), e do painel do sítio (2021); relevo LiDAR de 25 cm exagerado 1,15×; árvores nas posições e alturas medidas pelo LiDAR, rareadas dentro das muralhas.",
+ "tour": [
+  {
+   "sid": "M2",
+   "title": "A muralha do recinto superior",
+   "text": "Aparelho poligonal na face externa, que chega a 5,20 m de altura (Cruz & Antunes 2015). No LiDAR de 2025 o talude da muralha ainda tem 3 a 3,7 m de desnível."
+  },
+  {
+   "sid": "H01",
+   "title": "As casas circulares",
+   "text": "Sarmento contou 35 casas redondas, com cerca de 4,7 m de diâmetro; 29 no tabuleiro norte e 6 no sul."
+  },
+  {
+   "sid": "C1",
+   "title": "A cisterna",
+   "text": "Assinalada na legenda da planta de Mário Cardozo, de 1930."
+  },
+  {
+   "sid": "E1",
+   "title": "A entrada sudeste",
+   "text": "Corredor em cotovelo do último alargamento da muralha, segundo Hawkes (1958)."
+  },
+  {
+   "sid": "R",
+   "title": "Os afloramentos",
+   "text": "Penedos de granito com gravuras rupestres e uma gruta, assinalados na planta de 1930."
+  }
+ ],
+ "gaps": [
+  "Portas das casas: a orientação não está documentada na planta de 1930 e não foi representada.",
+  "A única casa com vestíbulo referida por Loureiro (1999) não está identificada na planta; nenhuma casa tem vestíbulo no modelo.",
+  "Pracetas lajeadas e arruamentos: referidos nas fontes, mas sem traçado publicado com precisão suficiente; não modelados.",
+  "Altura original das muralhas do alargamento (3.ª fase) e dos muros interiores: não publicada; valores da reconstituição hipotéticos.",
+  "Cobertura das casas: cónica por paralelo com as reconstituições de Martins Sarmento; material desconhecido.",
+  "Relevo: terreno de 25 cm interpolado dos pontos de solo do LiDAR da DGT (2025, bloco 182505), exagerado 1,15×. A muralha do recinto superior já está no terreno (o talude de pedra foi classificado como solo); no estado atual a pedra cobre esse talude.",
+  "Árvores: posições e alturas reais do modelo de copas do LiDAR (MDS − MDT); dentro das muralhas ficam só 10 % (recinto superior) a 15 % das árvores, e nenhuma a menos de 5 m das muralhas, para se lerem as ruínas. A largura da copa de cada árvore vem do LiDAR; a espécie não vem do LiDAR: segundo o Tiago, a mata atual é sobretudo de eucalipto, com castanheiros, carvalhos e sobreiros; as copas altas e estreitas são tratadas como eucaliptos e as largas como castanheiros (cerca de 60 % eucaliptos, 16 % castanheiros, 16 % carvalhos, 8 % sobreiros).",
+  "A planta de 1930 regista 33 casas e uma cisterna; Sarmento contou 35 casas.",
+  "Georreferenciação: planta de 1930 ajustada ao talude da muralha do recinto superior visível no LiDAR (erro médio ≈ 0,9 m; o ajuste anterior, pelos marcos da zona de proteção, deixava a planta cerca de 20 m a norte). Validação: recinto superior com 0,73 ha (publicado: 0,7 ha). As casas e os muros interiores seguem a planta; nos troços com floresta (alargamento sul e nascente) a muralha não foi verificada no LiDAR."
+ ]
+}

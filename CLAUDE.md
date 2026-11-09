@@ -21,6 +21,7 @@ Escreve em português (muitas vezes no telemóvel); responder sempre em portugu�
 | `app/index.html` | build publicado (gerado por `python3 build.py`) |
 | `data.json` | dados completos dos sítios (fonte). **Depois de editar, correr `python3 tools/split.py`** → `app/data.json` + `app/texts.json` |
 | `app/dio/<id>.glb.png`, `<id>.json` | maquetas 3D por sítio (GLB dentro de PNG) + catálogo de estruturas/fontes/árvores |
+| `maquetas/<id>.json`, `maquetas/luz.json` | dados do visualizador de cada maqueta (`order`, `cap`, `gaps`, `layers`, `noB`, `cam`, `tour` [{sid,title,text}], `luz` opcional) e luz comum; o `build.py` escreve-os em `DIOS`/`LUZ`. Uma maqueta nova = GLB + `app/dio/<id>.json` do Blender + este ficheiro, sem mexer no código |
 | `app/maq-*.jpg`, `app/maq-h.png` | textura e alturas da maqueta do noroeste (gerados por `tools/maquette.py`) |
 | `blend/` | scripts Blender das maquetas por sítio e dados georreferenciados (plantas, ajustes, casas, muros) |
 | `lidar/` | LiDAR DGT 2025 (`raw/*.tif`: Briteiros 184507/185507, Sabroso 182505, S. Miguel-o-Anjo 178499/178500/179499/179500, Santa Marta das Cortiças 177505/177506/178505/178506, Castro Máximo 175511 v03) e scripts. Castro Máximo: `cmx_laz.py`, `cmx_fill.py` (buraco da prisão), `cmx_osm.py`, `cmx_roofs.py` (casas da ortofoto). Santa Marta: `smc_laz.py`, `smc_lines.py` (linhas de `blend/smc_trace.py`, com os penedos retirados por abertura morfológica). S. Miguel-o-Anjo: `sma_laz.py` (LAZ 178499+179499 → terreno 25 cm), `sma_lines.py` (linhas de `blend/sma_trace.py` ajustadas ao talude). Sabroso: `sab_laz.py` (nuvem LAZ → terreno e copas de 25 cm), `sab_georef.py` (planta de 1930 ajustada ao talude da muralha) |
@@ -56,12 +57,12 @@ sh tools/fetch_dem.sh            # só para refazer a maqueta do noroeste
    AO cozido no solo. Cada estrutura é um objeto `A-<sid>` / `B-<sid>` / `AB-<sid>` com `extras` (sid, mode, ev) e entrada no catálogo.
 5. **Exportar**: `bash mkparts.sh <id>` (weld + quantize, **sem Draco**: o descodificador não corre no artifact) → `app/dio/<id>.glb.png`.
    O artifact não serve `.glb`; o PNG reduz ~3× e o visualizador extrai os bytes. Limite de 16 MB por ficheiro publicado.
-6. **Visualizador** (em `app/src.html`: `DIOS`, `TOURS`, `dioMount`; computador = sombra 4096 ajustada à maqueta + RoomEnvironment + GTAO, telemóvel/tátil = sombra 1024 sem pós-processamento; enquadramento automático pela silhueta, `DIOS[id].cam={az,el}` opcional; `?v=` dos ficheiros escrito pelo `build.py`; capturas antes/depois de todas as maquetas: `CDN=<pasta npm> node tests/dio_all.mjs <saída> desk|phone`, `BASE=` para outro servidor): estado atual/reconstituição, evidência (confirmado / documentado /
+6. **Visualizador** (em `app/src.html`: `dioMount`; dados em `maquetas/<id>.json` e luz em `maquetas/luz.json`; computador = sombra 4096 ajustada à maqueta + RoomEnvironment + GTAO, telemóvel/tátil = sombra 1024 sem pós-processamento; enquadramento automático pela silhueta, `"cam":{az,el}` opcional no ficheiro da maqueta; `?v=` dos ficheiros escrito pelo `build.py`; capturas antes/depois de todas as maquetas: `CDN=<pasta npm> node tests/dio_all.mjs <saída> desk|phone`, `BASE=` para outro servidor): estado atual/reconstituição, evidência (confirmado / documentado /
    hipotético), camadas, ficha por estrutura, visita guiada, fontes e lacunas.
 
 ## Regras do Tiago
 
-- **Nunca inventar** estruturas, medidas ou datas: tudo com fonte, e o que falta vai para a lista de lacunas (`DIOS[id].gaps`).
+- **Nunca inventar** estruturas, medidas ou datas: tudo com fonte, e o que falta vai para a lista de lacunas (`gaps` em `maquetas/<id>.json`).
 - Distinguir sempre confirmado / reconstituído com fundamento / hipotético.
 - Manter o sítio arqueológico limpo de árvores (rarear dentro das muralhas), mas com floresta realista à volta.
 - Miniaturas do mapa principal: brancas/cinzentas com contorno, como no castillos.site; fronteira PT–ES bem marcada.
@@ -74,7 +75,7 @@ sh tools/fetch_dem.sh            # só para refazer a maqueta do noroeste
   cobre o talude real em vez de assentar por cima), **Castro de S. Miguel-o-Anjo** (Guimarães; sem planta publicada: três linhas
   de muralha traçadas no LiDAR 2025, troço dos escuteiros pelo ponto «Muro Celta» do OSM, capela; `blend/dio_sma.py`; falta o MDT 179499, não preciso), **Castro de Santa Marta das Cortiças** (Braga; `blend/dio_smc.py`: duas linhas traçadas no LiDAR,
   basílica e palácio com as medidas de Barroca, Arezes e Morais em posição aproximada (as coordenadas dos núcleos A e B parecem trocadas),
-  capela pela classe edifício do LiDAR + fotografia, monumento de N.ª Sr.ª da Assunção 16 m; faltam as plantas do artigo, fig. 2-6, que o proxy bloqueia), **Castro Máximo** (Braga; `blend/dio_cmx.py`: só estado atual, `DIOS[id].noB` esconde a reconstituição;
+  capela pela classe edifício do LiDAR + fotografia, monumento de N.ª Sr.ª da Assunção 16 m; faltam as plantas do artigo, fig. 2-6, que o proxy bloqueia), **Castro Máximo** (Braga; `blend/dio_cmx.py`: só estado atual, `"noB": true` esconde a reconstituição;
   nada visível nem planta consultada, por isso sem muralhas nem casas castrejas; terreno, pedreira, estádio e casas do LiDAR 175511
   (edifícios = classe 6 + MDS em blocos de 1 m; o estádio inteiro no disco, com bancadas procedimentais, coberturas medidas e os 34 cabos que o LAZ apanha sobre o relvado); a DGT **não tem pontos num círculo de ≈ 190 m à volta da prisão**, que tapa a encosta
   nascente do cume: relevo por SRTM ajustado à borda e casas pela ortofoto; falta a dissertação de D. Rocha 2017, com as plantas de 2001). A nuvem de pontos (LAZ, quando o Tiago a envia) dá terreno de 25 cm, melhor que o MDT de 50 cm.

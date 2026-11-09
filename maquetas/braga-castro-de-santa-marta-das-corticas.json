@@ -1,0 +1,74 @@
+{
+ "id": "braga-castro-de-santa-marta-das-corticas",
+ "order": 4,
+ "cap": "As plantas das escavações não puderam ser consultadas: as duas linhas de muralha foram traçadas no relevo do LiDAR da DGT (2025, nuvem de pontos, terreno de 25 cm); basílica e edifício palatino com as medidas publicadas, em posição aproximada; capela e monumento pelo LiDAR, pelo OpenStreetMap e por fotografias; relevo exagerado 1,15×; árvores nas posições e alturas medidas pelo LiDAR, rareadas dentro das muralhas.",
+ "layers": [
+  [
+   "walls",
+   "Muralhas"
+  ],
+  [
+   "houses",
+   "Basílica, palácio, capela e monumento"
+  ],
+  [
+   "modern",
+   "Torres, baloiço e edifício de apoio"
+  ],
+  [
+   "trees",
+   "Vegetação"
+  ],
+  [
+   "lbl",
+   "Rótulos"
+  ]
+ ],
+ "tour": [
+  {
+   "sid": "M1",
+   "title": "A primeira muralha",
+   "text": "O rebordo da plataforma do cume, com um talude de 3 a 4 m no LiDAR de 2025, fecha cerca de 2,2 ha. A poente e a sul a estrada de acesso dá a volta ao alto por cima desta linha."
+  },
+  {
+   "sid": "BA",
+   "title": "A basílica paleocristã",
+   "text": "Escavada em 1953-54: três naves e abside a nascente, 25 × 16 m, talvez dos séculos V a VI. Hoje está tapada pelo mato; a posição é aproximada."
+  },
+  {
+   "sid": "PA",
+   "title": "O edifício palatino",
+   "text": "A sul da basílica, uma grande sala de duas naves com sete pilares, 34,2 × 12,6 m, interpretada como um palácio suevo, talvez destruído em 585."
+  },
+  {
+   "sid": "MN",
+   "title": "O monumento a Nossa Senhora da Assunção",
+   "text": "Coluna de granito com cerca de 16 m sobre um penedo, com a imagem branca da Senhora no topo. Junto à base apareceram muros de função desconhecida."
+  },
+  {
+   "sid": "CH",
+   "title": "A capela de Santa Marta",
+   "text": "Mandada construir por D. Diogo de Sousa em 1520, num monte já referido em 900. A zona da capela nunca foi escavada: é aí que se admite que estivesse o castelo medieval."
+  },
+  {
+   "sid": "M2",
+   "title": "A segunda muralha",
+   "text": "Um segundo talude a norte e a nascente. Foi entre a primeira e a segunda muralhas, pelo lado sul, que Albano Belino escavou em 1899."
+  }
+ ],
+ "gaps": [
+  "Muralhas: Martins Sarmento referiu duas linhas e outras fontes (Wikipédia, SIPA) três. No LiDAR identificam-se duas: o rebordo da plataforma do cume, que fecha cerca de 2,2 ha, e um segundo talude a norte e a nascente. A terceira não foi identificada. Os traçados não foram verificados no terreno; a poente e a sul a estrada de acesso corre sobre a primeira linha e cortou-a.",
+  "As plantas publicadas (planta geral de Russell Cortez, 1954; planta da basílica; planta do edifício palatino de Rigaud de Sousa, 1970; síntese de M. Real, 2001) estão no artigo de Barroca, Arezes e Morais, mas o ficheiro não pôde ser descarregado. Com elas a basílica e o palácio podem ser georreferenciados com rigor.",
+  "Posição da basílica e do palácio: o artigo dá as coordenadas do núcleo A (estruturas habitacionais) e do núcleo B (basílica), mas o texto põe a basílica na crista, cortada pelo caminho entre a capela e o monumento, e o núcleo A junto à estrada de acesso. As coordenadas parecem trocadas; o modelo põe a basílica na coordenada do núcleo A, onde passa esse caminho, e o palácio a sul dela. A confirmar com as plantas.",
+  "Basílica: medidas publicadas (25 × 16 m; nave central de 7,2 m, laterais de 3,5 m; abside inscrita a nascente); a posição dos seis pilares, a espessura dos muros e a forma exata da abside são esquemáticas. Não se sabe a altura das paredes: na reconstituição sobem a 1,4 m só para se ler a planta.",
+  "Edifício palatino: medidas publicadas (34,2 × 12,6 m; sete pilares); a divisão interior segue a descrição, sem a planta; o ângulo em relação à basílica («levemente divergente») não está publicado.",
+  "Núcleo A (estruturas habitacionais junto à estrada) e os muros «em labirinto» junto à base do monumento: sem planta consultada, não representados.",
+  "Casas castrejas (pequenas casas circulares): sem posições publicadas que se pudessem consultar; não representadas.",
+  "Castelo medieval (46 referências entre 900 e 1147): sem vestígios conhecidos; talvez junto à capela, zona que nunca foi escavada. Não representado.",
+  "Capela: planta e alturas do LiDAR (classe edifício) e forma da fotografia de 2023; o interior e as traseiras não estão documentados. O muro do adro foi traçado no rebordo do terraço, de forma aproximada.",
+  "Monumento a Nossa Senhora da Assunção: data e autor não apurados; proporções dos andares tiradas de uma fotografia, com a base e a altura total medidas no LiDAR.",
+  "Torre de telecomunicações, posto de vigia, mastro, baloiço e cruzeiro: posições do OpenStreetMap e alturas do LiDAR; formas simplificadas.",
+  "Cronologia: o modelo junta numa só cena o castro (Bronze Final à época romana), a basílica e o palácio (séculos V a VII) e a capela (1520); não separa fases.",
+  "Árvores: posições, alturas e largura da copa reais do LiDAR (MDS − MDT); dentro da primeira muralha fica só 10 % das árvores, e nenhuma a menos de 6 m das estruturas, para se lerem as ruínas; mantêm-se as árvores do adro da capela, que se veem na fotografia. A espécie não vem do LiDAR."
+ ]
+}
