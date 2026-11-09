@@ -56,7 +56,7 @@ sh tools/fetch_dem.sh            # só para refazer a maqueta do noroeste
    AO cozido no solo. Cada estrutura é um objeto `A-<sid>` / `B-<sid>` / `AB-<sid>` com `extras` (sid, mode, ev) e entrada no catálogo.
 5. **Exportar**: `bash mkparts.sh <id>` (weld + quantize, **sem Draco**: o descodificador não corre no artifact) → `app/dio/<id>.glb.png`.
    O artifact não serve `.glb`; o PNG reduz ~3× e o visualizador extrai os bytes. Limite de 16 MB por ficheiro publicado.
-6. **Visualizador** (em `app/src.html`: `DIOS`, `TOURS`, `dioMount`): estado atual/reconstituição, evidência (confirmado / documentado /
+6. **Visualizador** (em `app/src.html`: `DIOS`, `TOURS`, `dioMount`; computador = sombra 4096 ajustada à maqueta + RoomEnvironment + GTAO, telemóvel/tátil = sombra 1024 sem pós-processamento; enquadramento automático pela silhueta, `DIOS[id].cam={az,el}` opcional; `?v=` dos ficheiros escrito pelo `build.py`; capturas antes/depois de todas as maquetas: `CDN=<pasta npm> node tests/dio_all.mjs <saída> desk|phone`, `BASE=` para outro servidor): estado atual/reconstituição, evidência (confirmado / documentado /
    hipotético), camadas, ficha por estrutura, visita guiada, fontes e lacunas.
 
 ## Regras do Tiago

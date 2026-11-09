@@ -2910,8 +2910,11 @@ const DIOS={"guimaraes-citania-de-briteiros":{cap:"Estruturas georreferenciadas 
   "Árvores: posições, alturas e largura da copa reais do LiDAR (MDS − MDT); no alto do monte fica só cerca de um terço, para se ler o relevo. A espécie não vem do LiDAR."]}};
 const EVL={conf:"Confirmado",doc:"Reconstituído com fundamento documental",hip:"Hipotético"},EVC={conf:"#6d7f4f",doc:"#3f74a8",hip:"#c4772f"};
 const DIO={mods:null,cur:null};
+const DIOV=/*DIOV*/{};   // short content hash of each file in dio/ (written by build.py), so a new model is never hidden by the browser cache
+const dioV=f=>DIOV[f]?`?v=${DIOV[f]}`:"";
 const TJ="https://cdn.jsdelivr.net/npm/three@0.160.0/";
-function dioMods(){if(!DIO.mods)DIO.mods=Promise.all([import(TJ+"build/three.module.js"),import(TJ+"examples/jsm/loaders/GLTFLoader.js"),import(TJ+"examples/jsm/controls/OrbitControls.js")]).catch(e=>{DIO.mods=null;throw e});return DIO.mods}
+function dioMods(){if(!DIO.mods)DIO.mods=Promise.all([import(TJ+"build/three.module.js"),import(TJ+"examples/jsm/loaders/GLTFLoader.js"),import(TJ+"examples/jsm/controls/OrbitControls.js"),import(TJ+"examples/jsm/environments/RoomEnvironment.js"),
+  import(TJ+"examples/jsm/postprocessing/EffectComposer.js"),import(TJ+"examples/jsm/postprocessing/RenderPass.js"),import(TJ+"examples/jsm/postprocessing/GTAOPass.js"),import(TJ+"examples/jsm/postprocessing/OutputPass.js")]).catch(e=>{DIO.mods=null;throw e});return DIO.mods}
 function dioHtml(s){const d=DIOS[s.id];if(!d)return"";return `<figure class="dio" id="dio">
   <div class="dio-stage" id="dioStage"><div class="dio-load">A preparar a maqueta…</div></div>
   <div class="dio-bar" id="dioBar">
@@ -2934,24 +2937,27 @@ async function dioMount(s){
 async function dioBuild(s){
   let M;try{M=await dioMods()}catch(e){const l=$("#dioStage .dio-load");if(l)l.innerHTML=`Não foi possível carregar o 3D.<br><small style="font-family:var(--f-mono);letter-spacing:0;text-transform:none">${esc(String(e&&e.message||e).slice(0,160))}</small>`;return}
   if(S.sel!==s.id||!$("#dioStage"))return;
-  const [T,{GLTFLoader},{OrbitControls}]=M;
-  const meta=await fetch(`dio/${s.id}.json`).then(r=>r.json()).catch(()=>null);
+  const [T,{GLTFLoader},{OrbitControls},{RoomEnvironment},{EffectComposer},{RenderPass},{GTAOPass},{OutputPass}]=M;
+  // device tier: fine pointer on a large screen = computer (4096 shadow + ambient occlusion); touch or small screen = 1024 shadow, no post-processing
+  const FINE=matchMedia("(pointer:fine)").matches&&Math.min(innerWidth,innerHeight)>600,RM=matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const meta=await fetch(`dio/${s.id}.json${dioV(s.id+".json")}`).then(r=>r.json()).catch(()=>null);
   const ld=new GLTFLoader();
-  let g;try{let bin=null;try{const rp=await fetch(`dio/${s.id}.glb.png`);if(rp.ok){const bm=await createImageBitmap(await rp.blob(),{premultiplyAlpha:"none",colorSpaceConversion:"none"});const cv=document.createElement("canvas");cv.width=bm.width;cv.height=bm.height;const cx=cv.getContext("2d",{willReadFrequently:true});cx.drawImage(bm,0,0);const px=cx.getImageData(0,0,bm.width,bm.height).data,rgb=new Uint8Array(bm.width*bm.height*3);for(let i=0,j=0;i<px.length;i+=4){rgb[j++]=px[i];rgb[j++]=px[i+1];rgb[j++]=px[i+2]}const n=rgb[0]|rgb[1]<<8|rgb[2]<<16|rgb[3]<<24;bin=rgb.slice(4,4+n)}}catch(e){bin=null}
+  let g;try{let bin=null;try{const rp=await fetch(`dio/${s.id}.glb.png${dioV(s.id+".glb.png")}`);if(rp.ok){const bm=await createImageBitmap(await rp.blob(),{premultiplyAlpha:"none",colorSpaceConversion:"none"});const cv=document.createElement("canvas");cv.width=bm.width;cv.height=bm.height;const cx=cv.getContext("2d",{willReadFrequently:true});cx.drawImage(bm,0,0);const px=cx.getImageData(0,0,bm.width,bm.height).data,rgb=new Uint8Array(bm.width*bm.height*3);for(let i=0,j=0;i<px.length;i+=4){rgb[j++]=px[i];rgb[j++]=px[i+1];rgb[j++]=px[i+2]}const n=rgb[0]|rgb[1]<<8|rgb[2]<<16|rgb[3]<<24;bin=rgb.slice(4,4+n)}}catch(e){bin=null}
   if(!bin){let b64="";for(let k=0;;k++){const r=await fetch(`dio/${s.id}.glb.${k}.txt`);if(!r.ok){if(!k)b64=await fetch(`dio/${s.id}.glb.txt`).then(r=>{if(!r.ok)throw 0;return r.text()});break}b64+=(await r.text()).trim()}bin=Uint8Array.from(atob(b64.trim()),c=>c.charCodeAt(0))}g=await ld.parseAsync(bin.buffer,"")}catch(e){const l=$("#dioStage .dio-load");if(l)l.innerHTML=`Não foi possível carregar a maqueta.<br><small style="font-family:var(--f-mono);letter-spacing:0;text-transform:none">${esc(String(e&&e.message||e).slice(0,160))}</small>`;console.error(e);return}
   if(S.sel!==s.id)return;
   const CAT={};(meta&&meta.cat||[]).forEach(c=>CAT[c.id]=c);const SRC=meta&&meta.sources||{};
   const wrap=document.createElement("div");wrap.className="dio-wrap";
   const r=new T.WebGLRenderer({antialias:true,alpha:true});r.setPixelRatio(Math.min(devicePixelRatio,2));r.outputColorSpace=T.SRGBColorSpace;r.toneMapping=T.ACESFilmicToneMapping;r.toneMappingExposure=1.05;
   r.shadowMap.enabled=true;r.shadowMap.type=T.PCFSoftShadowMap;wrap.appendChild(r.domElement);
+  r.domElement.style.opacity=0;if(!RM)r.domElement.style.transition="opacity .8s ease";
   const lw=document.createElement("div");lw.className="dio-lbls";wrap.appendChild(lw);
   wrap.insertAdjacentHTML("beforeend",`<div class="dio-scale"><i></i><span>20 m</span></div><div class="dio-n" title="Norte"><svg width="26" height="26" viewBox="0 0 26 26"><path d="M13 2l4 11h-8z" fill="#9B2D20"/><path d="M13 24l-4-11h8z" fill="#bfb39a"/></svg><b>N</b></div><div class="dio-card" hidden></div>`);
   const card=wrap.querySelector(".dio-card");
   const scene=new T.Scene(),R=meta?meta.R:150;
   const cam=new T.PerspectiveCamera(32,1,1,R*20);
-  scene.add(new T.HemisphereLight(0xdfe8ff,0x5d4a36,1.05));
+  scene.add(new T.HemisphereLight(0xdfe8ff,0x5d4a36,.95));
   const sun=new T.DirectionalLight(0xffd9a8,2.9);sun.shadow&&(sun.shadow.radius=2.5);sun.position.set(-R*1.25,R*.95,R*.55);sun.castShadow=true;
-  Object.assign(sun.shadow.camera,{left:-R*1.1,right:R*1.1,top:R*1.1,bottom:-R*1.1,near:1,far:R*5});sun.shadow.mapSize.set(4096,4096);sun.shadow.bias=-.0003;sun.shadow.normalBias=.35;scene.add(sun,sun.target);
+  Object.assign(sun.shadow.camera,{left:-R*1.1,right:R*1.1,top:R*1.1,bottom:-R*1.1,near:1,far:R*5});sun.shadow.mapSize.setScalar(FINE?4096:1024);if(!FINE)sun.shadow.normalBias=.6;sun.shadow.bias=-.0003;sun.shadow.normalBias=.35;scene.add(sun,sun.target);
   const root=g.scene,protos={},objs=[];
   root.traverse(o=>{if(!o.isMesh)return;const n=o.name;
     if(n.startsWith("PROTO-")){const [,k,p]=n.split("-");o.updateWorldMatrix(true,false);(protos[k]=protos[k]||[]).push({p,g:o.geometry.clone().applyMatrix4(o.matrixWorld),m:o.material});o.visible=false;return}
@@ -2968,23 +2974,57 @@ async function dioBuild(s){
         list.forEach((t,i)=>{q.setFromAxisAngle(up,t[6]);m4.compose(new T.Vector3(t[0],t[2],-t[1]),q,new T.Vector3(t[3]*(t[7]||(.85+.3*((i*7)%10)/10)),t[3],t[3]*(t[7]||1)));im.setMatrixAt(i,m4);
           if(pp.p==="leaf"){const L=(meta.pal?meta.pal[k]:meta.leaf)[t[5]];c.setRGB(L[0]/255,L[1]/255,L[2]/255,T.SRGBColorSpace);im.setColorAt(i,c)}});
         if(k==="tuft"){im.castShadow=false;mat.side=T.DoubleSide}scene.add(im);trees.push(im)})}}
+  // scene box (terrain, structures, trees; without the disc's skirt): used for the shadow frustum and the framing
+  const BOX=new T.Box3(),BOXF=new T.Box3();root.updateMatrixWorld(true);
+  root.traverse(o=>{if(!o.isMesh||!o.visible||o.name.startsWith("PROTO-"))return;BOXF.expandByObject(o);if(!/skirt/.test(o.name))BOX.expandByObject(o)});
+  if(BOX.isEmpty())BOX.setFromCenterAndSize(new T.Vector3(),new T.Vector3(2*R,R*.3,2*R));if(BOXF.isEmpty())BOXF.copy(BOX);
+  // shadow frustum fitted to the scene box in light space (instead of a square of 2.2 R): sharper shadows for the same map size
+  {const lc=new T.OrthographicCamera();lc.position.copy(sun.position);lc.lookAt(sun.target.position);lc.updateMatrixWorld();const inv=lc.matrixWorld.clone().invert();
+   let x0=1e9,x1=-1e9,y0=1e9,y1=-1e9,z0=1e9,z1=-1e9;for(let i=0;i<8;i++){const q=new T.Vector3(i&1?BOX.max.x:BOX.min.x,i&2?BOX.max.y+R*.05:BOX.min.y,i&4?BOX.max.z:BOX.min.z).applyMatrix4(inv);
+     x0=Math.min(x0,q.x);x1=Math.max(x1,q.x);y0=Math.min(y0,q.y);y1=Math.max(y1,q.y);z0=Math.min(z0,-q.z);z1=Math.max(z1,-q.z)}
+   const px=(x1-x0)*.02,py=(y1-y0)*.02;Object.assign(sun.shadow.camera,{left:x0-px,right:x1+px,bottom:y0-py,top:y1+py,near:Math.max(.5,z0-R*.2),far:z1+R*.2});sun.shadow.camera.updateProjectionMatrix()}
+  // soft image-based fill (neutral room), as on castillos.site; kept weak so the sun still models the relief
+  const ENVI=.15,pm=new T.PMREMGenerator(r),envT=pm.fromScene(new RoomEnvironment(r),.04).texture;pm.dispose();scene.environment=envT;
+  scene.traverse(o=>{const ms=o.material?[].concat(o.material):[];ms.forEach(m=>{if("envMapIntensity" in m)m.envMapIntensity=ENVI})});
+  objs.forEach(o=>{o.userData.base.envMapIntensity=ENVI});
+  // ambient occlusion in screen space (GTAO), computer only; the ground keeps its AO baked in Blender
+  let comp=null;if(FINE){try{const rt=new T.WebGLRenderTarget(1,1,{type:T.HalfFloatType,samples:4});comp=new EffectComposer(r,rt);comp.addPass(new RenderPass(scene,cam));
+    const gt=new GTAOPass(scene,cam,1,1);gt.blendIntensity=1;gt.updateGtaoMaterial({radius:4,distanceExponent:1.5,thickness:4,scale:1,samples:16});gt.updatePdMaterial({lumaPhi:10,depthPhi:2,normalPhi:3,radius:6,rings:2,samples:16});
+    comp.addPass(gt);comp.addPass(new OutputPass())}catch(e){console.warn("GTAO",e);comp=null}}
+  let dirty=true;
   const st={mode:"A",ev:false,L:{walls:true,houses:true,roofs:true,rocks:true,modern:true,trees:true,lbl:true},sel:null};
   const layerOf=sid=>{const c=CAT[sid.replace(/R$/,"")];if(!c)return"houses";if(sid==="CRR")return"modern";if(sid.endsWith("R"))return"roofs";return /moderno|moderna/.test(c.kind)?"modern":/Muralha|Entrada|Muro|Arruamento/.test(c.kind)?"walls":c.kind==="Afloramento"?"rocks":"houses"};
   const evMat={};const evOf=o=>{const c=CAT[o.userData.sid.replace(/R$/,"")];if(!c)return o.userData.ev;if(o.userData.sid.endsWith("R")&&o.userData.sid!==c.id)return c.roof||o.userData.ev||"hip";return st.mode==="B"?(c.evB||c.ev):c.ev};
   const apply=()=>{for(const sid in bySid){const v=bySid[sid],useB=st.mode==="B"&&v.B.length;
       v.A.forEach(o=>o.visible=!useB||o.userData.mode==="AB");v.B.forEach(o=>o.visible=useB||o.userData.mode==="AB");
       [...v.A,...v.B].forEach(o=>{if(o.visible)o.visible=st.L[layerOf(o.userData.sid)];
-        const e=evOf(o);if(st.ev){evMat[e]=evMat[e]||new T.MeshStandardMaterial({color:EVC[e],roughness:.85});o.material=evMat[e]}else o.material=o.userData.base;
+        const e=evOf(o);if(st.ev){evMat[e]=evMat[e]||new T.MeshStandardMaterial({color:EVC[e],roughness:.85,envMapIntensity:ENVI});o.material=evMat[e]}else o.material=o.userData.base;
         if(o.material.emissive)o.material.emissive.setHex(0)})}
     trees.forEach(t=>t.visible=st.L.trees);
     if(st.sel){const v=bySid[st.sel];if(v)[...v.A,...v.B].forEach(o=>{if(o.visible){if(o.material===o.userData.base||st.ev)o.material=o.material.clone();o.material.emissive&&o.material.emissive.setHex(0x8a5a10)}})}
-    const lg=$("#dioLegend");if(lg)lg.hidden=!st.ev};
+    const lg=$("#dioLegend");if(lg)lg.hidden=!st.ev;dirty=true};
   apply();
   const labels=[];root.traverse(o=>{if(o.name&&o.name.startsWith("LBL-")){const e=document.createElement("div");e.className="dio-l";e.textContent=o.name.slice(4).replace(/-\d+$/,"").replace(/_/g," ");lw.appendChild(e);labels.push({o,e,w:0,h:0})}});
-  const ctl=new OrbitControls(cam,r.domElement);ctl.enableDamping=true;ctl.dampingFactor=.08;ctl.minDistance=R*.12;ctl.maxDistance=R*4;ctl.maxPolarAngle=1.32;ctl.minPolarAngle=.15;ctl.autoRotate=false;ctl.autoRotateSpeed=.55;ctl.screenSpacePanning=false;
+  const ctl=new OrbitControls(cam,r.domElement);ctl.enableDamping=true;ctl.dampingFactor=.08;ctl.minDistance=R*.12;ctl.maxDistance=R*4;ctl.maxPolarAngle=1.32;ctl.minPolarAngle=.15;ctl.autoRotate=!RM;ctl.autoRotateSpeed=.6;ctl.screenSpacePanning=false;ctl.addEventListener("change",()=>dirty=true);   // turns slowly until the first touch
   let fly=null;const flyTo=(pos,tgt,ms=900)=>{fly={p0:cam.position.clone(),t0:ctl.target.clone(),p1:pos,t1:tgt,s:performance.now(),ms}};
-  const HOME=[new T.Vector3(-R*.35,R*1.75,R*2.75),new T.Vector3(0,-4,0)];
-  const home=a=>{if(a)flyTo(HOME[0].clone(),HOME[1].clone());else{cam.position.copy(HOME[0]);ctl.target.copy(HOME[1]);ctl.update()}};home(false);
+  // framing: the whole disc fills ~93 % of the frame, from the usual oblique view (or DIOS[id].cam = {az, el} in degrees);
+  // target and distance refined in a few passes by projecting the corners of the scene box
+  const HDIR=(()=>{const c=(DIOS[s.id]||{}).cam;if(c&&c.az!=null){const a=c.az*Math.PI/180,e=(c.el??32)*Math.PI/180;return new T.Vector3(Math.sin(a)*Math.cos(e),Math.sin(e),Math.cos(a)*Math.cos(e))}return new T.Vector3(-R*.35,R*1.75+4,R*2.75).normalize()})();
+  // silhouette points: a sample of the model's vertices (≤ 20 000), so the round disc is framed by its outline and not by its bounding box
+  // framing target, as in castillos.site's showcase: the archaeological structures (walls, houses, roofs) fill the frame and the
+  // terrain runs off its edges; sites with none of these (Castro Máximo) are framed by the whole disc and its labels
+  const CORE=objs.filter(o=>o.visible&&/walls|houses|roofs/.test(layerOf(o.userData.sid)));
+  const SIL=[];{const ms=[];let nv=0;(CORE.length?CORE:(()=>{const a=[];root.traverse(o=>{if(o.isMesh&&o.visible&&!o.name.startsWith("PROTO-"))a.push(o)});return a})()).forEach(o=>{if(o.geometry&&o.geometry.attributes.position){ms.push(o);nv+=o.geometry.attributes.position.count}});
+    if(!CORE.length)root.traverse(o=>{if(o.name&&o.name.startsWith("LBL-"))SIL.push(o.getWorldPosition(new T.Vector3()).add(new T.Vector3(0,R*.14,0)))});
+    const step=Math.max(1,Math.ceil(nv/20000));ms.forEach(o=>{const P=o.geometry.attributes.position;for(let i=0;i<P.count;i+=step)SIL.push(new T.Vector3().fromBufferAttribute(P,i).applyMatrix4(o.matrixWorld))})}
+  const fitView=(fill=CORE.length?.92:.88)=>{const pts=SIL.length?SIL:[],c=(SIL.length?new T.Box3().setFromPoints(SIL):BOXF).getCenter(new T.Vector3());
+    let d=(SIL.length?new T.Box3().setFromPoints(SIL):BOXF).getSize(new T.Vector3()).length()*1.2;const c0=cam.position.clone(),q0=cam.quaternion.clone();
+    for(let k=0;k<5;k++){cam.position.copy(c).addScaledVector(HDIR,d);cam.lookAt(c);cam.updateMatrixWorld();let x0=1e9,x1=-1e9,y0=1e9,y1=-1e9;
+      pts.forEach(p=>{const q=p.clone().project(cam);x0=Math.min(x0,q.x);x1=Math.max(x1,q.x);y0=Math.min(y0,q.y);y1=Math.max(y1,q.y)});
+      const h=d*Math.tan(cam.fov*Math.PI/360),rt=new T.Vector3(1,0,0).applyQuaternion(cam.quaternion),up=new T.Vector3(0,1,0).applyQuaternion(cam.quaternion);
+      c.addScaledVector(rt,(x0+x1)/2*h*cam.aspect).addScaledVector(up,(y0+y1)/2*h);d*=Math.max((x1-x0)/2,(y1-y0)/2)/fill}
+    cam.position.copy(c0);cam.quaternion.copy(q0);return [c.clone().addScaledVector(HDIR,d),c]};
+  const home=a=>{const [p,t]=fitView();if(a)flyTo(p,t);else{cam.position.copy(p);ctl.target.copy(t);ctl.update()}dirty=true};
   // picking: tap/click selects a structure and opens its record
   const ray=new T.Raycaster(),ptr=new T.Vector2();let down=null;
   r.domElement.addEventListener("pointerdown",e=>{down=[e.clientX,e.clientY]});
@@ -3002,13 +3042,14 @@ async function dioBuild(s){
   const V=new T.Vector3(),dirv=new T.Vector3();
   const frame=t=>{raf=requestAnimationFrame(frame);if(!wrap.isConnected)return;const bb=wrap.getBoundingClientRect();vis=bb.bottom>0&&bb.top<innerHeight&&bb.width>0;if(!vis)return;
     if(fly){const k=Math.min(1,(performance.now()-fly.s)/fly.ms),e=k<.5?2*k*k:1-Math.pow(-2*k+2,2)/2;cam.position.lerpVectors(fly.p0,fly.p1,e);ctl.target.lerpVectors(fly.t0,fly.t1,e);if(k>=1)fly=null}
-    ctl.update();r.render(scene,cam);
+    const moved=ctl.update();if(!(moved||dirty||fly))return;dirty=false;   // render only when something changed
+    comp?comp.render():r.render(scene,cam);if(r.domElement.style.opacity==="0")r.domElement.style.opacity=1;
     const placed=[];for(const l of labels){if(!st.L.lbl){l.e.style.display="none";continue}l.o.getWorldPosition(V);V.project(cam);if(V.z>1){l.e.style.display="none";continue}
       if(!l.w){l.e.style.display="";l.w=l.e.offsetWidth;l.h=l.e.offsetHeight}const x=(V.x+1)/2*W,y=(1-V.y)/2*H,bx={l:x-l.w/2,r:x+l.w/2,t:y-l.h-12,b:y};
       if(placed.some(o=>bx.l<o.r&&bx.r>o.l&&bx.t<o.b&&bx.b>o.t)){l.e.style.display="none";continue}placed.push(bx);l.e.style.display="";l.e.style.transform=`translate(${x}px,${y}px) translate(-50%,-100%) translateY(-12px)`}
     cam.getWorldDirection(dirv);wrap.querySelector(".dio-n svg").style.transform=`rotate(${Math.atan2(dirv.x,-dirv.z)*-180/Math.PI}deg)`;
     const d=cam.position.distanceTo(ctl.target),mpx=2*d*Math.tan(cam.fov*Math.PI/360)/H,sb=d<R*.5?5:20;wrap.querySelector(".dio-scale i").style.width=(sb/mpx)+"px";wrap.querySelector(".dio-scale span").textContent=sb+" m"};
-  const resize=()=>{W=wrap.clientWidth||1;H=wrap.clientHeight||1;r.setSize(W,H,false);cam.aspect=W/H;cam.updateProjectionMatrix()};
+  const resize=()=>{W=wrap.clientWidth||1;H=wrap.clientHeight||1;r.setSize(W,H,false);if(comp){comp.setPixelRatio(Math.min(r.getPixelRatio(),1.5));comp.setSize(W,H)}cam.aspect=W/H;cam.updateProjectionMatrix();dirty=true};
   const ro=new ResizeObserver(resize);ro.observe(wrap);
   ctl.addEventListener("start",()=>{fly=null;if(ctl.autoRotate){ctl.autoRotate=false;const b=document.querySelector('#dioBar [data-a="spin"]');if(b)b.setAttribute("aria-pressed","false")}});
   // guided tour: fly to each stop (centre of the structure's geometry), with a short text
@@ -3036,8 +3077,8 @@ async function dioBuild(s){
       else if(a==="tour"){if(TO.on)tourEnd();else tourGo(0)}
       else if(a==="full"){const f=$("#dio");if(document.fullscreenElement){document.exitFullscreen()}else if(f.requestFullscreen){f.requestFullscreen().catch(()=>f.classList.toggle("full"))}else f.classList.toggle("full");setTimeout(resize,150)}};
     apply()};
-  const stage2=$("#dioStage");if(stage2){stage2.innerHTML="";stage2.appendChild(wrap)}resize();frame();bind();
-  DIO.cur={id:s.id,wrap,bind,resize,dispose(){cancelAnimationFrame(raf);ro.disconnect();ctl.dispose();r.dispose();r.forceContextLoss&&r.forceContextLoss();scene.traverse(o=>{if(o.geometry)o.geometry.dispose()})}};
+  const stage2=$("#dioStage");if(stage2){stage2.innerHTML="";stage2.appendChild(wrap)}resize();home(false);frame();bind();
+  DIO.cur={id:s.id,wrap,bind,resize,dispose(){cancelAnimationFrame(raf);ro.disconnect();ctl.dispose();if(comp)comp.dispose();envT.dispose();r.dispose();r.forceContextLoss&&r.forceContextLoss();scene.traverse(o=>{if(o.geometry)o.geometry.dispose()})}};
 }
 
 /* ---------- bottom sheet (phones) ---------- */
