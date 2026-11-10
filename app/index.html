@@ -3435,7 +3435,7 @@ const DIOS={"guimaraes-citania-de-briteiros":{"cap":"Estruturas georreferenciada
 const dioLuz=id=>{const o=JSON.parse(JSON.stringify(LUZ)),x=(DIOS[id]||{}).luz||{};for(const k in x)o[k]=x[k]&&typeof x[k]==="object"&&!Array.isArray(x[k])?{...o[k],...x[k]}:x[k];return o};
 const EVL={conf:"Confirmado",doc:"Reconstituído com fundamento documental",hip:"Hipotético"},EVC={conf:"#6d7f4f",doc:"#3f74a8",hip:"#c4772f"};
 const DIO={mods:null,cur:null};window.__dio=DIO;   // read by the capture tests (draw calls, frame time)
-const DIOV={"braga-castro-de-santa-marta-das-corticas.glb.png":"6dba8a20","braga-castro-de-santa-marta-das-corticas.json":"7f3f24c0","braga-castro-maximo.glb.png":"d592f640","braga-castro-maximo.json":"9a17d5e0","guimaraes-castro-de-sabroso.glb.png":"64216598","guimaraes-castro-de-sabroso.json":"32a70b7b","guimaraes-castro-de-sao-miguel-o-anjo.glb.png":"2ac2d50f","guimaraes-castro-de-sao-miguel-o-anjo.json":"6ee131b3","guimaraes-citania-de-briteiros.glb.png":"1911d62d","guimaraes-citania-de-briteiros.json":"75a3fae7"};   // short content hash of each file in dio/ (written by build.py), so a new model is never hidden by the browser cache
+const DIOV={"braga-castro-de-santa-marta-das-corticas.glb.png":"6dba8a20","braga-castro-de-santa-marta-das-corticas.json":"7f3f24c0","braga-castro-maximo.glb.png":"d592f640","braga-castro-maximo.json":"9a17d5e0","guimaraes-castro-de-sabroso.glb.png":"64216598","guimaraes-castro-de-sabroso.json":"32a70b7b","guimaraes-castro-de-sao-miguel-o-anjo.glb.png":"2ac2d50f","guimaraes-castro-de-sao-miguel-o-anjo.json":"6ee131b3","guimaraes-citania-de-briteiros.glb.png":"d70c70f7","guimaraes-citania-de-briteiros.json":"5b836c97"};   // short content hash of each file in dio/ (written by build.py), so a new model is never hidden by the browser cache
 const dioV=f=>DIOV[f]?`?v=${DIOV[f]}`:"";
 const TJ="https://cdn.jsdelivr.net/npm/three@0.170.0/";
 function dioMods(){if(!DIO.mods)DIO.mods=Promise.all([import(TJ+"build/three.module.js"),import(TJ+"examples/jsm/loaders/GLTFLoader.js"),import(TJ+"examples/jsm/controls/OrbitControls.js"),import(TJ+"examples/jsm/environments/RoomEnvironment.js"),
@@ -3514,14 +3514,35 @@ async function dioBuild(s){
     BC.forEach((mesh,key)=>{if(!keep.has(key)){mesh.geometry.dispose();BC.delete(key)}})};
   const bySid={};objs.forEach(o=>{const s0=o.userData.sid.replace(/R$/,"");(bySid[s0]=bySid[s0]||{A:[],B:[]});const md=o.userData.mode;if(md==="AB"){bySid[s0].A.push(o);bySid[s0].B.push(o)}else bySid[s0][md].push(o)});
   // trees: instanced from the Blender prototypes
-  const trees=[];
+  const trees=[],LOD=[],LODMIN=200,LODC=6,LODPX=24;
+  const tris=g=>(g.index?g.index.count:g.attributes.position.count)/3;
+  const simp=(g,cells)=>{const P=g.attributes.position,n=P.count;g.computeBoundingBox();const bb=g.boundingBox,sz=bb.getSize(new T.Vector3()),c=Math.max(sz.x,sz.y,sz.z)/cells;
+    const key=new Int32Array(n),mp=new Map(),acc=[];for(let i=0;i<n;i++){const x=P.getX(i),y=P.getY(i),z=P.getZ(i),k=Math.floor((x-bb.min.x)/c)+Math.floor((y-bb.min.y)/c)*64+Math.floor((z-bb.min.z)/c)*4096;
+      let id=mp.get(k);if(id===undefined){id=acc.length/4;mp.set(k,id);acc.push(0,0,0,0)}acc[id*4]+=x;acc[id*4+1]+=y;acc[id*4+2]+=z;acc[id*4+3]++;key[i]=id}
+    const ix=g.index?g.index.array:null,nt=(ix?ix.length:n)/3,seen=new Set(),out=[];
+    for(let t=0;t<nt;t++){const a=key[ix?ix[t*3]:t*3],b=key[ix?ix[t*3+1]:t*3+1],d=key[ix?ix[t*3+2]:t*3+2];if(a===b||b===d||a===d)continue;const s3=[a,b,d].sort((u,v)=>u-v).join();if(seen.has(s3))continue;seen.add(s3);
+      // keep the facing of the original face (clustering can turn a small triangle over, which then shades black)
+      const o0=ix?ix[t*3]:t*3,o1=ix?ix[t*3+1]:t*3+1,o2=ix?ix[t*3+2]:t*3+2,f=(i,j)=>[P.getX(j)-P.getX(i),P.getY(j)-P.getY(i),P.getZ(j)-P.getZ(i)],g=(v,j)=>acc[v*4+j]/acc[v*4+3],h=(u,v)=>[g(v,0)-g(u,0),g(v,1)-g(u,1),g(v,2)-g(u,2)];
+      const cr=(u,v)=>[u[1]*v[2]-u[2]*v[1],u[2]*v[0]-u[0]*v[2],u[0]*v[1]-u[1]*v[0]],n0=cr(f(o0,o1),f(o0,o2)),n1=cr(h(a,b),h(a,d)),flip=n0[0]*n1[0]+n0[1]*n1[1]+n0[2]*n1[2]<0;
+      for(const v of flip?[a,d,b]:[a,b,d])out.push(g(v,0),g(v,1),g(v,2))}
+    const G=new T.BufferGeometry();G.setAttribute("position",new T.Float32BufferAttribute(out,3));G.computeVertexNormals();return G};
   if(meta&&meta.trees){const tr=meta.trees,m4=new T.Matrix4(),q=new T.Quaternion(),c=new T.Color(),up=new T.Vector3(0,1,0);
     const TY=meta.types||["oak","pine"];for(const k of TY){const ti=TY.indexOf(k),list=tr.filter(t=>t[4]===ti);if(!list.length||!protos[k])continue;
       protos[k].forEach(pp=>{const mat=pp.m.clone();if(pp.p==="leaf")mat.color.set(0xffffff);const im=new T.InstancedMesh(pp.g,mat,list.length);im.castShadow=true;im.receiveShadow=pp.p==="leaf";   // thin trunks self-shadow to black with the normal bias
+        const lg=tris(pp.g)>LODMIN?simp(pp.g,LODC):null;if(lg){const lo=new T.InstancedMesh(lg,mat,list.length);lo.castShadow=true;lo.receiveShadow=im.receiveShadow;lo.frustumCulled=im.frustumCulled=false;LOD.push({hi:im,lo,list,leaf:pp.p==="leaf"});scene.add(lo);trees.push(lo)}
 
         list.forEach((t,i)=>{q.setFromAxisAngle(up,t[6]);m4.compose(new T.Vector3(t[0],t[2],-t[1]),q,new T.Vector3(t[3]*(t[7]||(.85+.3*((i*7)%10)/10)),t[3],t[3]*(t[7]||1)));im.setMatrixAt(i,m4);
           if(pp.p==="leaf"){const L=(meta.pal?meta.pal[k]:meta.leaf)[t[5]];c.setRGB(L[0]/255,L[1]/255,L[2]/255,T.SRGBColorSpace);im.setColorAt(i,c)}});
         if(k==="tuft"){im.castShadow=false;mat.side=T.DoubleSide}scene.add(im);trees.push(im)})}}
+  // level of detail for the trees: a crown that covers fewer than LODPX pixels on screen is drawn with a coarse copy of its prototype
+  // (vertex clustering, ~1/10 of the triangles); the split is redone while the camera moves (at most every 200 ms) and once it stops
+  LOD.forEach(L=>{const n=L.list.length;L.M=new Float32Array(L.hi.instanceMatrix.array);L.C=L.hi.instanceColor?new Float32Array(L.hi.instanceColor.array):null;if(L.C&&!L.lo.instanceColor)L.lo.instanceColor=new T.InstancedBufferAttribute(new Float32Array(n*3),3);
+    L.P=new Float32Array(n*4);L.list.forEach((t,i)=>{L.P[i*4]=t[0];L.P[i*4+1]=t[2]+t[3]*.5;L.P[i*4+2]=-t[1];L.P[i*4+3]=t[3]})});
+  let lodT=0,lodTm=0;const lodSplit=()=>{lodT=performance.now();let ch=false;if(!LOD.length)return ch;const f=r.domElement.height/(2*Math.tan(cam.fov*Math.PI/360)),cp=cam.position;
+    for(const L of LOD){const n=L.list.length,hm=L.hi.instanceMatrix.array,lm=L.lo.instanceMatrix.array,hc=L.hi.instanceColor&&L.hi.instanceColor.array,lc=L.lo.instanceColor&&L.lo.instanceColor.array;let a=0,b=0;
+      for(let i=0;i<n;i++){const dx=L.P[i*4]-cp.x,dy=L.P[i*4+1]-cp.y,dz=L.P[i*4+2]-cp.z,px=L.P[i*4+3]*f/Math.sqrt(dx*dx+dy*dy+dz*dz);
+        if(px>LODPX){hm.set(L.M.subarray(i*16,i*16+16),a*16);if(hc)hc.set(L.C.subarray(i*3,i*3+3),a*3);a++}else{lm.set(L.M.subarray(i*16,i*16+16),b*16);if(lc)lc.set(L.C.subarray(i*3,i*3+3),b*3);b++}}
+      if(L.hi.count!==a)ch=true;L.hi.count=a;L.lo.count=b;L.hi.instanceMatrix.needsUpdate=L.lo.instanceMatrix.needsUpdate=true;if(hc)L.hi.instanceColor.needsUpdate=true;if(lc)L.lo.instanceColor.needsUpdate=true}return ch};
   // scene box (terrain, structures, trees; without the disc's skirt): used for the shadow frustum and the framing
   const BOX=new T.Box3(),BOXF=new T.Box3();root.updateMatrixWorld(true);
   root.traverse(o=>{if(!o.isMesh||!o.visible||o.name.startsWith("PROTO-"))return;BOXF.expandByObject(o);if(!/skirt/.test(o.name))BOX.expandByObject(o)});
@@ -3614,6 +3635,7 @@ async function dioBuild(s){
   const frame=t=>{raf=requestAnimationFrame(frame);if(!wrap.isConnected)return;const bb=wrap.getBoundingClientRect();vis=bb.bottom>0&&bb.top<innerHeight&&bb.width>0;if(!vis)return;
     if(fly){const k=Math.min(1,(performance.now()-fly.s)/fly.ms),e=k<.5?2*k*k:1-Math.pow(-2*k+2,2)/2;cam.position.lerpVectors(fly.p0,fly.p1,e);ctl.target.lerpVectors(fly.t0,fly.t1,e);if(k>=1)fly=null}
     const moved=ctl.update();if(!(moved||dirty||fly))return;dirty=false;   // render only when something changed
+    if(LOD.length){if(performance.now()-lodT>200)lodSplit();clearTimeout(lodTm);lodTm=setTimeout(()=>{if(lodSplit())dirty=true},250)}
     comp?comp.render():r.render(scene,cam);if(r.domElement.style.opacity==="0")r.domElement.style.opacity=1;
     const placed=[];for(const l of labels){if(!st.L.lbl){l.e.style.display="none";continue}l.o.getWorldPosition(V);V.project(cam);if(V.z>1){l.e.style.display="none";continue}
       if(!l.w){l.e.style.display="";l.w=l.e.offsetWidth;l.h=l.e.offsetHeight}const x=(V.x+1)/2*W,y=(1-V.y)/2*H,bx={l:x-l.w/2,r:x+l.w/2,t:y-l.h-12,b:y};
@@ -3655,7 +3677,7 @@ async function dioBuild(s){
     apply()};
   const stage2=$("#dioStage");if(stage2){stage2.innerHTML="";stage2.appendChild(wrap)}resize();home(false);frame();bind();
   DIO.cur={id:s.id,wrap,bind,resize,camPos:()=>[cam.position.x,cam.position.y,cam.position.z,ctl.target.x,ctl.target.y,ctl.target.z].map(v=>Math.round(v)),
-    stats(n=10){r.info.autoReset=false;r.info.reset();const t0=performance.now();for(let i=0;i<n;i++)r.render(scene,cam);r.getContext().finish();const ms=(performance.now()-t0)/n,o={calls:r.info.render.calls/n,tris:r.info.render.triangles/n,ms:+ms.toFixed(1),geoms:r.info.memory.geometries};r.info.autoReset=true;dirty=true;return o},   // tests: draw calls and time per frame (without GTAO)
+    stats(n=10){lodSplit();r.info.autoReset=false;r.info.reset();const t0=performance.now();for(let i=0;i<n;i++)r.render(scene,cam);r.getContext().finish();const ms=(performance.now()-t0)/n,o={calls:r.info.render.calls/n,tris:r.info.render.triangles/n,ms:+ms.toFixed(1),geoms:r.info.memory.geometries};r.info.autoReset=true;dirty=true;return o},   // tests: draw calls and time per frame (without GTAO)
     dispose(){cancelAnimationFrame(raf);ro.disconnect();ctl.dispose();if(comp)comp.dispose();envT.dispose();BC.forEach(m=>m.geometry.dispose());selMat.forEach(m=>m.dispose());r.dispose();r.forceContextLoss&&r.forceContextLoss();scene.traverse(o=>{if(o.geometry)o.geometry.dispose()})}};
 }
 
