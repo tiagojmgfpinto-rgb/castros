@@ -582,6 +582,9 @@ sup.rf{font-size:10px;margin-left:2px}sup.rf a{color:var(--accent);text-decorati
 .dio:fullscreen,.dio.full{background:linear-gradient(#9cc3e6,#dfeaf2 45%,#efe7d3)!important}
 /* site diorama */
 .dio-seg{display:flex;flex:2 1 auto}.dio-seg button{flex:1;border-radius:0}.dio-seg button:first-child{border-radius:3px 0 0 3px}.dio-seg button:last-child{border-radius:0 3px 3px 0;border-left:0}
+.spi{background:none;border:0}.spi-b{position:absolute;transform:translate(-50%,-50%);white-space:nowrap;display:flex;gap:6px;align-items:center;padding:4px 9px;border:1px solid #cfc3a6;background:rgb(252 249 240/.97);color:#221B13;font:600 12px/1.2 var(--f-mono);border-radius:2px;cursor:pointer;box-shadow:0 2px 8px rgb(0 0 0/.25)}
+.spi-b i{width:9px;height:9px;border-radius:50%;background:var(--c);flex:none}.spi-b:hover{border-color:var(--accent)}
+.sem-dados{font-style:italic}
 .dio-v{flex:1 1 100%}.dio-v button b{color:var(--accent);margin-right:1px}
 @media (max-width:620px){.dio-v button:not([aria-pressed="true"]) .t{display:none}}
 .dio-l{pointer-events:auto;cursor:pointer}.dio-l:hover{border-color:var(--accent)}.dio-n{cursor:pointer;border-radius:3px;padding:2px}.dio-n:hover{background:rgb(252 249 240/.7)}
@@ -1214,7 +1217,7 @@ function toast(msg){const t=$("#toast");t.textContent=msg;t.classList.add("show"
 
 /* ---------- persisted per-viewer state ---------- */
 const store={get(k,d){try{const v=localStorage.getItem("castros."+k);return v?JSON.parse(v):d}catch(e){return d}},set(k,v){try{localStorage.setItem("castros."+k,JSON.stringify(v))}catch(e){}}};
-const S={stab:"hist",tab:"explore",q:"",types:new Set(Object.keys(TYPES)),dists:new Set(DISTRICTS),cls:new Set(CLSK),mun:null,inView:false,sel:null,
+const S={dio:false,stab:"hist",tab:"explore",q:"",types:new Set(Object.keys(TYPES)),dists:new Set(DISTRICTS),cls:new Set(CLSK),mun:null,inView:false,sel:null,
   route:store.get("route",[]),visited:new Set(store.get("visited",[])),names:false,relief:true};
 
 let D,BY={},MUN={},map,markers={},reliefLayer,reliefWide,reliefFar,munLayer,routeLine,routeNums=[],journey={line:null,i:-1,timer:null,speed:1,seq:[]};
@@ -1330,6 +1333,10 @@ function nearMeHtml(){if(!ME.ll)return"";const l=D.sites.filter(s=>s.coords&&s.k
 let TEXTS=false;
 function loadTexts(){fetch("texts.json").then(r=>r.json()).then(T=>{D.sites.forEach(s=>{s.text=T.t[s.id]||[];s.full=norm(s.text.join(" "))});D.municipios.forEach(m=>m.bib=T.b[m.slug]||[]);TEXTS=true;
   if(S.sel&&$("#sec-hist"))renderStab(BY[S.sel]);else if(!S.sel&&S.tab==="explore"&&S.q)renderList()}).catch(()=>{setTimeout(loadTexts,4000)})}
+/* the site records (history texts, sources, measurements, stamp art) come in fichas.json, fetched together with the index: the map and
+   the list draw from data.json at once, a record opened from a link waits for its texts, and an open record is redrawn when they arrive */
+let FICHAS=false;const FP=fetch("fichas.json").then(r=>r.json()).catch(()=>null);
+function mergeFichas(F){if(!F)return;for(const k of ["hist","sa","fic"])for(const id in F[k]||{})if(BY[id])BY[id][k]=F[k][id];FICHAS=true}
 Promise.all([fetch("data.json").then(r=>r.json()),fetch("base.topojson").then(r=>r.json())]).then(([data,topo])=>{
   D=data;
   D.sites.forEach((s,i)=>{s.i=i;BY[s.id]=s;s.n=norm(s.name+" "+s.municipio);s.text=s.text||[];s.full=""});
@@ -1337,7 +1344,8 @@ Promise.all([fetch("data.json").then(r=>r.json()),fetch("base.topojson").then(r=
   S.route=S.route.filter(id=>BY[id]);
   initMap(topo);buildLegend();updateBadges();initChrome();
   const h=location.hash.slice(1);
-  if(h&&BY[h])openSite(h,{fly:true});else if(h&&["route","passport","comments","culture","synth","about"].includes(h))setTab(h);else render();
+  const fp=FP.then(mergeFichas);
+  if(h&&BY[h])fp.then(()=>openSite(h,{fly:true}));else if(h&&["route","passport","comments","culture","synth","about"].includes(h))fp.then(()=>setTab(h));else{render();fp.then(()=>{if(S.sel)renderSite();else if(S.tab==="passport"||S.tab==="synth")render()})}
   checkOwner(h);initShared();loadTexts();
 }).catch(err=>{$("#pbody").innerHTML=`<div class="view"><p>Não foi possível carregar os dados do atlas (${esc(err.message)}). Recarregue a página.</p></div>`});
 
@@ -1356,8 +1364,8 @@ function addSiteMarker(s){
     const icon=L.divIcon({className:"",iconSize:[22,22],iconAnchor:[11,11],html:`<div class="mk ${t.sq?"sq":""} ${t.big?"big":""}" style="--c:${tc(s.kind)}"><i></i>${s.cls&&s.cls.c!=="ND"&&s.cls.c!=="NC"?`<b class="cb" title="${esc(CLS[s.cls.c].l)}">${clsIcon(s.cls.c,11)}</b>`:""}</div>`});
     const m=L.marker(s.coords,{icon,riseOnHover:true,title:s.name,alt:s.name,keyboard:true});
     m.bindTooltip(`${esc(s.name)}`,{className:"tt-name",permanent:true,direction:"right",offset:[8,0]});
-    m.on("click",()=>openSite(s.id,{fly:false}));
-    m.on("mouseover",()=>{hl(s.id,true);hoverCard(s)});m.on("mouseout",()=>{hl(s.id,false);$("#hcard").hidden=true});
+    m.on("click",()=>{const was=SPI&&SPI.ids.includes(s.id);spiderClose();if(was||!spiderOpen(s))openSite(s.id,{fly:false})});
+    m.on("mouseover",()=>{hl(s.id,true);hoverCard(s);prefetchSite(s.id)});m.on("mouseout",()=>{hl(s.id,false);$("#hcard").hidden=true});
     m.addTo(map);markers[s.id]=m;
 }
 function initMap(topo){
@@ -1465,6 +1473,23 @@ function restyleMun(l){
   l.setStyle({fillColor:cssv("--accent"),fillOpacity:focus?.08:0,color:focus?cssv("--accent"):S.sat?"#ffffff":cssv("--ink"),weight:focus?2:.75,opacity:focus?1:S.sat?.4:.42});
   if(focus)l.bringToFront();
 }
+/* markers that sit on top of each other at this zoom open as a fan ("spider") with one labelled button per site */
+let SPI=null;
+function spiderClose(){if(!SPI)return;const o=SPI;SPI=null;o.layer.remove();o.ids.forEach(id=>markers[id]&&markers[id].setOpacity(1));map.off("zoomstart movestart click",spiderClose)}
+function spiderOpen(s){const p0=map.latLngToContainerPoint(s.coords),vis=new Set(filtered().map(x=>x.id));
+  const near=D.sites.filter(x=>x.coords&&markers[x.id]&&(S.tab!=="explore"||vis.has(x.id))&&map.latLngToContainerPoint(x.coords).distanceTo(p0)<18);
+  if(near.length<2)return false;
+  const g=L.layerGroup().addTo(map),n=near.length,rad=Math.max(44,n*11);
+  near.forEach((x,i)=>{const a=-Math.PI/2+i*2*Math.PI/n,ll=map.containerPointToLatLng(L.point(p0.x+rad*Math.cos(a),p0.y+rad*Math.sin(a)));
+    L.polyline([s.coords,ll],{color:"#2a221a",weight:1.2,opacity:.7,interactive:false}).addTo(g);
+    L.marker(ll,{keyboard:true,zIndexOffset:3000,title:x.name,icon:L.divIcon({className:"spi",iconSize:[0,0],html:`<button class="spi-b" style="--c:${tc(x.kind)}" type="button"><i></i>${esc(x.name)}</button>`})})
+      .on("click",()=>{spiderClose();openSite(x.id,{fly:false})}).on("mouseover",()=>prefetchSite(x.id)).addTo(g)});
+  near.forEach(x=>markers[x.id].setOpacity(.3));SPI={layer:g,ids:near.map(x=>x.id)};
+  setTimeout(()=>map.on("zoomstart movestart click",spiderClose),0);return true}
+/* hovering a site warms the cache for its 3D model, so the record opens with it sooner */
+const PREF=new Set();
+function prefetchSite(id){if(PREF.has(id)||!DIOS[id])return;PREF.add(id);
+  for(const f of [`dio/${id}.json${dioV(id+".json")}`,`dio/${id}.glb.png${dioV(id+".glb.png")}`]){const l=document.createElement("link");l.rel="prefetch";l.href=f;document.head.appendChild(l)}}
 function syncMarkers(){
   const vis=new Set(filtered().map(s=>s.id));
   const z=map.getZoom();
@@ -1502,7 +1527,7 @@ function buildLegend(){$("#legend").innerHTML=Object.entries(TYPES).filter(([k])
 function filtered(){
   const q=norm(S.q.trim());
   let b=map?map.getBounds():null;
-  return D.sites.filter(s=>S.types.has(s.kind)&&S.dists.has(s.distrito)&&(S.cls.size===CLSK.length||(s.cls&&S.cls.has(s.cls.c)))&&(!S.mun||s.slug===S.mun)&&(!q||s.n.includes(q)||(q.length>2&&s.full.includes(q)))&&(!S.inView||!b||b.contains(s.coords)));
+  return D.sites.filter(s=>(!S.dio||DIOS[s.id])&&S.types.has(s.kind)&&S.dists.has(s.distrito)&&(S.cls.size===CLSK.length||(s.cls&&S.cls.has(s.cls.c)))&&(!S.mun||s.slug===S.mun)&&(!q||s.n.includes(q)||(q.length>2&&s.full.includes(q)))&&(!S.inView||!b||b.contains(s.coords)));
 }
 function snippet(s,q){const t=s.text.join(" "),nt=norm(t),i=nt.indexOf(q);if(i<0)return"";const a=Math.max(0,i-60),b=Math.min(t.length,i+q.length+80);return(a?"…":"")+esc(t.slice(a,i))+"<mark>"+esc(t.slice(i,i+q.length))+"</mark>"+esc(t.slice(i+q.length,b))+(b<t.length?"…":"")}
 
@@ -1525,20 +1550,20 @@ function count(fn){return D.sites.filter(fn).length}
 function renderExplore(){
   const all=Object.keys(TYPES),allOn=S.types.size===all.length,kinds=all.filter(k=>D.sites.some(s=>s.kind===k));
   const m=S.mun&&(MUN[S.mun]||(()=>{const x=D.sites.find(z=>z.slug===S.mun);return x?{name:x.municipio}:null})());
-  const dsel=S.dists.size<DISTRICTS.length?[...S.dists]:null,narrow=m||dsel||S.cls.size<CLSK.length||S.inView;
+  const dsel=S.dists.size<DISTRICTS.length?[...S.dists]:null,narrow=m||dsel||S.cls.size<CLSK.length||S.inView||S.dio;
   $("#pbody").innerHTML=`<div class="view idx">
     <header class="idx-h"><h2>Índice de castros</h2><button class="cerrar" id="idxclose" aria-label="Fechar o índice">×</button></header>
     <input id="q" class="buscar" type="search" placeholder="Procurar por nome, concelho, distrito…" value="${esc(S.q)}" autocomplete="off" aria-label="Procurar castro">
-    <div class="filtros" id="tchips" role="group" aria-label="Filtrar por tipo de sítio"><button class="filtro" data-type="" aria-pressed="${allOn}">Todos<small>${D.sites.length}</small></button>${kinds.map(k=>`<button class="filtro" data-type="${k}" aria-pressed="${!allOn&&S.types.has(k)}">${tdot(k)}${esc(TYPES[k].pl)}<small>${count(s=>s.kind===k)}</small></button>`).join("")}</div>
-    ${narrow?`<p class="filtro-ativo">${m?`Concelho de <b>${esc(m.name)}</b>`:dsel?`Distrito${dsel.length>1?"s":""} de <b>${dsel.map(esc).join(", ")}</b>`:"Filtro ativo"} · <button class="linkbtn" id="fclear">ver todos</button></p>`:""}
+    <div class="filtros" id="tchips" role="group" aria-label="Filtrar por tipo de sítio"><button class="filtro" data-type="" aria-pressed="${allOn}">Todos<small>${D.sites.length}</small></button>${kinds.map(k=>`<button class="filtro" data-type="${k}" aria-pressed="${!allOn&&S.types.has(k)}">${tdot(k)}${esc(TYPES[k].pl)}<small>${count(s=>s.kind===k)}</small></button>`).join("")}<button class="filtro" data-dio="1" aria-pressed="${S.dio}" title="Só os sítios com maqueta 3D">Com maqueta 3D<small>${count(s=>DIOS[s.id])}</small></button></div>
+    ${narrow?`<p class="filtro-ativo">${m?`Concelho de <b>${esc(m.name)}</b>`:dsel?`Distrito${dsel.length>1?"s":""} de <b>${dsel.map(esc).join(", ")}</b>`:S.dio?"Só sítios com <b>maqueta 3D</b>":"Filtro ativo"} · <button class="linkbtn" id="fclear">ver todos</button></p>`:""}
     ${nearMeHtml()}
     <div class="lista" id="list"></div></div>`;
   const q=$("#q");
   q.oninput=()=>{S.q=q.value;renderList();syncMarkers()};
   q.onkeydown=e=>{if(e.key==="Enter"){const f=sorted();if(f.length)openSite(f[0].id,{fly:true})}};
   $("#idxclose").onclick=()=>setIndex(false);
-  if($("#fclear"))$("#fclear").onclick=()=>{S.dists=new Set(DISTRICTS);S.cls=new Set(CLSK);S.inView=false;if(S.mun)selectMun(null);else{renderExplore();syncMarkers()}};
-  $("#tchips").onclick=e=>{const b=e.target.closest(".filtro");if(!b)return;const k=b.dataset.type;
+  if($("#fclear"))$("#fclear").onclick=()=>{S.dio=false;S.dists=new Set(DISTRICTS);S.cls=new Set(CLSK);S.inView=false;if(S.mun)selectMun(null);else{renderExplore();syncMarkers()}};
+  $("#tchips").onclick=e=>{const b=e.target.closest(".filtro");if(!b)return;if(b.dataset.dio){S.dio=!S.dio;renderExplore();return}const k=b.dataset.type;
     S.types=!k||(S.types.size===1&&S.types.has(k))?new Set(all):new Set([k]);renderExplore()};
   renderList();syncMarkers();
 }
@@ -1686,10 +1711,11 @@ function siteSections(s,nearSites,nearMus){
     <figcaption>${esc(e.c)}<small>${esc(e.a)}${e.y?`, ${esc(e.y)}`:""}${e.s?` · ${esc(e.s)}`:""} · <a href="${esc(e.u)}" target="_blank" rel="noopener">${esc(e.l)} · Wikimedia Commons ↗</a></small></figcaption></figure>`).join("")}</div>`:"";
   const H=(id,t,body,c="")=>`<section class="ssec ${c}" id="sec-${id}"><h3>${t}</h3>${body}</section>`;
   const hist=H("hist","História",`<div id="shist" data-skip1="1"></div>${s.text&&(s.text.length||!TEXTS)?`<details class="bib" id="sstudyd" style="margin-top:12px"><summary>Análise do local no estudo (tese)</summary><div id="sstudy"></div></details>`:""}`,"ficha-historia");
-  const medH=med.length?H("med","Medidas",`<dl class="meds">${med.map(r=>`<div><dt>${esc(r[0])}</dt><dd>${esc(r[1])}${refSup(F,r[2])}</dd></div>`).join("")}</dl>${F&&F.med?"":`<p class="note">Valores citados no texto histórico deste sítio.</p>`}`):"";
-  const sabH=sab.length?H("sab","Sabias que…",`<ul class="sabs">${sab.map(r=>`<li>${esc(r[0])}${refSup(F,r[1])}</li>`).join("")}</ul>`):"";
-  const imgH=gal||extH?H("img","Imagens",(gal?`${gal}<p class="note" style="margin-top:-8px">Fotografias de Tiago Pinto (visita de campo).</p>`:"")+extH):"";
-  const croH=cro.length?H("cro","Cronologia",`<ol class="cronologia">${cro.map(r=>`<li><b>${esc(r[0])}</b><span>${esc(r[1])}${refSup(F,r[2])}</span></li>`).join("")}</ol>${F&&F.cro?"":`<p class="note">Datas retiradas do texto histórico e da classificação legal.</p>`}`,"partible"):"";
+  const NONE=t=>`<p class="note sem-dados">${t}</p>`;
+  const medH=med.length?H("med","Medidas",`<dl class="meds">${med.map(r=>`<div><dt>${esc(r[0])}</dt><dd>${esc(r[1])}${refSup(F,r[2])}</dd></div>`).join("")}</dl>${F&&F.med?"":`<p class="note">Valores citados no texto histórico deste sítio.</p>`}`):H("med","Medidas",NONE("Sem medidas publicadas reunidas para este sítio."));
+  const sabH=sab.length?H("sab","Sabias que…",`<ul class="sabs">${sab.map(r=>`<li>${esc(r[0])}${refSup(F,r[1])}</li>`).join("")}</ul>`):"";   // curiosities: only shown when sourced
+  const imgH=gal||extH?H("img","Imagens",(gal?`${gal}<p class="note" style="margin-top:-8px">Fotografias de Tiago Pinto (visita de campo).</p>`:"")+extH):H("img","Imagens",NONE("Sem imagens deste sítio."));
+  const croH=cro.length?H("cro","Cronologia",`<ol class="cronologia">${cro.map(r=>`<li><b>${esc(r[0])}</b><span>${esc(r[1])}${refSup(F,r[2])}</span></li>`).join("")}</ol>${F&&F.cro?"":`<p class="note">Datas retiradas do texto histórico e da classificação legal.</p>`}`,"partible"):H("cro","Cronologia",NONE("Sem datas documentadas para este sítio."),"partible");
   const verItems=ver.map(r=>`<li>${esc(r[0])}${refSup(F,r[1])}</li>`).join("")+(s.hrs?`<li>Horário: ${esc(s.hrs.h)}${s.hrs.p?` · ${esc(s.hrs.p)}`:""}</li>`:"")+(s.t3?`<li>Relevo do local em 3D (botão «Relevo em 3D», no fim da ficha).</li>`:"");
   const verH=H("ver","O que ver",`${verItems?`<ul class="sabs">${verItems}</ul>`:""}<h4 class="sub4">Perto daqui</h4><ul class="near">${nearSites.map(o=>nearLi(o)).join("")}</ul>${nearMus.length?`<h4 class="sub4">Museus mais próximos</h4><ul class="near">${nearMus.map(o=>nearLi(o)).join("")}</ul>`:""}`);
   const src=s.hist?s.hist.src:[],li=x=>`<li>${x.u?`<a href="${esc(x.u)}" target="_blank" rel="noopener">${esc(x.t)}</a>`:esc(x.t)}</li>`,g=k=>src.filter(x=>x.k===k);
