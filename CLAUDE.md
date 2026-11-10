@@ -9,7 +9,7 @@ Escreve em português (muitas vezes no telemóvel); responder sempre em portugu�
   (`{"caminho/publicado": {"from": "app/..."}}`). Ler o artifact primeiro (`action: read`) numa conversa nova.
   As `capabilities` (user, db com coleções comments/history/extra, assets) passam de versão para versão: omitir o campo.
 - **Site público (GitHub Pages):** https://tiagojmgfpinto-rgb.github.io/castros/ — o workflow `.github/workflows/publicar.yml`
-  corre `python3 build.py` e `python3 tools/site.py` (→ `_site/`, com esqueleto HTML e metas) a cada push no `main`, como no castelos-site.
+  corre `python3 build.py` e `python3 tools/site.py` (→ `_site/`, com esqueleto HTML e metas; `tools/pages.py` gera `/castros/`, `/castro/<id>/` com canónico, Open Graph e schema.org, `/creditos/`, `sitemap.xml` e `robots.txt`, tudo a partir dos dados) a cada push no `main`, como no castelos-site.
   Sem `window.claude` a app corre só em leitura (sem comentários, histórico editado nem castros acrescentados pela base de dados do artifact).
 - Estilo visual pedido: como **castillos.site** (maqueta 3D inclinada do noroeste, miniaturas brancas, título Cinzel com escudo).
 
@@ -19,7 +19,7 @@ Escreve em português (muitas vezes no telemóvel); responder sempre em portugu�
 |---|---|
 | `app/src.html` | código-fonte da app (HTML+CSS+JS num ficheiro; Leaflet 1.9.4; three.js 0.170 ESM no visor das maquetas e 0.160 UMD na maqueta do noroeste, via CDN) |
 | `app/index.html` | build publicado (gerado por `python3 build.py`) |
-| `data.json` | dados completos dos sítios (fonte). **Depois de editar, correr `python3 tools/split.py`** → `app/data.json` + `app/texts.json` |
+| `data.json` | dados completos dos sítios (fonte). **Depois de editar, correr `python3 tools/split.py`** → `app/data.json` (índice, 91 KB), `app/fichas.json` (`hist`, `sa`, `fic`, carregado logo a seguir; um link `#<id>` espera por ele) + `app/texts.json` (textos da tese, em segundo plano) |
 | `app/dio/<id>.glb.png`, `<id>.json` | maquetas 3D por sítio (GLB dentro de PNG) + catálogo de estruturas/fontes/árvores |
 | `maquetas/<id>.json`, `maquetas/luz.json` | dados do visualizador de cada maqueta (`order`, `cap`, `gaps`, `layers`, `noB`, `cam`, `tour` [{sid,title,text}], `luz` opcional) e luz comum; o `build.py` escreve-os em `DIOS`/`LUZ`. Uma maqueta nova = GLB + `app/dio/<id>.json` do Blender + este ficheiro, sem mexer no código |
 | `app/maq-*.jpg`, `app/maq-h.png` | textura e alturas da maqueta do noroeste (gerados por `tools/maquette.py`) |

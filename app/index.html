@@ -1880,6 +1880,10 @@ function nearMeHtml(){if(!ME.ll)return"";const l=D.sites.filter(s=>s.coords&&s.k
 let TEXTS=false;
 function loadTexts(){fetch("texts.json").then(r=>r.json()).then(T=>{D.sites.forEach(s=>{s.text=T.t[s.id]||[];s.full=norm(s.text.join(" "))});D.municipios.forEach(m=>m.bib=T.b[m.slug]||[]);TEXTS=true;
   if(S.sel&&$("#sec-hist"))renderStab(BY[S.sel]);else if(!S.sel&&S.tab==="explore"&&S.q)renderList()}).catch(()=>{setTimeout(loadTexts,4000)})}
+/* the site records (history texts, sources, measurements, stamp art) come in fichas.json, fetched together with the index: the map and
+   the list draw from data.json at once, a record opened from a link waits for its texts, and an open record is redrawn when they arrive */
+let FICHAS=false;const FP=fetch("fichas.json").then(r=>r.json()).catch(()=>null);
+function mergeFichas(F){if(!F)return;for(const k of ["hist","sa","fic"])for(const id in F[k]||{})if(BY[id])BY[id][k]=F[k][id];FICHAS=true}
 Promise.all([fetch("data.json").then(r=>r.json()),fetch("base.topojson").then(r=>r.json())]).then(([data,topo])=>{
   D=data;
   D.sites.forEach((s,i)=>{s.i=i;BY[s.id]=s;s.n=norm(s.name+" "+s.municipio);s.text=s.text||[];s.full=""});
@@ -1887,7 +1891,8 @@ Promise.all([fetch("data.json").then(r=>r.json()),fetch("base.topojson").then(r=
   S.route=S.route.filter(id=>BY[id]);
   initMap(topo);buildLegend();updateBadges();initChrome();
   const h=location.hash.slice(1);
-  if(h&&BY[h])openSite(h,{fly:true});else if(h&&["route","passport","comments","culture","synth","about"].includes(h))setTab(h);else render();
+  const fp=FP.then(mergeFichas);
+  if(h&&BY[h])fp.then(()=>openSite(h,{fly:true}));else if(h&&["route","passport","comments","culture","synth","about"].includes(h))fp.then(()=>setTab(h));else{render();fp.then(()=>{if(S.sel)renderSite();else if(S.tab==="passport"||S.tab==="synth")render()})}
   checkOwner(h);initShared();loadTexts();
 }).catch(err=>{$("#pbody").innerHTML=`<div class="view"><p>Não foi possível carregar os dados do atlas (${esc(err.message)}). Recarregue a página.</p></div>`});
 
