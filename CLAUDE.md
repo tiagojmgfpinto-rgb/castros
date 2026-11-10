@@ -17,7 +17,7 @@ Escreve em português (muitas vezes no telemóvel); responder sempre em portugu�
 
 | Caminho | O quê |
 |---|---|
-| `app/src.html` | código-fonte da app (HTML+CSS+JS num ficheiro; Leaflet 1.9.4, three.js 0.160 via CDN) |
+| `app/src.html` | código-fonte da app (HTML+CSS+JS num ficheiro; Leaflet 1.9.4; three.js 0.170 ESM no visor das maquetas e 0.160 UMD na maqueta do noroeste, via CDN) |
 | `app/index.html` | build publicado (gerado por `python3 build.py`) |
 | `data.json` | dados completos dos sítios (fonte). **Depois de editar, correr `python3 tools/split.py`** → `app/data.json` + `app/texts.json` |
 | `app/dio/<id>.glb.png`, `<id>.json` | maquetas 3D por sítio (GLB dentro de PNG) + catálogo de estruturas/fontes/árvores |
@@ -41,6 +41,7 @@ sh tools/fetch_dem.sh            # só para refazer a maqueta do noroeste
 - bpy 5.1 exige Python 3.13. gltf-transform: `npx -y @gltf-transform/cli@4.1.1` (ou definir `GLTF_TRANSFORM`).
 - Teste local: `cd app && python3 -m http.server 8765 &`, depois `python3 build.py` e `node tests/<script>.mjs`
   (Playwright em `/opt/node22/lib/node_modules/playwright/index.mjs`, Chromium com `--use-angle=swiftshader --enable-unsafe-swiftshader`).
+  Com as CDN bloqueadas, `CDN=<pasta>` com `node_modules/three` (0.170), `three160` (alias `npm i three160@npm:three@0.160.0`), `leaflet`, `topojson`.
   As páginas de teste são `app/test.html` (com mock) e `app/test2.html`.
 
 ## Pipeline de uma maqueta de sítio (modelo: Citânia de Briteiros)
@@ -61,7 +62,7 @@ sh tools/fetch_dem.sh            # só para refazer a maqueta do noroeste
    weld + quantize (14/8/12), **sem Draco** (o descodificador não corre no artifact) e sem apagar os nós vazios `LBL-*` (rótulos).
    No visor as estruturas são desenhadas juntas por material (Briteiros 906 → 58 chamadas de desenho); as peças originais ficam na camada 1 para a lógica e a seleção.
    O artifact não serve `.glb`; o PNG reduz ~3× e o visualizador extrai os bytes. Limite de 16 MB por ficheiro publicado.
-6. **Visualizador** (em `app/src.html`: `dioMount`; dados em `maquetas/<id>.json` e luz em `maquetas/luz.json`; computador = sombra 4096 ajustada à maqueta + RoomEnvironment + GTAO, telemóvel/tátil = sombra 1024 sem pós-processamento; enquadramento automático pela silhueta, `"cam":{az,el}` opcional no ficheiro da maqueta; `?v=` dos ficheiros escrito pelo `build.py`; capturas antes/depois de todas as maquetas: `CDN=<pasta npm> node tests/dio_all.mjs <saída> desk|phone`, `BASE=` para outro servidor): estado atual/reconstituição, evidência (confirmado / documentado /
+6. **Visualizador** (em `app/src.html`: `dioMount`; dados em `maquetas/<id>.json` e luz em `maquetas/luz.json`; tone mapping `tone` aces/neutral em `luz.json` (comparados em nov. 2026, fica aces); a mesma luz no Blender com `blend/luz.py` e render de controlo `blend/luz_render.py <glb> <png> <id>` (Cycles CPU); computador = sombra 4096 ajustada à maqueta + RoomEnvironment + GTAO, telemóvel/tátil = sombra 1024 sem pós-processamento; enquadramento automático pela silhueta, `"cam":{az,el}` opcional no ficheiro da maqueta; `?v=` dos ficheiros escrito pelo `build.py`; capturas antes/depois de todas as maquetas: `CDN=<pasta npm> node tests/dio_all.mjs <saída> desk|phone`, `BASE=` para outro servidor): estado atual/reconstituição, evidência (confirmado / documentado /
    hipotético), camadas, ficha por estrutura, visita guiada, fontes e lacunas.
 
 ## Regras do Tiago

@@ -11,7 +11,7 @@ const times={};
 for(const id of IDS){
   const p=await ctx.newPage();p.setDefaultTimeout(180000);
   if(process.env.CDN){const M=process.env.CDN+'/node_modules/';
-    const map=u=>u.includes('leaflet/1.9.4/')?M+'leaflet/dist/leaflet.js':u.includes('three.js/0.160.0/')?M+'three/build/three.min.js':u.includes('topojson/3.0.2/')?M+'topojson/dist/topojson.min.js':u.includes('three@0.160.0/')?M+'three/'+u.split('three@0.160.0/')[1].split('?')[0]:null;
+    const map=u=>u.includes('leaflet/1.9.4/')?M+'leaflet/dist/leaflet.js':u.includes('three.js/0.160.0/')?(fs.existsSync(M+'three160')?M+'three160':M+'three')+'/build/three.min.js':u.includes('topojson/3.0.2/')?M+'topojson/dist/topojson.min.js':/three@0\.1\d\d\.\d\//.test(u)?M+'three/'+u.split(/three@0\.1\d\d\.\d\//)[1].split('?')[0]:null;
     await p.route(/cdnjs|jsdelivr|unpkg/,r=>{const f=map(r.request().url());return f&&fs.existsSync(f)?r.fulfill({path:f,contentType:'application/javascript',headers:{'access-control-allow-origin':'*'}}):r.abort()})}
   p.on('pageerror',e=>console.log(id,'ERR',e.message));
   p.on('console',m=>{if(m.type()==='error')console.log(id,'console',m.text().slice(0,200))});

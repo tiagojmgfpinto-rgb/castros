@@ -1122,7 +1122,7 @@ body.con-ficha .ficha-asa{display:block}
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/topojson/3.0.2/topojson.min.js"></script>
-<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js"}}</script>
+<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js"}}</script>
 <script>
 (function(){
 "use strict";
@@ -2827,7 +2827,7 @@ const EVL={conf:"Confirmado",doc:"Reconstituído com fundamento documental",hip:
 const DIO={mods:null,cur:null};window.__dio=DIO;   // read by the capture tests (draw calls, frame time)
 const DIOV=/*DIOV*/{};   // short content hash of each file in dio/ (written by build.py), so a new model is never hidden by the browser cache
 const dioV=f=>DIOV[f]?`?v=${DIOV[f]}`:"";
-const TJ="https://cdn.jsdelivr.net/npm/three@0.160.0/";
+const TJ="https://cdn.jsdelivr.net/npm/three@0.170.0/";
 function dioMods(){if(!DIO.mods)DIO.mods=Promise.all([import(TJ+"build/three.module.js"),import(TJ+"examples/jsm/loaders/GLTFLoader.js"),import(TJ+"examples/jsm/controls/OrbitControls.js"),import(TJ+"examples/jsm/environments/RoomEnvironment.js"),
   import(TJ+"examples/jsm/postprocessing/EffectComposer.js"),import(TJ+"examples/jsm/postprocessing/RenderPass.js"),import(TJ+"examples/jsm/postprocessing/GTAOPass.js"),import(TJ+"examples/jsm/postprocessing/OutputPass.js")]).catch(e=>{DIO.mods=null;throw e});return DIO.mods}
 function dioHtml(s){const d=DIOS[s.id];if(!d)return"";return `<figure class="dio" id="dio">
@@ -2863,7 +2863,7 @@ async function dioBuild(s){
   const CAT={};(meta&&meta.cat||[]).forEach(c=>CAT[c.id]=c);const SRC=meta&&meta.sources||{};
   const LZ=dioLuz(s.id);
   const wrap=document.createElement("div");wrap.className="dio-wrap";
-  const r=new T.WebGLRenderer({antialias:true,alpha:true});r.setPixelRatio(Math.min(devicePixelRatio,2));r.outputColorSpace=T.SRGBColorSpace;r.toneMapping=T.ACESFilmicToneMapping;r.toneMappingExposure=LZ.exposure;
+  const r=new T.WebGLRenderer({antialias:true,alpha:true});r.setPixelRatio(Math.min(devicePixelRatio,2));r.outputColorSpace=T.SRGBColorSpace;r.toneMapping=LZ.tone==="aces"?T.ACESFilmicToneMapping:T.NeutralToneMapping;r.toneMappingExposure=LZ.exposure;
   r.shadowMap.enabled=true;r.shadowMap.type=T.PCFSoftShadowMap;wrap.appendChild(r.domElement);
   r.domElement.style.opacity=0;if(!RM)r.domElement.style.transition="opacity .8s ease";
   const lw=document.createElement("div");lw.className="dio-lbls";wrap.appendChild(lw);
@@ -2918,7 +2918,7 @@ async function dioBuild(s){
      x0=Math.min(x0,q.x);x1=Math.max(x1,q.x);y0=Math.min(y0,q.y);y1=Math.max(y1,q.y);z0=Math.min(z0,-q.z);z1=Math.max(z1,-q.z)}
    const px=(x1-x0)*.02,py=(y1-y0)*.02;Object.assign(sun.shadow.camera,{left:x0-px,right:x1+px,bottom:y0-py,top:y1+py,near:Math.max(.5,z0-R*.2),far:z1+R*.2});sun.shadow.camera.updateProjectionMatrix()}
   // soft image-based fill (neutral room), as on castillos.site; kept weak so the sun still models the relief
-  const ENVI=LZ.env,pm=new T.PMREMGenerator(r),envT=pm.fromScene(new RoomEnvironment(r),.04).texture;pm.dispose();scene.environment=envT;
+  const ENVI=LZ.env,pm=new T.PMREMGenerator(r),envT=pm.fromScene(new RoomEnvironment(r),.04).texture;pm.dispose();scene.environment=envT;scene.environmentIntensity=ENVI;   // three r163+: the scene environment ignores material.envMapIntensity
   scene.traverse(o=>{const ms=o.material?[].concat(o.material):[];ms.forEach(m=>{if("envMapIntensity" in m)m.envMapIntensity=ENVI})});
 
   // ambient occlusion in screen space (GTAO), computer only; the ground keeps its AO baked in Blender
