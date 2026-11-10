@@ -55,7 +55,11 @@ sh tools/fetch_dem.sh            # só para refazer a maqueta do noroeste
 4. **Blender** (`blend/dio_brit.py <id>` como modelo; Sabroso: `blend/dio_sab.py`): disco com saia estratificada, terreno + plataformas das casas, muralhas, casas,
    muros, ruas, edifícios modernos (só no estado atual), estrada com textura pintada, árvores instanciadas (carvalho, sobreiro, pinheiro),
    AO cozido no solo. Cada estrutura é um objeto `A-<sid>` / `B-<sid>` / `AB-<sid>` com `extras` (sid, mode, ev) e entrada no catálogo.
-5. **Exportar**: `bash mkparts.sh <id>` (weld + quantize, **sem Draco**: o descodificador não corre no artifact) → `app/dio/<id>.glb.png`.
+5. **Exportar**: `bash mkparts.sh <id>` → `app/dio/<id>.glb.png`. Corre `tools/gltf/lighten.mjs` (instalar uma vez: `npm ci --prefix tools/gltf`):
+   terreno simplificado com meshoptimizer para ~60 mil triângulos (borda fixa; erro vertical medido em cada vértice original e escrito
+   em `tools/gltf/reports/<id>.json`; nov. 2026: p95 5–13 cm, máximo 0,3–1,4 m só em faces verticais de pedreiras), texturas ≤ 2048 px,
+   weld + quantize (14/8/12), **sem Draco** (o descodificador não corre no artifact) e sem apagar os nós vazios `LBL-*` (rótulos).
+   No visor as estruturas são desenhadas juntas por material (Briteiros 906 → 58 chamadas de desenho); as peças originais ficam na camada 1 para a lógica e a seleção.
    O artifact não serve `.glb`; o PNG reduz ~3× e o visualizador extrai os bytes. Limite de 16 MB por ficheiro publicado.
 6. **Visualizador** (em `app/src.html`: `dioMount`; dados em `maquetas/<id>.json` e luz em `maquetas/luz.json`; computador = sombra 4096 ajustada à maqueta + RoomEnvironment + GTAO, telemóvel/tátil = sombra 1024 sem pós-processamento; enquadramento automático pela silhueta, `"cam":{az,el}` opcional no ficheiro da maqueta; `?v=` dos ficheiros escrito pelo `build.py`; capturas antes/depois de todas as maquetas: `CDN=<pasta npm> node tests/dio_all.mjs <saída> desk|phone`, `BASE=` para outro servidor): estado atual/reconstituição, evidência (confirmado / documentado /
    hipotético), camadas, ficha por estrutura, visita guiada, fontes e lacunas.

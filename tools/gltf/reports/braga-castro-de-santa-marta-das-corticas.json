@@ -1,0 +1,26 @@
+{
+ "input": "app/dio/braga-castro-de-santa-marta-das-corticas.glb (Blender export)",
+ "terrain": {
+  "before": 415200,
+  "after": 60000,
+  "checked": 208001,
+  "of": 208001,
+  "err_cm": {
+   "median": 2.2,
+   "p95": 9.9,
+   "p99": 15.4,
+   "max": 94.5
+  }
+ },
+ "textures": [
+  {
+   "name": "ground",
+   "from": "3072x3072",
+   "to": 2048,
+   "kb": [
+    1715,
+    547
+   ]
+  }
+ ]
+}

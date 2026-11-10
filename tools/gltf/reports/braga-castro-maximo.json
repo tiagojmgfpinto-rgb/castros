@@ -1,0 +1,26 @@
+{
+ "input": "app/dio/braga-castro-maximo.glb (Blender export)",
+ "terrain": {
+  "before": 415200,
+  "after": 60000,
+  "checked": 208001,
+  "of": 208001,
+  "err_cm": {
+   "median": 2.2,
+   "p95": 12.3,
+   "p99": 21,
+   "max": 135
+  }
+ },
+ "textures": [
+  {
+   "name": "ground",
+   "from": "4096x4096",
+   "to": 2048,
+   "kb": [
+    3288,
+    676
+   ]
+  }
+ ]
+}

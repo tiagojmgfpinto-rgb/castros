@@ -1,0 +1,26 @@
+{
+ "input": "app/dio/guimaraes-castro-de-sao-miguel-o-anjo.glb (Blender export)",
+ "terrain": {
+  "before": 415200,
+  "after": 59998,
+  "checked": 208001,
+  "of": 208001,
+  "err_cm": {
+   "median": 1.4,
+   "p95": 5.4,
+   "p99": 7.8,
+   "max": 28.1
+  }
+ },
+ "textures": [
+  {
+   "name": "ground",
+   "from": "3072x3072",
+   "to": 2048,
+   "kb": [
+    1695,
+    522
+   ]
+  }
+ ]
+}

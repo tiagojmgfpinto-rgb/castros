@@ -1,0 +1,13 @@
+{
+  "name": "castros-gltf-tools",
+  "private": true,
+  "type": "module",
+  "description": "Post-processing of the site models (tools/gltf/lighten.mjs). Install with: npm ci --prefix tools/gltf",
+  "dependencies": {
+    "@gltf-transform/core": "4.1.1",
+    "@gltf-transform/extensions": "4.1.1",
+    "@gltf-transform/functions": "4.1.1",
+    "meshoptimizer": "0.22.0",
+    "sharp": "0.33.5"
+  }
+}
