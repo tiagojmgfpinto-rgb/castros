@@ -1753,6 +1753,35 @@ const DISTRICTS=["Viana do Castelo","Braga","Vila Real","Porto","Aveiro","Lisboa
 const MONTHS=["janeiro","fevereiro","março","abril","maio","junho","julho","agosto","setembro","outubro","novembro","dezembro"];
 const $=s=>document.querySelector(s);
 const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+
+/* ---------- sanitização: tudo o que vem da base de dados partilhada é tratado como não fiável ----------
+   As regras do servidor (capabilities db.rules) já limitam quem escreve: comments/<id> só o próprio, history e extra só o dono.
+   Mesmo assim, um contribuidor pode escrever no seu documento de comentários qualquer forma de dados fora da interface,
+   por isso cada campo é validado (tipo, tamanho, formato) antes de chegar ao ecrã. */
+const SAN={
+  str(v,max){return typeof v==="string"?v.replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F\u202A-\u202E\u2066-\u2069]/g,"").trim().slice(0,max):""},
+  num(v,lo,hi){return typeof v==="number"&&isFinite(v)&&v>=lo&&v<=hi?v:null},
+  url(v){if(typeof v!=="string"||v.length>2000)return "";try{const u=new URL(v.trim());return u.protocol==="https:"||u.protocol==="http:"?u.href:""}catch(_){return ""}},
+  uid(v){return typeof v==="string"&&/^[A-Za-z0-9_-]{1,128}$/.test(v)?v:null},
+  cid(v){return typeof v==="string"&&/^[a-z0-9]{1,24}$/.test(v)?v:null},
+  xid(v){return typeof v==="string"&&/^x-[a-z0-9-]{1,90}$/.test(v)?v:null},
+  asset(v){return typeof v==="string"&&/^[0-9a-f]{32}$/.test(v)?v:null},
+  date(v){return typeof v==="string"&&/^\d{4}-\d{2}-\d{2}$/.test(v)?v:""},
+  comment(c){if(!c||typeof c!=="object")return null;const id=SAN.cid(c.id),text=SAN.str(c.text,800),ts=SAN.num(c.ts,1.6e12,Date.now()+864e5);
+    if(!id||!text||!ts||typeof c.site!=="string"||!BY[c.site])return null;return {id,site:c.site,text,ts,hid:c.hid===true}},
+  comments(d){const it=d&&Array.isArray(d.items)?d.items.slice(-300):[];return {items:it.map(SAN.comment).filter(Boolean)}},
+  hist(d){const text=SAN.str(d&&d.text,30000);return text?{text,ts:SAN.num(d.ts,0,Date.now()+864e5)||0}:null},
+  extra(d){if(!d||typeof d!=="object"||!Array.isArray(d.coords)||d.coords.length!==2)return null;
+    const la=SAN.num(d.coords[0],36,44.5),lo=SAN.num(d.coords[1],-10.5,-5),name=SAN.str(d.name,200);if(la===null||lo===null||!name)return null;
+    return {name,kind:typeof d.kind==="string"&&TYPES[d.kind]?d.kind:"castro",cls:typeof d.cls==="string"&&CLS[d.cls]?d.cls:null,
+      distrito:SAN.str(d.distrito,60),municipio:SAN.str(d.municipio,80),coords:[la,lo],date:SAN.date(d.date),
+      text:SAN.str(d.text,20000),hist:SAN.str(d.hist,12000),
+      src:(Array.isArray(d.src)?d.src.slice(0,30):[]).map(x=>x&&typeof x==="object"?{t:SAN.str(x.t,300),u:SAN.url(x.u),k:["sci","sipa","muni","wiki","tese"].includes(x.k)?x.k:"sci"}:null).filter(x=>x&&x.t),
+      photos:(Array.isArray(d.photos)?d.photos.slice(0,40):[]).map(SAN.asset).filter(Boolean),ts:SAN.num(d.ts,0,Date.now()+864e5)||0}}
+};
+/* limite de escritas no navegador: rajadas de cliques ou scripts não martelam a base de dados (o servidor aplica as suas próprias quotas) */
+const RL={t:{},ok(k,n,ms){const now=Date.now(),a=(RL.t[k]||[]).filter(x=>now-x<ms);if(a.length>=n){RL.t[k]=a;return false}a.push(now);RL.t[k]=a;return true}};
+function rlOk(k,n,ms){if(RL.ok(k,n,ms))return true;toast("Demasiadas alterações seguidas. Aguarde um momento.");return false}
 const norm=s=>String(s||"").normalize("NFD").replace(/[̀-ͯ]/g,"").toLowerCase();
 const tc=k=>`var(--t-${k})`;
 function km(a,b){const R=6371,r=Math.PI/180,dl=(b[0]-a[0])*r,dn=(b[1]-a[1])*r;const h=Math.sin(dl/2)**2+Math.cos(a[0]*r)*Math.cos(b[0]*r)*Math.sin(dn/2)**2;return 2*R*Math.asin(Math.sqrt(h))}
@@ -2262,7 +2291,7 @@ function renderHistory(s,el,editing){
       <textarea id="htext" style="margin-top:6px">${esc(paras.join("\n\n"))}</textarea>
       <div class="row-btns"><button class="btn primary" id="hsave">Guardar</button><button class="btn" id="hcancel">Cancelar</button>${o?`<button class="btn" id="hreset">Repor texto original</button>`:""}</div></div>`;
     $("#hcancel").onclick=()=>renderHistory(s,el);
-    $("#hsave").onclick=async e=>{e.target.disabled=true;try{await SH.db.collection("history").doc(s.id).set({text:$("#htext").value.trim(),ts:Date.now()});toast("Texto guardado");renderHistory(s,el)}catch(err){e.target.disabled=false;toast("Não foi possível guardar. Tente de novo.")}};
+    $("#hsave").onclick=async e=>{if(!rlOk("hist",5,6e4))return;const text=SAN.str($("#htext").value,30000);if(!text){toast("O texto está vazio.");return}e.target.disabled=true;try{await SH.db.collection("history").doc(s.id).set({text,ts:Date.now()});toast("Texto guardado");renderHistory(s,el)}catch(err){e.target.disabled=false;toast("Não foi possível guardar. Tente de novo.")}};
     if($("#hreset"))$("#hreset").onclick=async()=>{try{await SH.db.collection("history").doc(s.id).delete();toast("Texto original reposto")}catch(err){toast("Não foi possível repor.")}renderHistory(s,el)};
     return;
   }
@@ -2618,7 +2647,7 @@ function xToSite(id,d){
   const m=Object.values(MUN).find(m=>m.name===d.municipio);
   return {id,x:1,name:d.name,kind:TYPES[d.kind]?d.kind:"castro",municipio:d.municipio||"",slug:m?m.slug:"x-"+xSlug(d.municipio||""),distrito:d.distrito||"",coords:d.coords,date:d.date||"",
     cls:d.cls&&CLS[d.cls]?{c:d.cls,l:CLS[d.cls].l}:undefined,text:(d.text||"").split(/\n\s*\n/).map(x=>x.trim()).filter(Boolean),
-    hist:{p:(d.hist||"").split(/\n\s*\n/).map(x=>x.trim()).filter(Boolean),src:(d.src||[]).map(x=>({t:x.t,u:x.u,k:x.k||"sci"}))},
+    hist:{p:(d.hist||"").split(/\n\s*\n/).map(x=>x.trim()).filter(Boolean),src:(d.src||[]).map(x=>({t:x.t,u:SAN.url(x.u),k:x.k||"sci"}))},
     xph:(d.photos||[]).filter(x=>/^[0-9a-f]{32}$/.test(x)),visit:!!d.date}}
 function applyExtras(){
   // remove previous extras, then add the current ones
@@ -2686,10 +2715,12 @@ function renderAdd(){
   f.onsubmit=async ev=>{ev.preventDefault();if(!SH.db){toast("Sem ligação à base de dados.");return}
     const la=parseFloat(String(f.lat.value).replace(",",".")),lo=parseFloat(String(f.lon.value).replace(",","."));
     if(!(la>36&&la<44.5&&lo>-10.5&&lo<-5)){toast("Coordenadas fora do noroeste peninsular.");return}
-    const src=f.src.value.split("\n").map(l=>l.trim()).filter(Boolean).map(l=>{const[t,u]=l.split("|").map(x=>x.trim());return{t:t.slice(0,300),u:/^https?:\/\//.test(u||"")?u:"",k:"sci"}}).slice(0,30);
-    const doc={name:f.name.value.trim(),kind:f.kind.value,cls:f.cls.value||null,distrito:f.distrito.value,municipio:f.municipio.value.trim(),coords:[+la.toFixed(6),+lo.toFixed(6)],date:f.date.value||"",
-      text:f.text.value.trim().slice(0,20000),hist:f.hist.value.trim().slice(0,12000),src,photos:XD.photos.slice(0,40),ts:Date.now()};
-    const id=XD.edit||("x-"+xSlug(doc.name+"-"+doc.municipio)).slice(0,90);
+    if(!rlOk("extra",5,6e4))return;
+    const src=f.src.value.split("\n").map(l=>l.trim()).filter(Boolean).map(l=>{const[t,u]=l.split("|").map(x=>x.trim());return{t:SAN.str(t,300),u:SAN.url(u),k:"sci"}}).filter(x=>x.t).slice(0,30);
+    const raw={name:f.name.value,kind:f.kind.value,cls:f.cls.value||null,distrito:f.distrito.value,municipio:f.municipio.value.trim(),coords:[+la.toFixed(6),+lo.toFixed(6)],date:f.date.value||"",
+      text:f.text.value,hist:f.hist.value,src,photos:XD.photos.slice(0,40),ts:Date.now()};
+    const doc=SAN.extra(raw);if(!doc){toast("Preencha o nome e as coordenadas.");return}
+    const id=SAN.xid(XD.edit||("x-"+xSlug(doc.name+"-"+doc.municipio)).slice(0,92));if(!id){toast("Nome inválido.");return}
     if(!XD.edit&&(BY[id]||XD.docs[id])){toast("Já existe um castro com este nome neste concelho.");return}
     $("#xsave").disabled=true;
     try{await SH.db.collection("extra").doc(id).set(doc);toast(XD.edit?"Castro atualizado":"Castro acrescentado ao atlas");XD.edit=null;xClearPick();XD.docs[id]=doc;applyExtras();openSite(id,{fly:true})}
@@ -2709,7 +2740,7 @@ function xMarker(){const f=$("#xform");if(!f||!map)return;const la=parseFloat(f.
 function xClearPick(){XD.pick=false;if(map)map.getContainer().style.cursor="";if(XD.pickMk){XD.pickMk.remove();XD.pickMk=null}}
 function initExtras(){
   if(!SH.db)return;
-  SH.db.collection("extra").onSnapshot(snap=>{const n={};snap.docs.forEach(d=>{if(d.exists)n[d.id]=d.data()});XD.docs=n;applyExtras();if(S.tab==="add"&&!S.sel&&!XD.edit&&document.activeElement&&!document.activeElement.closest("#xform"))renderAdd()},()=>{});
+  SH.db.collection("extra").onSnapshot(snap=>{const n={};snap.docs.forEach(d=>{const id=SAN.xid(d.id),x=d.exists&&id?SAN.extra(d.data()):null;if(x)n[id]=x});XD.docs=n;applyExtras();if(S.tab==="add"&&!S.sel&&!XD.edit&&document.activeElement&&!document.activeElement.closest("#xform"))renderAdd()},()=>{});
   if(OWNER&&window.claude)window.claude.use("assets").then(a=>{XD.assets=a;if(S.tab==="add"&&!S.sel)renderAdd()}).catch(()=>{});
 }
 /* ---------- comments: each person writes only their own document comments/<id> ---------- */
@@ -2721,9 +2752,9 @@ async function initShared(){
     SH.db=db;SH.user=user;
     if(user){SH.uid=await user.id();const c=await user.can("data.write");SH.canWrite=OWNER?true:c}
     if(!db){SH.ready=true;refreshComments();return}
-    db.collection("comments").onSnapshot(snap=>{SH.docs={};snap.docs.forEach(d=>{if(d.exists)SH.docs[d.id]=d.data()});SH.ready=true;refreshComments()},()=>{SH.ready=true;refreshComments()});
+    db.collection("comments").onSnapshot(snap=>{SH.docs={};snap.docs.forEach(d=>{const id=SAN.uid(d.id);if(d.exists&&id)SH.docs[id]=SAN.comments(d.data())});SH.ready=true;refreshComments()},()=>{SH.ready=true;refreshComments()});
     initExtras();
-    db.collection("history").onSnapshot(snap=>{SH.hist={};snap.docs.forEach(d=>{if(d.exists)SH.hist[d.id]=d.data()});if(S.sel&&!document.querySelector("#htext")){const el=$("#shist");if(el)renderHistory(BY[S.sel],el)}},()=>{});
+    db.collection("history").onSnapshot(snap=>{SH.hist={};snap.docs.forEach(d=>{const h=d.exists&&typeof d.id==="string"&&BY[d.id]?SAN.hist(d.data()):null;if(h)SH.hist[d.id]=h});if(S.sel&&!document.querySelector("#htext")){const el=$("#shist");if(el)renderHistory(BY[S.sel],el)}},()=>{});
   }catch(e){SH.ready=true;refreshComments()}
 }
 function allComments(){const out=[];for(const uid in SH.docs){const it=SH.docs[uid].items;if(Array.isArray(it))it.forEach(c=>{if(c&&c.text&&BY[c.site]&&(!c.hid||OWNER||uid===SH.uid))out.push({...c,uid})})}return out.sort((a,b)=>b.ts-a.ts)}
@@ -2746,13 +2777,15 @@ function formHtml(s){
 function bindForm(s){
   const f=$("#cform");if(!f)return;const t=$("#ctext");
   t.oninput=()=>{$("#ccount").textContent=t.value.length+"/800"};
-  f.onsubmit=async e=>{e.preventDefault();const text=t.value.trim();const site=s?s.id:$("#csite").value;
+  f.onsubmit=async e=>{e.preventDefault();const text=SAN.str(t.value,800);const site=s?s.id:$("#csite").value;
     if(!site){toast("Escolha o local do comentário");return}if(!text){toast("Escreva o comentário primeiro");return}
     const mine=(SH.docs[SH.uid]&&SH.docs[SH.uid].items)||[];
     if(!OWNER&&mine.filter(x=>Date.now()-x.ts<6e5).length>=5){toast("Muitos comentários seguidos. Tente daqui a alguns minutos.");return}
-    if(!OWNER&&mine.some(x=>x.text===text.slice(0,800)&&x.site===site)){toast("Esse comentário já foi publicado.");return}
+    if(!BY[site]){toast("Local desconhecido");return}
+    if(!rlOk("com",3,6e4))return;
+    if(!OWNER&&mine.some(x=>x.text===text&&x.site===site)){toast("Esse comentário já foi publicado.");return}
     const btn=$("#csend");btn.disabled=true;
-    const items=[...mine,{id:Date.now().toString(36)+Math.random().toString(36).slice(2,6),site,text:text.slice(0,800),ts:Date.now()}].slice(-300);
+    const items=[...mine,{id:Date.now().toString(36)+Math.random().toString(36).slice(2,6),site,text,ts:Date.now()}].slice(-300);
     try{await SH.db.collection("comments").doc(SH.uid).set({items});t.value="";$("#ccount").textContent="0/800";toast("Comentário publicado")}
     catch(err){if(err&&err.code==="invalid_argument"){SH.blocked=true;toast("Não tem permissão para comentar nesta página");refreshForm(s)}else if(err&&err.code==="quota_exceeded")toast("O espaço para comentários está cheio.");else toast("Não foi possível publicar. Tente de novo.")}
     btn.disabled=false};
@@ -2762,15 +2795,15 @@ async function fillList(el,list,showSite){
   if(!list.length){el.innerHTML=`<li class="empty">${showSite?"Ainda não há comentários. Seja o primeiro a partilhar a sua visita.":"Ainda não há comentários sobre este local."}</li>`;return}
   const ps=SH.user?await SH.user.profiles([...new Set(list.map(c=>c.uid))]):{};
   el.innerHTML=list.map(c=>{const p=ps[c.uid]||{};const s=BY[c.site];const mine=c.uid===SH.uid;
-    return `<li class="citem"${c.hid?' style="opacity:.55"':""}><img src="${esc(p.avatarUrl||"")}" alt=""><div style="min-width:0"><div class="who"><b data-n></b><span>${new Date(c.ts).toLocaleDateString("pt-PT",{day:"numeric",month:"short",year:"numeric"})}</span>${OWNER&&!mine?`<button class="del" data-hide="${c.uid}|${c.id}">${c.hid?"mostrar":"ocultar"}</button>`:""}${mine||OWNER?`<button class="del" data-del="${c.uid}|${c.id}">${mine?"apagar":"remover"}</button>`:""}</div>${c.hid?`<div class="muted" style="font-size:11.5px">Oculto para os visitantes</div>`:""}
+    return `<li class="citem"${c.hid?' style="opacity:.55"':""}><img src="${esc(p.avatarUrl||"")}" alt=""><div style="min-width:0"><div class="who"><b data-n></b><span>${new Date(c.ts).toLocaleDateString("pt-PT",{day:"numeric",month:"short",year:"numeric"})}</span>${OWNER&&!mine?`<button class="del" data-hide="${esc(c.uid)}|${esc(c.id)}">${c.hid?"mostrar":"ocultar"}</button>`:""}${mine||OWNER?`<button class="del" data-del="${esc(c.uid)}|${esc(c.id)}">${mine?"apagar":"remover"}</button>`:""}</div>${c.hid?`<div class="muted" style="font-size:11.5px">Oculto para os visitantes</div>`:""}
       ${showSite?`<button class="site" data-id="${s.id}">${esc(s.name)} · ${esc(s.municipio)}</button>`:""}<p>${esc(c.text)}</p></div></li>`}).join("");
   el.querySelectorAll("[data-n]").forEach((b,i)=>{const c=list[i],p=ps[c.uid]||{};b.textContent=(p.name||"Visitante")+(c.uid===SH.uid?" (você)":"")});
-  el.querySelectorAll("[data-hide]").forEach(b=>b.onclick=async e=>{e.stopPropagation();const [uid,id]=b.dataset.hide.split("|");
+  el.querySelectorAll("[data-hide]").forEach(b=>b.onclick=async e=>{e.stopPropagation();if(!rlOk("mod",10,6e4))return;const [uid,id]=b.dataset.hide.split("|");
     const items=((SH.docs[uid]&&SH.docs[uid].items)||[]).map(x=>x.id===id?{...x,hid:!x.hid}:x);
     try{await SH.db.collection("comments").doc(uid).set({items});toast("Visibilidade alterada")}catch(err){toast("Não foi possível alterar.")}});
   el.querySelectorAll("[data-del]").forEach(b=>b.onclick=async e=>{e.stopPropagation();
     if(!b.dataset.c){b.dataset.c=1;b.textContent="confirmar?";return}
-    const [uid,id]=b.dataset.del.split("|");const items=((SH.docs[uid]&&SH.docs[uid].items)||[]).filter(x=>x.id!==id);
+    if(!rlOk("mod",10,6e4))return;const [uid,id]=b.dataset.del.split("|");const items=((SH.docs[uid]&&SH.docs[uid].items)||[]).filter(x=>x.id!==id);
     try{await SH.db.collection("comments").doc(uid).set({items});toast("Comentário removido")}catch(err){toast("Não foi possível remover.")}});
 }
 function renderSiteComments(s,el){el.innerHTML=`<div id="cwrap">${formHtml(s)}</div><ul class="clist" id="clist"></ul>`;bindForm(s);fillList($("#clist"),siteComments(s.id),false)}
