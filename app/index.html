@@ -1161,6 +1161,11 @@ sup.rf{font-size:10px;margin-left:2px}sup.rf a{color:var(--accent);text-decorati
 .dio:fullscreen,.dio.full{background:linear-gradient(#9cc3e6,#dfeaf2 45%,#efe7d3)!important}
 /* site diorama */
 .dio-seg{display:flex;flex:2 1 auto}.dio-seg button{flex:1;border-radius:0}.dio-seg button:first-child{border-radius:3px 0 0 3px}.dio-seg button:last-child{border-radius:0 3px 3px 0;border-left:0}
+.dio-v{flex:1 1 100%}.dio-v button b{color:var(--accent);margin-right:1px}
+@media (max-width:620px){.dio-v button:not([aria-pressed="true"]) .t{display:none}}
+.dio-l{pointer-events:auto;cursor:pointer}.dio-l:hover{border-color:var(--accent)}.dio-n{cursor:pointer;border-radius:3px;padding:2px}.dio-n:hover{background:rgb(252 249 240/.7)}
+.dio-chk{display:flex;gap:6px;align-items:center;cursor:pointer}.dio-ex{display:inline-flex;gap:4px;align-items:center}
+.dio-ex button{border:1px solid var(--line-2);background:transparent;color:var(--ink);font:500 12px/1 var(--f-mono);padding:4px 7px;border-radius:2px;cursor:pointer}.dio-ex button[aria-pressed="true"]{background:var(--ink);color:var(--panel)}
 .dio-dd{position:relative;flex:1 1 auto;display:flex}.dio-dd>button{flex:1}
 .dio-menu{position:absolute;bottom:calc(100% + 6px);left:0;z-index:5;background:var(--panel);border:1px solid var(--line-2);border-radius:6px;padding:8px 10px;display:grid;gap:6px;min-width:220px;box-shadow:0 6px 18px rgb(0 0 0/.2);font-size:13px}
 .dio-menu label{display:flex;gap:8px;align-items:center;cursor:pointer}
@@ -3409,15 +3414,19 @@ const dioV=f=>DIOV[f]?`?v=${DIOV[f]}`:"";
 const TJ="https://cdn.jsdelivr.net/npm/three@0.170.0/";
 function dioMods(){if(!DIO.mods)DIO.mods=Promise.all([import(TJ+"build/three.module.js"),import(TJ+"examples/jsm/loaders/GLTFLoader.js"),import(TJ+"examples/jsm/controls/OrbitControls.js"),import(TJ+"examples/jsm/environments/RoomEnvironment.js"),
   import(TJ+"examples/jsm/postprocessing/EffectComposer.js"),import(TJ+"examples/jsm/postprocessing/RenderPass.js"),import(TJ+"examples/jsm/postprocessing/GTAOPass.js"),import(TJ+"examples/jsm/postprocessing/OutputPass.js")]).catch(e=>{DIO.mods=null;throw e});return DIO.mods}
+// the model's layers, as in the audit plan: A what is there today, B how sure each structure is (evidence colours on the current state),
+// C the reconstitution (only where there is one), D the bare relief with contour lines, E one structure on its own
+const dioViews=d=>[["A","Atual","A · Estado atual do sítio"],["B","Interpretação","B · Interpretação: grau de evidência de cada estrutura"],
+  ...(d.noB?[]:[["C","Reconstituição","C · Reconstituição"]]),["D","Relevo","D · Só o relevo, com curvas de nível"],["E","Estrutura","E · Uma estrutura isolada"]];
 function dioHtml(s){const d=DIOS[s.id];if(!d)return"";return `<figure class="dio" id="dio">
   <div class="dio-stage" id="dioStage"><div class="dio-load">A preparar a maqueta…</div></div>
   <div class="dio-bar" id="dioBar">
-    <div class="dio-seg" role="group" aria-label="Modo"><button data-m="A" aria-pressed="true">Estado atual</button>${d.noB?"":`<button data-m="B" aria-pressed="false">Reconstituição</button>`}</div>
-    <button data-a="spin" aria-pressed="false">Giro</button><button data-a="ev" aria-pressed="false">Evidência</button>
+    <div class="dio-seg dio-v" role="group" aria-label="Camada">${dioViews(d).map(([k,l,t],i)=>`<button data-v="${k}" aria-pressed="${!i}" title="${t}"><b>${k}</b><span class="t"> ${l}</span></button>`).join("")}</div>
+    <button data-a="spin" aria-pressed="false">Giro</button>
     <div class="dio-dd"><button data-a="layers" aria-expanded="false">Camadas ▾</button><div class="dio-menu" id="dioLayers" hidden>
       ${(d.layers||[["walls","Muralhas e muros"],["houses","Casas e estruturas"],["roofs","Coberturas (reconstituição)"],["rocks","Afloramentos"],["trees","Vegetação"],["lbl","Rótulos"]]).map(([k,l])=>`<label><input type="checkbox" data-l="${k}" checked> ${l}</label>`).join("")}</div></div>
     ${d.tour&&d.tour.length?`<button data-a="tour" aria-pressed="false">Visita guiada</button>`:""}<button data-a="fit">Enquadrar</button><button data-a="full">Ampliar</button></div>
-  <div class="dio-legend" id="dioLegend" hidden>${Object.keys(EVL).map(k=>`<span><i style="background:${EVC[k]}"></i>${EVL[k]}</span>`).join("")}</div>
+  <div class="dio-legend" id="dioLegend" hidden></div>
   <figcaption>Maqueta interpretativa em 3D. Toque numa estrutura para ver a sua ficha. ${d.cap||""}
     <details class="dio-src"><summary>Fontes e lacunas</summary><div id="dioSrc"></div><h4>O que ainda falta documentar</h4><ul>${d.gaps.map(g=>`<li>${esc(g)}</li>`).join("")}</ul></details></figcaption></figure>`}
 async function dioMount(s){
@@ -3446,7 +3455,7 @@ async function dioBuild(s){
   r.shadowMap.enabled=true;r.shadowMap.type=T.PCFSoftShadowMap;wrap.appendChild(r.domElement);
   r.domElement.style.opacity=0;if(!RM)r.domElement.style.transition="opacity .8s ease";
   const lw=document.createElement("div");lw.className="dio-lbls";wrap.appendChild(lw);
-  wrap.insertAdjacentHTML("beforeend",`<div class="dio-scale"><i></i><span>20 m</span></div><div class="dio-n" title="Norte"><svg width="26" height="26" viewBox="0 0 26 26"><path d="M13 2l4 11h-8z" fill="#9B2D20"/><path d="M13 24l-4-11h8z" fill="#bfb39a"/></svg><b>N</b></div><div class="dio-card" hidden></div>`);
+  wrap.insertAdjacentHTML("beforeend",`<div class="dio-scale"><i></i><span>20 m</span></div><div class="dio-n" role="button" tabindex="0" title="Orientar a norte" aria-label="Orientar a norte"><svg width="26" height="26" viewBox="0 0 26 26"><path d="M13 2l4 11h-8z" fill="#9B2D20"/><path d="M13 24l-4-11h8z" fill="#bfb39a"/></svg><b>N</b></div><div class="dio-card" hidden></div>`);
   const card=wrap.querySelector(".dio-card");
   const scene=new T.Scene(),R=meta?meta.R:150;
   const cam=new T.PerspectiveCamera(32,1,1,R*20);
@@ -3505,18 +3514,41 @@ async function dioBuild(s){
     const gt=new GTAOPass(scene,cam,1,1);gt.blendIntensity=1;gt.updateGtaoMaterial(LZ.gtao);gt.updatePdMaterial({lumaPhi:10,depthPhi:2,normalPhi:3,radius:6,rings:2,samples:16});
     comp.addPass(gt);comp.addPass(new OutputPass())}catch(e){console.warn("GTAO",e);comp=null}}
   let dirty=true;
-  const st={mode:"A",ev:false,L:{walls:true,houses:true,roofs:true,rocks:true,modern:true,trees:true,lbl:true},sel:null};
+  const st={v:"A",mode:"A",ev:false,evC:false,ex:1,L:{walls:true,houses:true,roofs:true,rocks:true,modern:true,trees:true,lbl:true},sel:null};
   const layerOf=sid=>{const c=CAT[sid.replace(/R$/,"")];if(!c)return"houses";if(sid==="CRR")return"modern";if(sid.endsWith("R"))return"roofs";return /moderno|moderna/.test(c.kind)?"modern":/Muralha|Entrada|Muro|Arruamento/.test(c.kind)?"walls":c.kind==="Afloramento"?"rocks":"houses"};
   const evMat={},selMat=new Map();const selOf=m=>{let c=selMat.get(m);if(!c){c=m.clone();c.emissive&&c.emissive.setHex(0x8a5a10);selMat.set(m,c)}return c};const evOf=o=>{const c=CAT[o.userData.sid.replace(/R$/,"")];if(!c)return o.userData.ev;if(o.userData.sid.endsWith("R")&&o.userData.sid!==c.id)return c.roof||o.userData.ev||"hip";return st.mode==="B"?(c.evB||c.ev):c.ev};
-  const apply=()=>{for(const sid in bySid){const v=bySid[sid],useB=st.mode==="B"&&v.B.length;
+  // D (relief): terrain only, with contour lines every 1 m (index lines every 5 m) drawn from the true height even when exaggerated
+  const EX0=meta&&meta.ex||1,TER=[],XTRA=[],CON={uEx:{value:EX0},uH0:{value:((meta&&meta.h0||0)%5+5)%5}};;
+  // model height y = (altitude − h0) × ex (blend/dio_*.py); only h0 mod 5 enters the shader (small numbers keep the precision) and the lines still fall on true altitudes
+  root.traverse(o=>{if(!o.isMesh||o.name.startsWith("PROTO-")||o.userData.sid)return;if(/^terrain/.test(o.name)){TER.push(o);o.userData.base=o.material}else if(!/skirt/.test(o.name))XTRA.push(o)});
+  const conMat=m0=>{const m=m0.clone();m.onBeforeCompile=sh=>{sh.uniforms.uEx=CON.uEx;sh.uniforms.uH0=CON.uH0;
+      sh.vertexShader=sh.vertexShader.replace("#include <common>","#include <common>\nvarying float vWY;").replace("#include <project_vertex>","#include <project_vertex>\nvWY=(modelMatrix*vec4(transformed,1.)).y;");
+      sh.fragmentShader=sh.fragmentShader.replace("#include <common>","#include <common>\nvarying float vWY;uniform float uEx,uH0;").replace("#include <dithering_fragment>",
+        "#include <dithering_fragment>\n{float h=uH0+vWY/uEx,a=abs(fract(h+.5)-.5)/fwidth(h),b=abs(fract(h/5.+.5)-.5)/fwidth(h/5.);float k=max((1.-min(a,1.))*.38,(1.-min(b/1.5,1.))*.8);gl_FragColor.rgb=mix(gl_FragColor.rgb,vec3(.2,.13,.07),k);}")};
+    m.customProgramCacheKey=()=>"contour";return m};
+  const legend=()=>{const lg=$("#dioLegend");if(!lg)return;const V=st.v,c=st.sel&&CAT[st.sel];let h="";
+    const evh=Object.keys(EVL).map(k=>`<span><i style="background:${EVC[k]}"></i>${EVL[k]}</span>`).join("");
+    if(V==="B")h=evh;
+    else if(V==="C")h=`<label class="dio-chk"><input type="checkbox" data-x="evC"${st.evC?" checked":""}> Colorir por grau de evidência</label>${st.evC?evh:""}`;
+    else if(V==="D")h=`<span>Curvas de nível de 1 m (mestras de 5 m) em altitude real, do modelo de terreno LiDAR.${EX0!==1?` Nas outras camadas o relevo tem exagero × ${String(EX0).replace(".",",")}.`:""}</span><span class="dio-ex">Exagero vertical: <button data-x="ex1" aria-pressed="${st.ex===1}">× 1</button><button data-x="ex2" aria-pressed="${st.ex===2}">× 2</button></span>`;
+    else if(V==="E")h=c?`<span><b>${esc(c.name)}</b>${c.dims?` · ${esc(c.dims)}`:""} · fontes na ficha ao lado. Toque fora da estrutura para ver todas.</span>`:`<span>Toque numa estrutura para a isolar.</span>`;
+    lg.innerHTML=h;lg.hidden=!h;
+    lg.onclick=e=>{const x=e.target.closest("[data-x]");if(!x)return;if(x.dataset.x==="evC"){st.evC=x.checked;apply()}else{st.ex=x.dataset.x==="ex2"?2:1;apply()}}};
+  const apply=()=>{const V=st.v;st.mode=V==="C"?"B":V==="E"?st.mode:"A";st.ev=V==="B"||(V==="C"&&st.evC);
+    for(const sid in bySid){const v=bySid[sid],useB=st.mode==="B"&&v.B.length;
       v.A.forEach(o=>o.visible=!useB||o.userData.mode==="AB");v.B.forEach(o=>o.visible=useB||o.userData.mode==="AB");
-      [...v.A,...v.B].forEach(o=>{if(o.visible)o.visible=st.L[layerOf(o.userData.sid)];
+      [...v.A,...v.B].forEach(o=>{if(o.visible)o.visible=V==="E"&&st.sel?sid===st.sel:V!=="D"&&st.L[layerOf(o.userData.sid)];
         const e=evOf(o);if(st.ev){evMat[e]=evMat[e]||new T.MeshStandardMaterial({color:EVC[e],roughness:.85,envMapIntensity:ENVI});o.material=evMat[e]}else o.material=o.userData.base;
-        if(st.sel===sid)o.material=selOf(o.material)})}
-    trees.forEach(t=>t.visible=st.L.trees);batch();
-    const lg=$("#dioLegend");if(lg)lg.hidden=!st.ev;dirty=true};
+        if(st.sel===sid&&V!=="E")o.material=selOf(o.material)})}
+    trees.forEach(t=>t.visible=st.L.trees&&V!=="D"&&!(V==="E"&&st.sel));XTRA.forEach(o=>o.visible=V!=="D");
+    TER.forEach(o=>{o.material=V==="D"?(o.userData.con=o.userData.con||conMat(o.userData.base)):o.userData.base});
+    const ex=V==="D"?st.ex/EX0:1;if(root.scale.y!==ex){root.scale.y=ex;root.updateMatrixWorld(true)}CON.uEx.value=EX0*ex;   // D: × 1 = true relief
+    batch();legend();dirty=true};
   apply();
-  const labels=[];root.traverse(o=>{if(o.name&&o.name.startsWith("LBL-")){const e=document.createElement("div");e.className="dio-l";e.textContent=o.name.slice(4).replace(/-\d+$/,"").replace(/_/g," ");lw.appendChild(e);labels.push({o,e,w:0,h:0})}});
+  const labels=[];root.traverse(o=>{if(o.name&&o.name.startsWith("LBL-")){const e=document.createElement("div");e.className="dio-l";e.textContent=o.name.slice(4).replace(/-\d+$/,"").replace(/_/g," ");lw.appendChild(e);labels.push({o,e,w:0,h:0});
+    e.setAttribute("role","button");e.tabIndex=0;e.title="Aproximar";const go=()=>{const t=o.getWorldPosition(new T.Vector3()),d=Math.min(cam.position.distanceTo(ctl.target),R*.55),dir=cam.position.clone().sub(ctl.target).normalize();ctl.autoRotate=false;flyTo(t.clone().add(dir.multiplyScalar(d)),t,900)};
+    e.addEventListener("wheel",ev=>{ev.preventDefault();r.domElement.dispatchEvent(new WheelEvent("wheel",ev))},{passive:false});   // zooming over a label still zooms the model
+    e.onclick=go;e.onkeydown=k=>{if(k.key==="Enter"||k.key===" "){k.preventDefault();go()}}}});
   const ctl=new OrbitControls(cam,r.domElement);ctl.enableDamping=true;ctl.dampingFactor=.08;ctl.minDistance=R*.12;ctl.maxDistance=R*4;ctl.maxPolarAngle=1.32;ctl.minPolarAngle=.15;ctl.autoRotate=!RM;ctl.autoRotateSpeed=.6;ctl.screenSpacePanning=false;ctl.addEventListener("change",()=>dirty=true);   // turns slowly until the first touch
   let fly=null;const flyTo=(pos,tgt,ms=900)=>{fly={p0:cam.position.clone(),t0:ctl.target.clone(),p1:pos,t1:tgt,s:performance.now(),ms}};
   // framing: the whole disc fills ~93 % of the frame, from the usual oblique view (or "cam": {az, el} in degrees in maquetas/<id>.json);
@@ -3549,7 +3581,8 @@ async function dioBuild(s){
       <div class="evs"><span>Estado atual</span>${chip(evA)}${bySid[sid]&&bySid[sid].B.length?`<span>Reconstituição</span>${chip(evB)}`:""}${c.roof?`<span>Cobertura</span>${chip(c.roof)}`:""}</div>
       <p>${esc(c.note||"")}</p><div class="s">${(c.src||[]).map(k=>`<div>${esc(SRC[k]||k)}</div>`).join("")}</div>`;
     card.hidden=false;card.querySelector(".x").onclick=()=>select(null);
-    if(pt){const t=new T.Vector3(pt.x,pt.y,pt.z),d=Math.min(cam.position.distanceTo(ctl.target),R*.9),dir=cam.position.clone().sub(ctl.target).normalize();flyTo(t.clone().add(dir.multiplyScalar(d)),t,700)}};
+    if(st.v==="E"){const bx=ctr(sid)||ctr(sid+"R");if(bx){const c=bx.getCenter(new T.Vector3()),sz=Math.max(12,bx.getSize(new T.Vector3()).length()),dir=cam.position.clone().sub(ctl.target).normalize();flyTo(c.clone().add(dir.multiplyScalar(Math.min(R*1.3,sz*1.9))),c,800)}}
+    else if(pt){const t=new T.Vector3(pt.x,pt.y,pt.z),d=Math.min(cam.position.distanceTo(ctl.target),R*.9),dir=cam.position.clone().sub(ctl.target).normalize();flyTo(t.clone().add(dir.multiplyScalar(d)),t,700)}};
   let vis=true,raf=0,W=1,H=1;
   const V=new T.Vector3(),dirv=new T.Vector3();
   const frame=t=>{raf=requestAnimationFrame(frame);if(!wrap.isConnected)return;const bb=wrap.getBoundingClientRect();vis=bb.bottom>0&&bb.top<innerHeight&&bb.width>0;if(!vis)return;
@@ -3568,29 +3601,34 @@ async function dioBuild(s){
   const TO={on:false,i:0},tc=document.createElement("div");tc.className="dio-tour";tc.hidden=true;wrap.appendChild(tc);
   const ctr=sid=>{const b=new T.Box3();let ok=false;objs.forEach(o=>{if(o.userData.sid===sid&&o.visible){b.expandByObject(o);ok=true}});return ok?b:null};
   const tourEnd=()=>{TO.on=false;tc.hidden=true;const b=$("#dioBar [data-a='tour']");if(b)b.setAttribute("aria-pressed","false");st.sel=null;apply()};
-  const tourGo=i=>{const L=DIOS[s.id].tour;TO.on=true;TO.i=(i+L.length)%L.length;const {sid,title:t,text:d}=L[TO.i];card.hidden=true;ctl.autoRotate=false;
+  const tourGo=i=>{if(st.v==="D"||st.v==="E")setV("A");const L=DIOS[s.id].tour;TO.on=true;TO.i=(i+L.length)%L.length;const {sid,title:t,text:d}=L[TO.i];card.hidden=true;ctl.autoRotate=false;
     const b=$("#dioBar [data-a='tour']");if(b)b.setAttribute("aria-pressed","true");
     const bx=ctr(sid);if(bx){const c=bx.getCenter(new T.Vector3()),sz=bx.getSize(new T.Vector3()).length(),dist=Math.max(55,Math.min(R*1.3,sz*1.6)),dir=new T.Vector3(.35,.75,.62).normalize();c.y-=dist*.16;flyTo(c.clone().add(dir.multiplyScalar(dist)),c,1300)}
     st.sel=sid;apply();
     tc.innerHTML=`<div class="k">Visita guiada · ${TO.i+1}/${L.length}</div><b>${esc(t)}</b><p>${esc(d)}</p><div class="nav"><button data-t="-1" aria-label="Anterior">‹ Anterior</button><button data-t="x">Terminar</button><button data-t="1" aria-label="Seguinte">Seguinte ›</button></div>`;tc.hidden=false;
     tc.onclick=e=>{const q=e.target.closest("[data-t]");if(!q)return;if(q.dataset.t==="x")tourEnd();else tourGo(TO.i+ +q.dataset.t)}};
+  const setV=v=>{if(v===st.v)return;const was=st.v;if(v==="E")st.mode=was==="C"?"B":"A";if(TO.on&&(v==="D"||v==="E"))tourEnd();st.v=v;
+    const bar=$("#dioBar");if(bar)bar.querySelectorAll("[data-v]").forEach(x=>x.setAttribute("aria-pressed",x.dataset.v===v));
+    if(v==="D"){card.hidden=true;st.sel=null}apply();if(st.sel)select(st.sel);else if(was==="E"||v==="D")card.hidden=true};
+  // north: turn the view so that north is up, keeping distance and height
+  {const nb=wrap.querySelector(".dio-n"),north=()=>{const o=cam.position.clone().sub(ctl.target),h=Math.hypot(o.x,o.z);ctl.autoRotate=false;flyTo(ctl.target.clone().add(new T.Vector3(0,o.y,h)),ctl.target.clone(),800)};
+    nb.onclick=north;nb.onkeydown=k=>{if(k.key==="Enter"||k.key===" "){k.preventDefault();north()}}}
   const bind=()=>{const bar=$("#dioBar");if(!bar)return;
-    bar.querySelectorAll("[data-m]").forEach(b=>b.setAttribute("aria-pressed",b.dataset.m===st.mode));
-    bar.querySelector('[data-a="spin"]').setAttribute("aria-pressed",ctl.autoRotate);bar.querySelector('[data-a="ev"]').setAttribute("aria-pressed",st.ev);
+    bar.querySelectorAll("[data-v]").forEach(b=>b.setAttribute("aria-pressed",b.dataset.v===st.v));
+    bar.querySelector('[data-a="spin"]').setAttribute("aria-pressed",ctl.autoRotate);
     const lm=$("#dioLayers");lm.querySelectorAll("input").forEach(i=>{i.checked=st.L[i.dataset.l];i.onchange=()=>{st.L[i.dataset.l]=i.checked;apply()}});
     const sc=$("#dioSrc");if(sc)sc.innerHTML=`<ol>${Object.values(SRC).map(t=>`<li>${esc(t)}</li>`).join("")}</ol>`;
     bar.onclick=e=>{const b=e.target.closest("button");if(!b)return;
-      if(b.dataset.m){st.mode=b.dataset.m;bar.querySelectorAll("[data-m]").forEach(x=>x.setAttribute("aria-pressed",x===b));apply();if(st.sel)select(st.sel);return}
+      if(b.dataset.v){setV(b.dataset.v);return}
       const a=b.dataset.a;
       if(a==="spin"){ctl.autoRotate=!ctl.autoRotate;b.setAttribute("aria-pressed",ctl.autoRotate)}
-      else if(a==="ev"){st.ev=!st.ev;b.setAttribute("aria-pressed",st.ev);apply()}
       else if(a==="layers"){lm.hidden=!lm.hidden;b.setAttribute("aria-expanded",!lm.hidden)}
       else if(a==="fit"){tourEnd();select(null);home(true)}
       else if(a==="tour"){if(TO.on)tourEnd();else tourGo(0)}
       else if(a==="full"){const f=$("#dio");if(document.fullscreenElement){document.exitFullscreen()}else if(f.requestFullscreen){f.requestFullscreen().catch(()=>f.classList.toggle("full"))}else f.classList.toggle("full");setTimeout(resize,150)}};
     apply()};
   const stage2=$("#dioStage");if(stage2){stage2.innerHTML="";stage2.appendChild(wrap)}resize();home(false);frame();bind();
-  DIO.cur={id:s.id,wrap,bind,resize,
+  DIO.cur={id:s.id,wrap,bind,resize,camPos:()=>[cam.position.x,cam.position.y,cam.position.z,ctl.target.x,ctl.target.y,ctl.target.z].map(v=>Math.round(v)),
     stats(n=10){r.info.autoReset=false;r.info.reset();const t0=performance.now();for(let i=0;i<n;i++)r.render(scene,cam);r.getContext().finish();const ms=(performance.now()-t0)/n,o={calls:r.info.render.calls/n,tris:r.info.render.triangles/n,ms:+ms.toFixed(1),geoms:r.info.memory.geometries};r.info.autoReset=true;dirty=true;return o},   // tests: draw calls and time per frame (without GTAO)
     dispose(){cancelAnimationFrame(raf);ro.disconnect();ctl.dispose();if(comp)comp.dispose();envT.dispose();BC.forEach(m=>m.geometry.dispose());selMat.forEach(m=>m.dispose());r.dispose();r.forceContextLoss&&r.forceContextLoss();scene.traverse(o=>{if(o.geometry)o.geometry.dispose()})}};
 }
