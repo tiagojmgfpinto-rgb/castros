@@ -28,7 +28,7 @@ for(const id of IDS){
   // close-up: 7 wheel steps towards the centre of the view
   for(let i=0;i<7;i++){await p.mouse.move(bx.x+bx.width*.5,bx.y+bx.height*.5);await p.mouse.wheel(0,-120);await p.waitForTimeout(150)}
   await p.waitForTimeout(3000);await p.screenshot({path:`${D}${id}-${VP}-Z.png`,clip});
-  const B=p.locator('#dioBar [data-m="B"]');
+  const B=p.locator('#dioBar [data-v="C"]');
   if(await B.count()){await B.click();await p.waitForTimeout(4000);await p.screenshot({path:`${D}${id}-${VP}-B.png`,clip})}
   await p.close();
 }
