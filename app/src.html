@@ -2824,7 +2824,7 @@ function initChrome(){
 const DIOS=/*DIOS*/{},LUZ=/*LUZ*/{};
 const dioLuz=id=>{const o=JSON.parse(JSON.stringify(LUZ)),x=(DIOS[id]||{}).luz||{};for(const k in x)o[k]=x[k]&&typeof x[k]==="object"&&!Array.isArray(x[k])?{...o[k],...x[k]}:x[k];return o};
 const EVL={conf:"Confirmado",doc:"Reconstituído com fundamento documental",hip:"Hipotético"},EVC={conf:"#6d7f4f",doc:"#3f74a8",hip:"#c4772f"};
-const DIO={mods:null,cur:null};
+const DIO={mods:null,cur:null};window.__dio=DIO;   // read by the capture tests (draw calls, frame time)
 const DIOV=/*DIOV*/{};   // short content hash of each file in dio/ (written by build.py), so a new model is never hidden by the browser cache
 const dioV=f=>DIOV[f]?`?v=${DIOV[f]}`:"";
 const TJ="https://cdn.jsdelivr.net/npm/three@0.160.0/";
@@ -2878,8 +2878,26 @@ async function dioBuild(s){
   root.traverse(o=>{if(!o.isMesh)return;const n=o.name;
     if(n.startsWith("PROTO-")){const [,k,p]=n.split("-");o.updateWorldMatrix(true,false);(protos[k]=protos[k]||[]).push({p,g:o.geometry.clone().applyMatrix4(o.matrixWorld),m:o.material});o.visible=false;return}
     o.castShadow=!/terrain|skirt/.test(n);o.receiveShadow=true;if(o.material&&o.material.map){o.material.map.anisotropy=r.capabilities.getMaxAnisotropy();o.material.map.needsUpdate=true}
-    const u=o.userData||{};if(u.sid){o.material=o.material.clone();o.userData.base=o.material;objs.push(o)}});
+    const u=o.userData||{};if(u.sid){o.userData.base=o.material;objs.push(o)}});
   scene.add(root);
+  // the structures are drawn in batches, one merged mesh per material (Briteiros: ~1000 pieces -> ~20 draw calls); the pieces stay in the
+  // scene on layer 1 only, for the logic (visibility, picking, boxes), and the batches are rebuilt by apply() when the visible set changes
+  objs.forEach(o=>o.layers.set(1));
+  const BG=new T.Group();scene.add(BG);const WG=new Map(),BC=new Map();
+  const wgeo=o=>{let w=WG.get(o);if(w)return w;const G=o.geometry,P=G.attributes.position,N=G.attributes.normal,U=G.attributes.uv,n=P.count,v=new T.Vector3(),nm=new T.Matrix3().getNormalMatrix(o.matrixWorld);
+    const p=new Float32Array(n*3),q=new Float32Array(n*3),uv=U?new Float32Array(n*2):null;
+    for(let i=0;i<n;i++){v.fromBufferAttribute(P,i).applyMatrix4(o.matrixWorld);p[i*3]=v.x;p[i*3+1]=v.y;p[i*3+2]=v.z;if(N){v.fromBufferAttribute(N,i).applyMatrix3(nm).normalize();q[i*3]=v.x;q[i*3+1]=v.y;q[i*3+2]=v.z}if(uv){uv[i*2]=U.getX(i);uv[i*2+1]=U.getY(i)}}
+    const ix=G.index?G.index.array:Uint32Array.from({length:n},(_,i)=>i);w={p,q,uv,ix,n,N:!!N};WG.set(o,w);return w};
+  const batch=()=>{const grp=new Map();objs.forEach(o=>{if(!o.visible)return;const m=o.material;(grp.get(m)||grp.set(m,[]).get(m)).push(o)});
+    const keep=new Set();BG.clear();
+    grp.forEach((list,m)=>{const key=m.uuid+":"+list.map(o=>o.id).join(",");keep.add(key);let mesh=BC.get(key);
+      if(!mesh){const ws=list.map(wgeo);let nv=0,ni=0;ws.forEach(w=>{nv+=w.n;ni+=w.ix.length});
+        const p=new Float32Array(nv*3),q=new Float32Array(nv*3),uv=m.map?new Float32Array(nv*2):null,ix=new Uint32Array(ni);let ov=0,oi=0,allN=true;
+        ws.forEach(w=>{p.set(w.p,ov*3);q.set(w.q,ov*3);if(uv&&w.uv)uv.set(w.uv,ov*2);for(let k=0;k<w.ix.length;k++)ix[oi+k]=w.ix[k]+ov;ov+=w.n;oi+=w.ix.length;allN=allN&&w.N});
+        const G=new T.BufferGeometry();G.setAttribute("position",new T.BufferAttribute(p,3));G.setAttribute("normal",new T.BufferAttribute(q,3));if(uv)G.setAttribute("uv",new T.BufferAttribute(uv,2));G.setIndex(new T.BufferAttribute(ix,1));
+        if(!allN)G.computeVertexNormals();G.computeBoundingSphere();mesh=new T.Mesh(G,m);mesh.castShadow=mesh.receiveShadow=true;mesh.matrixAutoUpdate=false;BC.set(key,mesh)}
+      BG.add(mesh)});
+    BC.forEach((mesh,key)=>{if(!keep.has(key)){mesh.geometry.dispose();BC.delete(key)}})};
   const bySid={};objs.forEach(o=>{const s0=o.userData.sid.replace(/R$/,"");(bySid[s0]=bySid[s0]||{A:[],B:[]});const md=o.userData.mode;if(md==="AB"){bySid[s0].A.push(o);bySid[s0].B.push(o)}else bySid[s0][md].push(o)});
   // trees: instanced from the Blender prototypes
   const trees=[];
@@ -2902,7 +2920,7 @@ async function dioBuild(s){
   // soft image-based fill (neutral room), as on castillos.site; kept weak so the sun still models the relief
   const ENVI=LZ.env,pm=new T.PMREMGenerator(r),envT=pm.fromScene(new RoomEnvironment(r),.04).texture;pm.dispose();scene.environment=envT;
   scene.traverse(o=>{const ms=o.material?[].concat(o.material):[];ms.forEach(m=>{if("envMapIntensity" in m)m.envMapIntensity=ENVI})});
-  objs.forEach(o=>{o.userData.base.envMapIntensity=ENVI});
+
   // ambient occlusion in screen space (GTAO), computer only; the ground keeps its AO baked in Blender
   let comp=null;if(FINE){try{const rt=new T.WebGLRenderTarget(1,1,{type:T.HalfFloatType,samples:4});comp=new EffectComposer(r,rt);comp.addPass(new RenderPass(scene,cam));
     const gt=new GTAOPass(scene,cam,1,1);gt.blendIntensity=1;gt.updateGtaoMaterial(LZ.gtao);gt.updatePdMaterial({lumaPhi:10,depthPhi:2,normalPhi:3,radius:6,rings:2,samples:16});
@@ -2910,14 +2928,13 @@ async function dioBuild(s){
   let dirty=true;
   const st={mode:"A",ev:false,L:{walls:true,houses:true,roofs:true,rocks:true,modern:true,trees:true,lbl:true},sel:null};
   const layerOf=sid=>{const c=CAT[sid.replace(/R$/,"")];if(!c)return"houses";if(sid==="CRR")return"modern";if(sid.endsWith("R"))return"roofs";return /moderno|moderna/.test(c.kind)?"modern":/Muralha|Entrada|Muro|Arruamento/.test(c.kind)?"walls":c.kind==="Afloramento"?"rocks":"houses"};
-  const evMat={};const evOf=o=>{const c=CAT[o.userData.sid.replace(/R$/,"")];if(!c)return o.userData.ev;if(o.userData.sid.endsWith("R")&&o.userData.sid!==c.id)return c.roof||o.userData.ev||"hip";return st.mode==="B"?(c.evB||c.ev):c.ev};
+  const evMat={},selMat=new Map();const selOf=m=>{let c=selMat.get(m);if(!c){c=m.clone();c.emissive&&c.emissive.setHex(0x8a5a10);selMat.set(m,c)}return c};const evOf=o=>{const c=CAT[o.userData.sid.replace(/R$/,"")];if(!c)return o.userData.ev;if(o.userData.sid.endsWith("R")&&o.userData.sid!==c.id)return c.roof||o.userData.ev||"hip";return st.mode==="B"?(c.evB||c.ev):c.ev};
   const apply=()=>{for(const sid in bySid){const v=bySid[sid],useB=st.mode==="B"&&v.B.length;
       v.A.forEach(o=>o.visible=!useB||o.userData.mode==="AB");v.B.forEach(o=>o.visible=useB||o.userData.mode==="AB");
       [...v.A,...v.B].forEach(o=>{if(o.visible)o.visible=st.L[layerOf(o.userData.sid)];
         const e=evOf(o);if(st.ev){evMat[e]=evMat[e]||new T.MeshStandardMaterial({color:EVC[e],roughness:.85,envMapIntensity:ENVI});o.material=evMat[e]}else o.material=o.userData.base;
-        if(o.material.emissive)o.material.emissive.setHex(0)})}
-    trees.forEach(t=>t.visible=st.L.trees);
-    if(st.sel){const v=bySid[st.sel];if(v)[...v.A,...v.B].forEach(o=>{if(o.visible){if(o.material===o.userData.base||st.ev)o.material=o.material.clone();o.material.emissive&&o.material.emissive.setHex(0x8a5a10)}})}
+        if(st.sel===sid)o.material=selOf(o.material)})}
+    trees.forEach(t=>t.visible=st.L.trees);batch();
     const lg=$("#dioLegend");if(lg)lg.hidden=!st.ev;dirty=true};
   apply();
   const labels=[];root.traverse(o=>{if(o.name&&o.name.startsWith("LBL-")){const e=document.createElement("div");e.className="dio-l";e.textContent=o.name.slice(4).replace(/-\d+$/,"").replace(/_/g," ");lw.appendChild(e);labels.push({o,e,w:0,h:0})}});
@@ -2942,7 +2959,7 @@ async function dioBuild(s){
     cam.position.copy(c0);cam.quaternion.copy(q0);return [c.clone().addScaledVector(HDIR,d),c]};
   const home=a=>{const [p,t]=fitView();if(a)flyTo(p,t);else{cam.position.copy(p);ctl.target.copy(t);ctl.update()}dirty=true};
   // picking: tap/click selects a structure and opens its record
-  const ray=new T.Raycaster(),ptr=new T.Vector2();let down=null;
+  const ray=new T.Raycaster(),ptr=new T.Vector2();ray.layers.set(1);let down=null;
   r.domElement.addEventListener("pointerdown",e=>{down=[e.clientX,e.clientY]});
   r.domElement.addEventListener("pointerup",e=>{if(!down||Math.hypot(e.clientX-down[0],e.clientY-down[1])>5)return;const b=r.domElement.getBoundingClientRect();ptr.set((e.clientX-b.left)/b.width*2-1,-(e.clientY-b.top)/b.height*2+1);ray.setFromCamera(ptr,cam);
     const hit=ray.intersectObjects(objs.filter(o=>o.visible),false)[0];select(hit?hit.object.userData.sid.replace(/R$/,""):null,hit&&hit.point)});
@@ -2994,7 +3011,9 @@ async function dioBuild(s){
       else if(a==="full"){const f=$("#dio");if(document.fullscreenElement){document.exitFullscreen()}else if(f.requestFullscreen){f.requestFullscreen().catch(()=>f.classList.toggle("full"))}else f.classList.toggle("full");setTimeout(resize,150)}};
     apply()};
   const stage2=$("#dioStage");if(stage2){stage2.innerHTML="";stage2.appendChild(wrap)}resize();home(false);frame();bind();
-  DIO.cur={id:s.id,wrap,bind,resize,dispose(){cancelAnimationFrame(raf);ro.disconnect();ctl.dispose();if(comp)comp.dispose();envT.dispose();r.dispose();r.forceContextLoss&&r.forceContextLoss();scene.traverse(o=>{if(o.geometry)o.geometry.dispose()})}};
+  DIO.cur={id:s.id,wrap,bind,resize,
+    stats(n=10){r.info.autoReset=false;r.info.reset();const t0=performance.now();for(let i=0;i<n;i++)r.render(scene,cam);r.getContext().finish();const ms=(performance.now()-t0)/n,o={calls:r.info.render.calls/n,tris:r.info.render.triangles/n,ms:+ms.toFixed(1),geoms:r.info.memory.geometries};r.info.autoReset=true;dirty=true;return o},   // tests: draw calls and time per frame (without GTAO)
+    dispose(){cancelAnimationFrame(raf);ro.disconnect();ctl.dispose();if(comp)comp.dispose();envT.dispose();BC.forEach(m=>m.geometry.dispose());selMat.forEach(m=>m.dispose());r.dispose();r.forceContextLoss&&r.forceContextLoss();scene.traverse(o=>{if(o.geometry)o.geometry.dispose()})}};
 }
 
 /* ---------- bottom sheet (phones) ---------- */

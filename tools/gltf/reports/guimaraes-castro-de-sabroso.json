@@ -1,0 +1,26 @@
+{
+ "input": "app/dio/guimaraes-castro-de-sabroso.glb (Blender export)",
+ "terrain": {
+  "before": 415200,
+  "after": 60000,
+  "checked": 208001,
+  "of": 208001,
+  "err_cm": {
+   "median": 2.5,
+   "p95": 9.5,
+   "p99": 13.7,
+   "max": 45.1
+  }
+ },
+ "textures": [
+  {
+   "name": "ground",
+   "from": "3072x3072",
+   "to": 2048,
+   "kb": [
+    1717,
+    545
+   ]
+  }
+ ]
+}

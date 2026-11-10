@@ -22,6 +22,7 @@ for(const id of IDS){
   await p.waitForSelector('#dioStage canvas',{timeout:120000});
   times[id]=Date.now()-t0;
   await p.waitForTimeout(6000);
+  times[id+':stats']=await p.evaluate(()=>window.__dio&&__dio.cur&&__dio.cur.stats?__dio.cur.stats():null).catch(()=>null);
   const bx=await p.locator('#dioStage canvas').boundingBox();const clip={x:bx.x,y:bx.y,width:bx.width,height:bx.height};
   await p.screenshot({path:`${D}${id}-${VP}-A.png`,clip,timeout:120000});
   // close-up: 7 wheel steps towards the centre of the view
