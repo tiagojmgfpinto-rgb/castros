@@ -8,7 +8,7 @@ Uso: python3 build.py && python3 tools/site.py
 import os, shutil
 
 SRC, OUT = 'app', '_site'
-SKIP = {'src.html', 'test.html', 'test2.html', 'index.html'}
+SKIP = {'src.html', 'test.html', 'test2.html', 'index.html'}   # (tools/pages.py adds /castros/, /castro/<id>/, /creditos/, sitemap.xml, robots.txt)
 URL = 'https://tiagojmgfpinto-rgb.github.io/castros/'
 DESC = ('Atlas interativo dos castros do Noroeste Peninsular: mapa em relevo, fichas, fontes '
         'e maquetas 3D dos sítios, a partir da tese de doutoramento de Tiago Pinto (USC).')
@@ -38,5 +38,7 @@ app = open(os.path.join(SRC, 'index.html'), encoding='utf-8').read()
 with open(os.path.join(OUT, 'index.html'), 'w', encoding='utf-8') as f:
     f.write(head + app + '\n</body>\n</html>\n')
 open(os.path.join(OUT, '.nojekyll'), 'w').close()
+import sys; sys.path.insert(0, os.path.dirname(os.path.abspath(__file__))); import pages
+print('páginas:', pages.build(OUT))
 total = sum(os.path.getsize(os.path.join(r, n)) for r, _, ns in os.walk(OUT) for n in ns)
 print(f'{OUT}/: {total/1e6:.0f} MB')
