@@ -65,6 +65,13 @@ sh tools/fetch_dem.sh            # só para refazer a maqueta do noroeste
    O artifact não serve `.glb`; o PNG reduz ~3× e o visualizador extrai os bytes. Limite de 16 MB por ficheiro publicado.
 6. **Visualizador** (em `app/src.html`: `dioMount`; dados em `maquetas/<id>.json` e luz em `maquetas/luz.json`; tone mapping `tone` aces/neutral em `luz.json` (comparados em nov. 2026, fica aces); a mesma luz no Blender com `blend/luz.py` e render de controlo `blend/luz_render.py <glb> <png> <id>` (Cycles CPU); computador = sombra 4096 ajustada à maqueta + RoomEnvironment + GTAO, telemóvel/tátil = sombra 1024 sem pós-processamento; enquadramento automático pela silhueta, `"cam":{az,el}` opcional no ficheiro da maqueta; `?v=` dos ficheiros escrito pelo `build.py`; capturas antes/depois de todas as maquetas: `CDN=<pasta npm> node tests/dio_all.mjs <saída> desk|phone`, `BASE=` para outro servidor): camadas A–E (A estado atual, B interpretação = cores de evidência confirmado / documentado / hipotético, C reconstituição se não houver `noB`, D só relevo com curvas de nível de 1 m em altitude real a partir de `ex`/`h0` do `app/dio/<id>.json` e exagero × 1/× 2, E estrutura isolada), grupos de peças (`layers`), rótulos que aproximam a câmara, botão norte, ficha por estrutura, visita guiada, fontes e lacunas. Teste das camadas: `node tests/dio_pick.mjs <saída> [id]` (`VP=desk`). Fases por estrutura só quando houver fonte (ainda nenhuma maqueta tem `phases`).
 
+## Segurança
+
+- Não há chaves de API nem servidor próprio: os dados partilhados vivem na base de dados do artifact, com regras no servidor
+  (`comments/<id>` só o próprio escreve; `history` e `extra` só o dono). Não guardar segredos no código nem no `data.json`.
+- Tudo o que vem da base de dados passa por `SAN` em `app/src.html` (tipo, tamanho, formato, URLs só http/https) antes de chegar ao ecrã;
+  as escritas passam pelos mesmos limites e por `rlOk` (limite de rajadas no navegador). Teste: `CDN=<pasta npm> node tests/sanitize.mjs`.
+
 ## Regras do Tiago
 
 - **Nunca inventar** estruturas, medidas ou datas: tudo com fonte, e o que falta vai para a lista de lacunas (`gaps` em `maquetas/<id>.json`).
