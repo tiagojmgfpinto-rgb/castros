@@ -1,6 +1,7 @@
 import {chromium, devices} from '/opt/node22/lib/node_modules/playwright/index.mjs';
 // Captures of every site diorama (current state + reconstitution where it exists), on desktop or phone.
 // Use: node tests/dio_all.mjs <out dir> [desk|phone]   (CDN=<npm folder> when the CDNs are blocked)
+// NODRACO=1 blocks the Draco decoder (app/draco/ and the CDN copy), to check the fallback to the plain model.
 // Writes <id>-<vp>-A.png / -B.png and a times.json with the load time of each model (ms, from opening the record).
 import fs from 'fs';
 const D=(process.argv[2]||'.')+'/', VP=process.argv[3]||'desk';
@@ -13,6 +14,7 @@ for(const id of IDS){
   if(process.env.CDN){const M=process.env.CDN+'/node_modules/';
     const map=u=>u.includes('leaflet/1.9.4/')?M+'leaflet/dist/leaflet.js':u.includes('three.js/0.160.0/')?(fs.existsSync(M+'three160')?M+'three160':M+'three')+'/build/three.min.js':u.includes('topojson/3.0.2/')?M+'topojson/dist/topojson.min.js':/three@0\.1\d\d\.\d\//.test(u)?M+'three/'+u.split(/three@0\.1\d\d\.\d\//)[1].split('?')[0]:null;
     await p.route(/cdnjs|jsdelivr|unpkg/,r=>{const f=map(r.request().url());return f&&fs.existsSync(f)?r.fulfill({path:f,contentType:'application/javascript',headers:{'access-control-allow-origin':'*'}}):r.abort()})}
+  if(process.env.NODRACO)await p.route(/draco_(decoder|wasm_wrapper)/,r=>r.abort());
   p.on('pageerror',e=>console.log(id,'ERR',e.message));
   p.on('console',m=>{if(m.type()==='error')console.log(id,'console',m.text().slice(0,200))});
   const t0=Date.now();
@@ -22,6 +24,7 @@ for(const id of IDS){
   await p.waitForSelector('#dioStage canvas',{timeout:120000});
   times[id]=Date.now()-t0;
   await p.waitForTimeout(6000);
+  times[id+':fmt']=await p.evaluate(()=>document.querySelector('.dio-wrap')?.dataset.fmt);
   times[id+':stats']=await p.evaluate(()=>window.__dio&&__dio.cur&&__dio.cur.stats?__dio.cur.stats():null).catch(()=>null);
   const bx=await p.locator('#dioStage canvas').boundingBox();const clip={x:bx.x,y:bx.y,width:bx.width,height:bx.height};
   await p.screenshot({path:`${D}${id}-${VP}-A.png`,clip,timeout:120000});

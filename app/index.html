@@ -2039,7 +2039,7 @@ function spiderOpen(s){const p0=map.latLngToContainerPoint(s.coords),vis=new Set
 /* hovering a site warms the cache for its 3D model, so the record opens with it sooner */
 const PREF=new Set();
 function prefetchSite(id){if(PREF.has(id)||!DIOS[id])return;PREF.add(id);
-  for(const f of [`dio/${id}.json${dioV(id+".json")}`,`dio/${id}.glb.png${dioV(id+".glb.png")}`]){const l=document.createElement("link");l.rel="prefetch";l.href=f;document.head.appendChild(l)}}
+  for(const f of [`dio/${id}.json${dioV(id+".json")}`,dioPng(id)]){const l=document.createElement("link");l.rel="prefetch";l.href=f;document.head.appendChild(l)}}
 function syncMarkers(){
   const vis=new Set(filtered().map(s=>s.id));
   const z=map.getZoom();
@@ -3435,11 +3435,39 @@ const DIOS={"guimaraes-citania-de-briteiros":{"cap":"Estruturas georreferenciada
 const dioLuz=id=>{const o=JSON.parse(JSON.stringify(LUZ)),x=(DIOS[id]||{}).luz||{};for(const k in x)o[k]=x[k]&&typeof x[k]==="object"&&!Array.isArray(x[k])?{...o[k],...x[k]}:x[k];return o};
 const EVL={conf:"Confirmado",doc:"Reconstituído com fundamento documental",hip:"Hipotético"},EVC={conf:"#6d7f4f",doc:"#3f74a8",hip:"#c4772f"};
 const DIO={mods:null,cur:null};window.__dio=DIO;   // read by the capture tests (draw calls, frame time)
-const DIOV={"braga-castro-de-santa-marta-das-corticas.glb.png":"6dba8a20","braga-castro-de-santa-marta-das-corticas.json":"7f3f24c0","braga-castro-maximo.glb.png":"d592f640","braga-castro-maximo.json":"9a17d5e0","guimaraes-castro-de-sabroso.glb.png":"64216598","guimaraes-castro-de-sabroso.json":"32a70b7b","guimaraes-castro-de-sao-miguel-o-anjo.glb.png":"2ac2d50f","guimaraes-castro-de-sao-miguel-o-anjo.json":"6ee131b3","guimaraes-citania-de-briteiros.glb.png":"d70c70f7","guimaraes-citania-de-briteiros.json":"5b836c97"};   // short content hash of each file in dio/ (written by build.py), so a new model is never hidden by the browser cache
+const DIOV={"braga-castro-de-santa-marta-das-corticas.drc.glb.png":"ff3c75f0","braga-castro-de-santa-marta-das-corticas.glb.png":"6dba8a20","braga-castro-de-santa-marta-das-corticas.json":"7f3f24c0","braga-castro-maximo.drc.glb.png":"eb04d49d","braga-castro-maximo.glb.png":"d592f640","braga-castro-maximo.json":"9a17d5e0","guimaraes-castro-de-sabroso.drc.glb.png":"6616a765","guimaraes-castro-de-sabroso.glb.png":"64216598","guimaraes-castro-de-sabroso.json":"32a70b7b","guimaraes-castro-de-sao-miguel-o-anjo.drc.glb.png":"43b083df","guimaraes-castro-de-sao-miguel-o-anjo.glb.png":"2ac2d50f","guimaraes-castro-de-sao-miguel-o-anjo.json":"6ee131b3","guimaraes-citania-de-briteiros.drc.glb.png":"12e75300","guimaraes-citania-de-briteiros.glb.png":"d70c70f7","guimaraes-citania-de-briteiros.json":"5b836c97"};   // short content hash of each file in dio/ (written by build.py), so a new model is never hidden by the browser cache
 const dioV=f=>DIOV[f]?`?v=${DIOV[f]}`:"";
+// the model file: the Draco one (<id>.drc.glb.png, about half the size) where it exists and WebAssembly runs, else the plain <id>.glb.png
+const dioDrc=id=>!!DIOV[id+".drc.glb.png"]&&typeof WebAssembly==="object"&&!DIO.noDraco;
+const dioPng=(id,plain)=>{const f=id+(!plain&&dioDrc(id)?".drc":"")+".glb.png";return`dio/${f}${dioV(f)}`};
+/* Draco decoder (google/draco 1.5.7, glTF build, from three 0.170: app/draco/), run on the main thread: the artifact may refuse the
+   Web Workers made from blob: URLs that three's DRACOLoader uses. The wrapper and the .wasm come from app/draco/, or from the CDN.
+   Any failure falls back to the plain model (dioBuild), so a browser or page that cannot run it only loses the smaller download. */
+function dioDracoMod(){if(!DIO.draco)DIO.draco=(async()=>{
+  const get=async u=>{const r=await fetch(u);if(!r.ok)throw Error(u+" "+r.status);return r.arrayBuffer()};
+  const wasmBinary=await get("draco/draco_decoder.wasm").catch(()=>get(TJ+"examples/jsm/libs/draco/gltf/draco_decoder.wasm"));
+  const tag=src=>new Promise((ok,ko)=>{const e=document.createElement("script");e.src=src;e.onload=ok;e.onerror=()=>ko(Error(src));document.head.appendChild(e)});
+  if(typeof DracoDecoderModule!=="function")await tag("draco/draco_wasm_wrapper.js").catch(()=>tag(TJ+"examples/jsm/libs/draco/gltf/draco_wasm_wrapper.js"));
+  return await new Promise((ok,ko)=>{DracoDecoderModule({wasmBinary,onModuleLoaded:draco=>ok({draco})});setTimeout(()=>ko(Error("Draco: tempo esgotado")),20000)});   // {draco}: the module is a thenable
+})().catch(e=>{DIO.draco=null;throw e});return DIO.draco}
+function dioDracoLoader(DRACOLoader){
+  // same decoding as the worker inside three's DRACOLoader (decodeGeometry/decodeAttribute/decodeIndex), then its _createGeometry
+  const decode=(draco,dec,arr,cfg)=>{const m=new draco.Mesh(),st=dec.DecodeArrayToMesh(arr,arr.byteLength,m);
+    try{if(!st.ok()||!m.ptr)throw Error("Draco: "+st.error_msg());const out={index:null,attributes:[]},np=m.num_points();
+      for(const name in cfg.attributeIDs){const Ty=self[cfg.attributeTypes[name]],at=dec.GetAttributeByUniqueId(m,cfg.attributeIDs[name]),nc=at.num_components(),nv=np*nc,bl=nv*Ty.BYTES_PER_ELEMENT;
+        const dt={Float32Array:draco.DT_FLOAT32,Int8Array:draco.DT_INT8,Int16Array:draco.DT_INT16,Int32Array:draco.DT_INT32,Uint8Array:draco.DT_UINT8,Uint16Array:draco.DT_UINT16,Uint32Array:draco.DT_UINT32}[Ty.name];
+        const ptr=draco._malloc(bl);dec.GetAttributeDataArrayForAllPoints(m,at,dt,bl,ptr);const a=new Ty(draco.HEAPF32.buffer,ptr,nv).slice();draco._free(ptr);
+        const r={name,array:a,itemSize:nc};if(name==="color")r.vertexColorSpace=cfg.vertexColorSpace;out.attributes.push(r)}
+      const ni=m.num_faces()*3,ptr=draco._malloc(ni*4);dec.GetTrianglesUInt32Array(m,ni*4,ptr);out.index={array:new Uint32Array(draco.HEAPF32.buffer,ptr,ni).slice(),itemSize:1};draco._free(ptr);
+      return out}finally{draco.destroy(m)}};
+  return new class extends DRACOLoader{
+    preload(){return this}
+    decodeGeometry(buf,cfg){return dioDracoMod().then(({draco})=>{const dec=new draco.Decoder();try{return this._createGeometry(decode(draco,dec,new Int8Array(buf),cfg))}finally{draco.destroy(dec)}})}
+  }}
+DIO.dracoLoader=dioDracoLoader;   // for the tests
 const TJ="https://cdn.jsdelivr.net/npm/three@0.170.0/";
 function dioMods(){if(!DIO.mods)DIO.mods=Promise.all([import(TJ+"build/three.module.js"),import(TJ+"examples/jsm/loaders/GLTFLoader.js"),import(TJ+"examples/jsm/controls/OrbitControls.js"),import(TJ+"examples/jsm/environments/RoomEnvironment.js"),
-  import(TJ+"examples/jsm/postprocessing/EffectComposer.js"),import(TJ+"examples/jsm/postprocessing/RenderPass.js"),import(TJ+"examples/jsm/postprocessing/GTAOPass.js"),import(TJ+"examples/jsm/postprocessing/OutputPass.js")]).catch(e=>{DIO.mods=null;throw e});return DIO.mods}
+  import(TJ+"examples/jsm/postprocessing/EffectComposer.js"),import(TJ+"examples/jsm/postprocessing/RenderPass.js"),import(TJ+"examples/jsm/postprocessing/GTAOPass.js"),import(TJ+"examples/jsm/postprocessing/OutputPass.js"),import(TJ+"examples/jsm/loaders/DRACOLoader.js").catch(()=>({}))]).catch(e=>{DIO.mods=null;throw e});return DIO.mods}
 // the model's layers, as in the audit plan: A what is there today, B how sure each structure is (evidence colours on the current state),
 // C the reconstitution (only where there is one), D the bare relief with contour lines, E one structure on its own
 const dioViews=d=>[["A","Atual","A · Estado atual do sítio"],["B","Interpretação","B · Interpretação: grau de evidência de cada estrutura"],
@@ -3466,17 +3494,21 @@ async function dioMount(s){
 async function dioBuild(s){
   let M;try{M=await dioMods()}catch(e){const l=$("#dioStage .dio-load");if(l)l.innerHTML=`Não foi possível carregar o 3D.<br><small style="font-family:var(--f-mono);letter-spacing:0;text-transform:none">${esc(String(e&&e.message||e).slice(0,160))}</small>`;return}
   if(S.sel!==s.id||!$("#dioStage"))return;
-  const [T,{GLTFLoader},{OrbitControls},{RoomEnvironment},{EffectComposer},{RenderPass},{GTAOPass},{OutputPass}]=M;
+  const [T,{GLTFLoader},{OrbitControls},{RoomEnvironment},{EffectComposer},{RenderPass},{GTAOPass},{OutputPass},{DRACOLoader}]=M;
   // device tier: fine pointer on a large screen = computer (4096 shadow + ambient occlusion); touch or small screen = 1024 shadow, no post-processing
   const FINE=matchMedia("(pointer:fine)").matches&&Math.min(innerWidth,innerHeight)>600,RM=matchMedia("(prefers-reduced-motion: reduce)").matches;
   const meta=await fetch(`dio/${s.id}.json${dioV(s.id+".json")}`).then(r=>r.json()).catch(()=>null);
-  const ld=new GLTFLoader();
-  let g;try{let bin=null;try{const rp=await fetch(`dio/${s.id}.glb.png${dioV(s.id+".glb.png")}`);if(rp.ok){const bm=await createImageBitmap(await rp.blob(),{premultiplyAlpha:"none",colorSpaceConversion:"none"});const cv=document.createElement("canvas");cv.width=bm.width;cv.height=bm.height;const cx=cv.getContext("2d",{willReadFrequently:true});cx.drawImage(bm,0,0);const px=cx.getImageData(0,0,bm.width,bm.height).data,rgb=new Uint8Array(bm.width*bm.height*3);for(let i=0,j=0;i<px.length;i+=4){rgb[j++]=px[i];rgb[j++]=px[i+1];rgb[j++]=px[i+2]}const n=rgb[0]|rgb[1]<<8|rgb[2]<<16|rgb[3]<<24;bin=rgb.slice(4,4+n)}}catch(e){bin=null}
+  // the GLB bytes are packed in the RGB pixels of a PNG after a 4-byte little-endian length (mkpng.py)
+  const unpng=async u=>{const rp=await fetch(u);if(!rp.ok)throw Error(u+" "+rp.status);const bm=await createImageBitmap(await rp.blob(),{premultiplyAlpha:"none",colorSpaceConversion:"none"});const cv=document.createElement("canvas");cv.width=bm.width;cv.height=bm.height;const cx=cv.getContext("2d",{willReadFrequently:true});cx.drawImage(bm,0,0);const px=cx.getImageData(0,0,bm.width,bm.height).data,rgb=new Uint8Array(bm.width*bm.height*3);for(let i=0,j=0;i<px.length;i+=4){rgb[j++]=px[i];rgb[j++]=px[i+1];rgb[j++]=px[i+2]}const n=rgb[0]|rgb[1]<<8|rgb[2]<<16|rgb[3]<<24;return rgb.slice(4,4+n)};
+  let g=null,dioFmt="glb";
+  if(dioDrc(s.id)&&DRACOLoader){try{const ld=new GLTFLoader();ld.setDRACOLoader(dioDracoLoader(DRACOLoader));g=await ld.parseAsync((await unpng(dioPng(s.id))).buffer,"");dioFmt="draco"}
+    catch(e){console.warn("Draco indisponível, a carregar o modelo sem compressão:",e);DIO.noDraco=true;g=null}}
+  if(!g)try{const ld=new GLTFLoader();let bin=null;try{bin=await unpng(dioPng(s.id,true))}catch(e){bin=null}
   if(!bin){let b64="";for(let k=0;;k++){const r=await fetch(`dio/${s.id}.glb.${k}.txt`);if(!r.ok){if(!k)b64=await fetch(`dio/${s.id}.glb.txt`).then(r=>{if(!r.ok)throw 0;return r.text()});break}b64+=(await r.text()).trim()}bin=Uint8Array.from(atob(b64.trim()),c=>c.charCodeAt(0))}g=await ld.parseAsync(bin.buffer,"")}catch(e){const l=$("#dioStage .dio-load");if(l)l.innerHTML=`Não foi possível carregar a maqueta.<br><small style="font-family:var(--f-mono);letter-spacing:0;text-transform:none">${esc(String(e&&e.message||e).slice(0,160))}</small>`;console.error(e);return}
   if(S.sel!==s.id)return;
   const CAT={};(meta&&meta.cat||[]).forEach(c=>CAT[c.id]=c);const SRC=meta&&meta.sources||{};
   const LZ=dioLuz(s.id);
-  const wrap=document.createElement("div");wrap.className="dio-wrap";
+  const wrap=document.createElement("div");wrap.className="dio-wrap";wrap.dataset.fmt=dioFmt;
   const r=new T.WebGLRenderer({antialias:true,alpha:true});r.setPixelRatio(Math.min(devicePixelRatio,2));r.outputColorSpace=T.SRGBColorSpace;r.toneMapping=LZ.tone==="aces"?T.ACESFilmicToneMapping:T.NeutralToneMapping;r.toneMappingExposure=LZ.exposure;
   r.shadowMap.enabled=true;r.shadowMap.type=T.PCFSoftShadowMap;wrap.appendChild(r.domElement);
   r.domElement.style.opacity=0;if(!RM)r.domElement.style.transition="opacity .8s ease";

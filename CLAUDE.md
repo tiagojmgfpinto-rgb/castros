@@ -6,7 +6,7 @@ Escreve em português (muitas vezes no telemóvel); responder sempre em portugu�
 
 - **App publicada:** https://claude.ai/artifact/J1zReem6sDceCc7CVTBHB8 (partilhada "qualquer pessoa com o link").
   Para atualizar: Artifact `publish` com `file_path` = `app/index.html` e `url` = esse link; ficheiros de apoio em `files`
-  (`{"caminho/publicado": {"from": "app/..."}}`). Ler o artifact primeiro (`action: read`) numa conversa nova.
+  (`{"caminho/publicado": {"from": "app/..."}}`; incluir `dio/<id>.drc.glb.png` e `draco/draco_wasm_wrapper.js`, `draco/draco_decoder.wasm`). Ler o artifact primeiro (`action: read`) numa conversa nova.
   As `capabilities` (user, db com coleções comments/history/extra, assets) passam de versão para versão: omitir o campo.
 - **Site público (GitHub Pages):** https://tiagojmgfpinto-rgb.github.io/castros/ — o workflow `.github/workflows/publicar.yml`
   corre `python3 build.py` e `python3 tools/site.py` (→ `_site/`, com esqueleto HTML e metas; `tools/pages.py` gera `/castros/`, `/castro/<id>/` com canónico, Open Graph e schema.org, `/creditos/`, `sitemap.xml` e `robots.txt`, tudo a partir dos dados) a cada push no `main`, como no castelos-site.
@@ -20,7 +20,8 @@ Escreve em português (muitas vezes no telemóvel); responder sempre em portugu�
 | `app/src.html` | código-fonte da app (HTML+CSS+JS num ficheiro; Leaflet 1.9.4; three.js 0.170 ESM no visor das maquetas e 0.160 UMD na maqueta do noroeste, via CDN) |
 | `app/index.html` | build publicado (gerado por `python3 build.py`) |
 | `data.json` | dados completos dos sítios (fonte). **Depois de editar, correr `python3 tools/split.py`** → `app/data.json` (índice, 91 KB), `app/fichas.json` (`hist`, `sa`, `fic`, carregado logo a seguir; um link `#<id>` espera por ele) + `app/texts.json` (textos da tese, em segundo plano) |
-| `app/dio/<id>.glb.png`, `<id>.json` | maquetas 3D por sítio (GLB dentro de PNG) + catálogo de estruturas/fontes/árvores |
+| `app/dio/<id>.glb.png`, `<id>.drc.glb.png`, `<id>.json` | maquetas 3D por sítio (GLB dentro de PNG; `.drc` = o mesmo com Draco, carregado primeiro) + catálogo de estruturas/fontes/árvores |
+| `app/draco/` | descodificador Draco (`draco_wasm_wrapper.js` + `draco_decoder.wasm`), publicado com a app |
 | `maquetas/<id>.json`, `maquetas/luz.json` | dados do visualizador de cada maqueta (`order`, `cap`, `gaps`, `layers`, `noB`, `cam`, `tour` [{sid,title,text}], `luz` opcional) e luz comum; o `build.py` escreve-os em `DIOS`/`LUZ`. Uma maqueta nova = GLB + `app/dio/<id>.json` do Blender + este ficheiro, sem mexer no código |
 | `app/maq-*.jpg`, `app/maq-h.png` | textura e alturas da maqueta do noroeste (gerados por `tools/maquette.py`) |
 | `blend/` | scripts Blender das maquetas por sítio e dados georreferenciados (plantas, ajustes, casas, muros) |
@@ -59,7 +60,11 @@ sh tools/fetch_dem.sh            # só para refazer a maqueta do noroeste
 5. **Exportar**: `bash mkparts.sh <id>` → `app/dio/<id>.glb.png`. Corre `tools/gltf/lighten.mjs` (instalar uma vez: `npm ci --prefix tools/gltf`):
    terreno simplificado com meshoptimizer para ~60 mil triângulos (borda fixa; erro vertical medido em cada vértice original e escrito
    em `tools/gltf/reports/<id>.json`; nov. 2026: p95 5–13 cm, máximo 0,3–1,4 m só em faces verticais de pedreiras), texturas ≤ 2048 px,
-   weld + quantize (14/8/12), **sem Draco** (o descodificador não corre no artifact) e sem apagar os nós vazios `LBL-*` (rótulos).
+   weld + quantize (14/8/12) e sem apagar os nós vazios `LBL-*` (rótulos) → `app/dio/<id>.glb.png`; depois `tools/gltf/draco.mjs`
+   (Google Draco, edgebreaker, sem weld nem prune; verifica nós, malhas e triângulos não degenerados; as posições ficam exatas) → `app/dio/<id>.drc.glb.png`,
+   cerca de metade do tamanho (nov. 2026: as 5 maquetas 11,4 → 6,1 MB). O visor carrega o `.drc` e descodifica-o na thread principal com
+   `app/draco/` (descodificador glTF do Draco 1.5.7 vindo do three 0.170, WebAssembly; se falhar, a cópia na CDN); se o Draco falhar por
+   qualquer motivo, carrega o `.glb.png` normal. Por isso os dois ficheiros são publicados. `NODRACO=1` nos testes `dio_all`/`dio_pick` força o recurso.
    No visor as árvores têm nível de pormenor: uma copa com menos de 24 px no ecrã usa uma cópia simplificada do protótipo (agrupamento de vértices, refeito com a câmara).
    No visor as estruturas são desenhadas juntas por material (Briteiros 906 → 58 chamadas de desenho); as peças originais ficam na camada 1 para a lógica e a seleção.
    O artifact não serve `.glb`; o PNG reduz ~3× e o visualizador extrai os bytes. Limite de 16 MB por ficheiro publicado.
