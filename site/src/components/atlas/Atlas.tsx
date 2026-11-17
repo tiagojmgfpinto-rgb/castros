@@ -1,0 +1,188 @@
+import { Canvas, useFrame, useThree } from "@react-three/fiber";
+import { useEffect, useMemo, useRef, useState } from "react";
+import * as THREE from "three";
+import { paraCena, projectar, TERRITORIOS, type TerritorioId } from "../../lib/territorios";
+import { Camara, vistaInicial } from "./Camara";
+import { Cursor } from "./Cursor";
+import { Linhas } from "./Linhas";
+import { Marcadores, tocar } from "./Marcadores";
+import { useAtlas, type MonumentoResumo } from "./store";
+import { Terreno } from "./Terrain";
+import { Ficha } from "../ui/Ficha";
+import { Interface } from "../ui/Interface";
+import { BASE } from "../../lib/base";
+import { caminhoFicha } from "../../lib/rotas";
+
+/** Sol baixo de noroeste, como no relevo sombreado clássico; a sombra acompanha a câmara. */
+function Luz() {
+  const sol = useRef<THREE.DirectionalLight>(null);
+  const controls = useThree((s) => s.controls) as unknown as { target: THREE.Vector3 } | null;
+  const camera = useThree((s) => s.camera);
+  const dir = useMemo(() => new THREE.Vector3(-0.62, 0.72, -0.5).normalize(), []);
+  useFrame(() => {
+    const l = sol.current;
+    if (!l || !controls) return;
+    const alvo = controls.target;
+    const dist = camera.position.distanceTo(alvo);
+    // à escala do país o sombreado vem das normais; sombras projetadas só ao aproximar
+    l.castShadow = dist < 160;
+    const raio = Math.min(Math.max(dist * 1.25, 3), 260);
+    l.position.copy(alvo).addScaledVector(dir, raio * 2);
+    l.target.position.copy(alvo);
+    l.target.updateMatrixWorld();
+    const sc = l.shadow.camera;
+    sc.left = -raio;
+    sc.right = raio;
+    sc.top = raio;
+    sc.bottom = -raio;
+    sc.near = raio * 0.2;
+    sc.far = raio * 4;
+    sc.updateProjectionMatrix();
+    l.shadow.bias = -0.0005;
+    l.shadow.normalBias = raio * 0.004;
+  });
+  return (
+    <>
+      <hemisphereLight args={["#f2f6ff", "#8a7a66", 1.62]} />
+      <directionalLight ref={sol} color="#fff1dc" intensity={2.05} castShadow shadow-mapSize={[4096, 4096]} />
+    </>
+  );
+}
+
+
+/**
+ * Sincroniza a seleção com o endereço (#guimaraes), como ligação partilhável. Um monumento que ainda não está no
+ * mapa (sem maqueta publicada) abre a sua página.
+ */
+function useHash(monumentos: MonumentoResumo[], todos: MonumentoResumo[]) {
+  const selecionado = useAtlas((s) => s.selecionado);
+  useEffect(() => {
+    const ler = () => {
+      // Um # mal formado (ex.: #%E0) faria rebentar o decodeURIComponent; tratamos como "sem seleção".
+      let id = "";
+      try {
+        id = decodeURIComponent(location.hash.slice(1));
+      } catch {
+        return;
+      }
+      const m = monumentos.find((x) => x.id === id);
+      const fora = !m && todos.find((x) => x.id === id);
+      if (fora) location.replace(`${BASE}${caminhoFicha(fora)}`);
+      if (m) {
+        const s = useAtlas.getState();
+        if (s.territorio !== m.territorio) s.setTerritorio(m.territorio);
+        s.selecionar(m.id);
+      }
+    };
+    ler();
+    addEventListener("hashchange", ler);
+    return () => removeEventListener("hashchange", ler);
+  }, [monumentos, todos]);
+  useEffect(() => {
+    const novo = selecionado ? `#${selecionado}` : " ";
+    if ((location.hash || " ") !== novo) history.replaceState(null, "", selecionado ? novo : location.pathname + location.search);
+  }, [selecionado]);
+}
+
+/** Ao selecionar um monumento, a câmara voa até ele. */
+function useVooSelecao(monumentos: MonumentoResumo[]) {
+  const selecionado = useAtlas((s) => s.selecionado);
+  const territorio = useAtlas((s) => s.territorio);
+  useEffect(() => {
+    if (!selecionado) return;
+    const m = monumentos.find((x) => x.id === selecionado);
+    if (!m) return;
+    const t = TERRITORIOS[territorio];
+    const [x, y] = projectar(t, m.lon, m.lat);
+    const [sx, sz] = paraCena(t, x, y);
+    // pequeno atraso para o terreno do novo território existir antes do voo
+    const id = setTimeout(() => useAtlas.getState().voar({ x: sx, z: sz, distancia: 45, inclinacao: 38 }), 60);
+    return () => clearTimeout(id);
+  }, [selecionado, territorio, monumentos]);
+}
+
+/**
+ * Com a ficha aberta, o mapa fica parado (só se redesenha se algo o pedir) depois de o voo acabar e enquanto o rato
+ * não está sobre ele: assim o mapa (terreno e sombras de 4096 px) não disputa a placa gráfica com a maqueta 3D.
+ */
+function useRepouso(fichaAberta: boolean) {
+  const [ativo, setAtivo] = useState(false);
+  const sobre = useRef(false);
+  const relogio = useRef<ReturnType<typeof setTimeout>>(undefined);
+  const agendar = (ms: number) => {
+    clearTimeout(relogio.current);
+    relogio.current = setTimeout(() => !sobre.current && setAtivo(true), ms);
+  };
+  useEffect(() => {
+    setAtivo(false);
+    if (fichaAberta) agendar(4000);
+    return () => clearTimeout(relogio.current);
+  }, [fichaAberta]); // eslint-disable-line react-hooks/exhaustive-deps
+  return {
+    ativo: fichaAberta && ativo,
+    acordar: () => {
+      sobre.current = true;
+      clearTimeout(relogio.current);
+      setAtivo(false);
+    },
+    adormecer: () => {
+      sobre.current = false;
+      if (fichaAberta) agendar(2500);
+    },
+  };
+}
+
+export default function Atlas({ monumentos: todos }: { monumentos: MonumentoResumo[] }) {
+  // o mapa principal só mostra os monumentos com a maqueta concluída e publicada; os outros estão em Próximas adições
+  const monumentos = useMemo(() => todos.filter((x) => x.noMapa), [todos]);
+  const territorio = useAtlas((s) => s.territorio);
+  const selecionado = useAtlas((s) => s.selecionado);
+  const m = monumentos.find((x) => x.id === selecionado) ?? null;
+  useHash(monumentos, todos);
+  useVooSelecao(monumentos);
+  const repouso = useRepouso(!!m);
+
+  // com a ficha aberta, o mapa encolhe para a metade esquerda e o monumento fica ao centro dela
+  return (
+    <div className="atlas" data-ficha={m ? "1" : "0"}>
+      <div className="atlas-mapa" onPointerEnter={repouso.acordar} onPointerLeave={repouso.adormecer}>
+        <Canvas
+          shadows="percentage"
+          dpr={[1, 1.5]}
+          frameloop={repouso.ativo ? "demand" : "always"}
+          camera={{ fov: 32, near: 0.5, far: 6000, position: [0, 500, 400] }}
+          gl={{ antialias: true, alpha: true, powerPreference: "high-performance" }}
+          onCreated={({ gl }) => {
+            gl.toneMapping = THREE.NoToneMapping;
+            // fundo transparente: à volta da maqueta vê-se a mesa escura do CSS
+            gl.setClearColor(0x000000, 0);
+          }}
+          onPointerMissed={() => {
+            // o marcador sob o rato é escolhido por proximidade no ecrã, mesmo sem tocar na malha
+            const s = useAtlas.getState();
+            if (s.sobre) tocar(s.sobre);
+            else if (s.roda) s.setRoda(null);
+          }}
+        >
+          <Cena territorio={territorio} monumentos={monumentos} />
+        </Canvas>
+        <Interface monumentos={monumentos} todos={todos} vistaInicial={() => useAtlas.getState().voar(vistaInicial(useAtlas.getState().territorio))} />
+      </div>
+      {m && <Ficha key={m.id} m={m} monumentos={monumentos} onFechar={() => useAtlas.getState().selecionar(null)} />}
+    </div>
+  );
+}
+
+function Cena({ territorio, monumentos }: { territorio: TerritorioId; monumentos: MonumentoResumo[] }) {
+  return (
+    <>
+      <Luz />
+      <Terreno territorio={territorio}>
+        <Linhas />
+        <Marcadores monumentos={monumentos} territorio={territorio} />
+        <Camara territorio={territorio} />
+        <Cursor territorio={territorio} />
+      </Terreno>
+    </>
+  );
+}

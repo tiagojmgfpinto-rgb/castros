@@ -1,0 +1,16 @@
+---
+import Base from "../layouts/Base.astro";
+import Atlas from "../components/atlas/Atlas";
+import { todosMonumentos, resumo } from "../lib/monumentos";
+const monumentos = (await todosMonumentos()).map(resumo);
+---
+<Base classe="pagina-atlas">
+  <h1 class="sr-only">Castros do Noroeste · Atlas 3D dos castros do Noroeste de Portugal</h1>
+  <Atlas client:only="react" monumentos={monumentos} />
+  <noscript>
+    <div class="sem-webgl">
+      <p>Este atlas precisa de JavaScript e WebGL.</p>
+      <a href={`${import.meta.env.BASE_URL}castros/`}>Ver a lista de castros</a>
+    </div>
+  </noscript>
+</Base>

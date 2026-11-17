@@ -1,0 +1,962 @@
+{
+  "monumento": "guimaraes-castro-de-sabroso",
+  "titulo": "Castro de Sabroso",
+  "variante": "estado-atual",
+  "versao": "1.0",
+  "data": "2025-07-20",
+  "origem": {
+    "lat": 41.511944,
+    "lon": -8.341528,
+    "nota": "Ponto do sítio na tese. Eixos da maqueta: x para este, y para cima, z para sul, em metros; o relevo está exagerado 1,15× na vertical."
+  },
+  "fontes": {
+    "cardozo1930": {
+      "titulo": "Cardozo, M. (1930). Planta do Castro de Sabroso, levantamento e desenho do autor (Fig. 17), com o limite da zona de protecção balizada em 1929."
+    },
+    "era2021": {
+      "titulo": "Painel interpretativo do Castro de Sabroso (ERA Arqueologia / Município de Guimarães, 2021), planta do estado actual."
+    },
+    "loureiro1999": {
+      "titulo": "Loureiro, S. (1999). O Castro de Sabroso (Guimarães). Um estudo espacial à luz dos dados arqueológicos. Revista de Guimarães, 109, 13-50."
+    },
+    "cruz2015": {
+      "titulo": "Cruz, G. & Antunes, J. (2015). Castro de Sabroso. Notícia dos trabalhos arqueológicos de 2015. Revista de Guimarães, 124-125, 237-249."
+    },
+    "pereira1938": {
+      "titulo": "Páginas inéditas de Félix Alves Pereira (1938). Revista de Guimarães, 48(4), 277-282."
+    },
+    "cardozo1976": {
+      "titulo": "Cardozo, M. (1976), citado em Loureiro (1999): muralha em talude com 3 a 5 m de altura e 4 m de largura."
+    },
+    "hawkes1958": {
+      "titulo": "Hawkes, C. (1958; publ. 1971), citado em Loureiro (1999): fases da muralha e entradas N, SO e SE."
+    },
+    "sarmento1909": {
+      "titulo": "Sarmento, F. M. (1909), citado em Loureiro (1999): 35 casas circulares, diâmetro médio 4,70 m; placas de xisto como possível cobertura."
+    },
+    "dgt": {
+      "titulo": "DGT — Ortofotomapa 2021 (25 cm), usado só para orientar a cor do solo."
+    },
+    "lidar": {
+      "titulo": "DGT — LiDAR 2025, bloco 182505: nuvem de pontos classificada (LO-182505-07-2025, ≈ 12 pontos de solo por m²), MDT e MDS de 50 cm. Terreno de 25 cm interpolado dos pontos de solo; árvores com a altura real do modelo de copas (MDS − MDT); planta de 1930 georreferenciada pelo talude da muralha do recinto superior (erro médio ≈ 0,9 m). Relevo exagerado 1,15×."
+    }
+  },
+  "limitacoes": [
+    "Estruturas georreferenciadas a partir da planta de Mário Cardozo (1930), ajustada ao talude da muralha no LiDAR da DGT (2025), e do painel do sítio (2021); relevo LiDAR de 25 cm exagerado 1,15×; árvores nas posições e alturas medidas pelo LiDAR, rareadas dentro das muralhas.",
+    "Portas das casas: a orientação não está documentada na planta de 1930 e não foi representada.",
+    "A única casa com vestíbulo referida por Loureiro (1999) não está identificada na planta; nenhuma casa tem vestíbulo no modelo.",
+    "Pracetas lajeadas e arruamentos: referidos nas fontes, mas sem traçado publicado com precisão suficiente; não modelados.",
+    "Altura original das muralhas do alargamento (3.ª fase) e dos muros interiores: não publicada; valores da reconstituição hipotéticos.",
+    "Cobertura das casas: cónica por paralelo com as reconstituições de Martins Sarmento; material desconhecido.",
+    "Relevo: terreno de 25 cm interpolado dos pontos de solo do LiDAR da DGT (2025, bloco 182505), exagerado 1,15×. A muralha do recinto superior já está no terreno (o talude de pedra foi classificado como solo); no estado atual a pedra cobre esse talude.",
+    "Árvores: posições e alturas reais do modelo de copas do LiDAR (MDS − MDT); dentro das muralhas ficam só 10 % (recinto superior) a 15 % das árvores, e nenhuma a menos de 5 m das muralhas, para se lerem as ruínas. A largura da copa de cada árvore vem do LiDAR; a espécie não vem do LiDAR: segundo o Tiago, a mata atual é sobretudo de eucalipto, com castanheiros, carvalhos e sobreiros; as copas altas e estreitas são tratadas como eucaliptos e as largas como castanheiros (cerca de 60 % eucaliptos, 16 % castanheiros, 16 % carvalhos, 8 % sobreiros).",
+    "A planta de 1930 regista 33 casas e uma cisterna; Sarmento contou 35 casas.",
+    "Georreferenciação: planta de 1930 ajustada ao talude da muralha do recinto superior visível no LiDAR (erro médio ≈ 0,9 m; o ajuste anterior, pelos marcos da zona de proteção, deixava a planta cerca de 20 m a norte). Validação: recinto superior com 0,73 ha (publicado: 0,7 ha). As casas e os muros interiores seguem a planta; nos troços com floresta (alargamento sul e nascente) a muralha não foi verificada no LiDAR."
+  ],
+  "placas": [
+    "C1",
+    "E1",
+    "M1",
+    "M2",
+    "H01"
+  ],
+  "elementos": [
+    {
+      "id": "M1",
+      "nome": "Muralha do recinto superior, troço poente",
+      "grupo": "Muralhas",
+      "estado": "estado-atual",
+      "confianca": "alta",
+      "descricao": "Traçado da planta de 1930 (Cardozo), confirmado pelo painel de 2021 e pelo talude da muralha no modelo do terreno LiDAR da DGT (2025). No estado atual a pedra cobre o talude real. Altura de reconstituição segundo Cardozo (1976): 3 a 5 m; face externa com 5,20 m medida em 2015. Fase: 1.ª/2.ª fase.",
+      "fontes": [
+        "cardozo1930",
+        "era2021",
+        "lidar",
+        "cardozo1976"
+      ],
+      "medidas": "largura ≈ 4 m · desnível atual na linha da muralha ≈ 3.1 m (LiDAR) · reconstituição: face externa com 5 m",
+      "resumo": "Traçado da planta de 1930 (Cardozo)",
+      "ancora": [
+        -24.57,
+        15.38,
+        -82.69
+      ]
+    },
+    {
+      "id": "M2",
+      "nome": "Muralha do recinto superior, troço nascente (aparelho poligonal)",
+      "grupo": "Muralhas",
+      "estado": "estado-atual",
+      "confianca": "alta",
+      "descricao": "Traçado da planta de 1930 (Cardozo), confirmado pelo painel de 2021 e pelo talude da muralha no modelo do terreno LiDAR da DGT (2025). No estado atual a pedra cobre o talude real. Altura de reconstituição segundo Cardozo (1976): 3 a 5 m; face externa com 5,20 m medida em 2015. Fase: 1.ª/2.ª fase.",
+      "fontes": [
+        "cardozo1930",
+        "era2021",
+        "lidar",
+        "cardozo1976",
+        "cruz2015"
+      ],
+      "medidas": "largura ≈ 4 m · desnível atual na linha da muralha ≈ 3.7 m (LiDAR) · reconstituição: face externa com 5.2 m",
+      "resumo": "Aparelho poligonal na face externa, que chega a 5,20 m de altura (Cruz & Antunes 2015)"
+    },
+    {
+      "id": "M3",
+      "nome": "Muralha do alargamento sul",
+      "grupo": "Muralhas",
+      "estado": "estado-atual",
+      "confianca": "alta",
+      "descricao": "Traçado da planta de 1930 (Cardozo), confirmado pelo painel de 2021 e pelo talude da muralha no modelo do terreno LiDAR da DGT (2025). No estado atual a pedra cobre o talude real. A altura original deste troço não está publicada: valor hipotético, por comparação com o recinto superior. Fase: 3.ª fase.",
+      "fontes": [
+        "cardozo1930",
+        "era2021",
+        "lidar",
+        "loureiro1999"
+      ],
+      "medidas": "largura ≈ 2.6 m · desnível atual na linha da muralha ≈ 1.7 m (LiDAR) · reconstituição: face externa com 3.5 m",
+      "resumo": "Traçado da planta de 1930 (Cardozo)"
+    },
+    {
+      "id": "M4",
+      "nome": "Muralha do alargamento nascente",
+      "grupo": "Muralhas",
+      "estado": "estado-atual",
+      "confianca": "alta",
+      "descricao": "Traçado da planta de 1930 (Cardozo), confirmado pelo painel de 2021 e pelo talude da muralha no modelo do terreno LiDAR da DGT (2025). No estado atual a pedra cobre o talude real. A altura original deste troço não está publicada: valor hipotético, por comparação com o recinto superior. Fase: 3.ª fase.",
+      "fontes": [
+        "cardozo1930",
+        "era2021",
+        "lidar",
+        "loureiro1999"
+      ],
+      "medidas": "largura ≈ 2.6 m · desnível atual na linha da muralha ≈ 2.7 m (LiDAR) · reconstituição: face externa com 3.5 m",
+      "resumo": "Traçado da planta de 1930 (Cardozo)"
+    },
+    {
+      "id": "E1",
+      "nome": "Entrada SE em corredor de cotovelo",
+      "grupo": "Entradas",
+      "estado": "estado-atual",
+      "confianca": "alta",
+      "descricao": "Muros do corredor segundo a planta de 1930; interpretação como entrada em cotovelo de Hawkes (1958). Altura reconstituída hipotética. Fase: 3.ª fase.",
+      "fontes": [
+        "cardozo1930",
+        "hawkes1958",
+        "loureiro1999"
+      ],
+      "medidas": "corredor com cerca de 18 m",
+      "resumo": "Corredor em cotovelo do último alargamento da muralha, segundo Hawkes (1958)",
+      "ancora": [
+        -55.08,
+        8.07,
+        29.21
+      ]
+    },
+    {
+      "id": "W01",
+      "nome": "Muro associado às habitações",
+      "grupo": "Muros",
+      "estado": "estado-atual",
+      "confianca": "alta",
+      "descricao": "Muros de pedra dispersos, associados às casas (Loureiro 1999). Traçado da planta de 1930; altura hipotética. Fase: —.",
+      "fontes": [
+        "cardozo1930",
+        "loureiro1999"
+      ],
+      "medidas": "largura ≈ 0,8 m",
+      "resumo": "Muros de pedra dispersos, associados às casas (Loureiro 1999)"
+    },
+    {
+      "id": "W02",
+      "nome": "Muro associado às habitações",
+      "grupo": "Muros",
+      "estado": "estado-atual",
+      "confianca": "alta",
+      "descricao": "Muros de pedra dispersos, associados às casas (Loureiro 1999). Traçado da planta de 1930; altura hipotética. Fase: —.",
+      "fontes": [
+        "cardozo1930",
+        "loureiro1999"
+      ],
+      "medidas": "largura ≈ 0,8 m",
+      "resumo": "Muros de pedra dispersos, associados às casas (Loureiro 1999)"
+    },
+    {
+      "id": "W03",
+      "nome": "Muro associado às habitações",
+      "grupo": "Muros",
+      "estado": "estado-atual",
+      "confianca": "alta",
+      "descricao": "Muros de pedra dispersos, associados às casas (Loureiro 1999). Traçado da planta de 1930; altura hipotética. Fase: —.",
+      "fontes": [
+        "cardozo1930",
+        "loureiro1999"
+      ],
+      "medidas": "largura ≈ 0,8 m",
+      "resumo": "Muros de pedra dispersos, associados às casas (Loureiro 1999)"
+    },
+    {
+      "id": "W04",
+      "nome": "Muro associado às habitações",
+      "grupo": "Muros",
+      "estado": "estado-atual",
+      "confianca": "alta",
+      "descricao": "Muros de pedra dispersos, associados às casas (Loureiro 1999). Traçado da planta de 1930; altura hipotética. Fase: —.",
+      "fontes": [
+        "cardozo1930",
+        "loureiro1999"
+      ],
+      "medidas": "largura ≈ 0,8 m",
+      "resumo": "Muros de pedra dispersos, associados às casas (Loureiro 1999)"
+    },
+    {
+      "id": "W05",
+      "nome": "Muro associado às habitações",
+      "grupo": "Muros",
+      "estado": "estado-atual",
+      "confianca": "alta",
+      "descricao": "Muros de pedra dispersos, associados às casas (Loureiro 1999). Traçado da planta de 1930; altura hipotética. Fase: —.",
+      "fontes": [
+        "cardozo1930",
+        "loureiro1999"
+      ],
+      "medidas": "largura ≈ 0,8 m",
+      "resumo": "Muros de pedra dispersos, associados às casas (Loureiro 1999)"
+    },
+    {
+      "id": "W06",
+      "nome": "Muro associado às habitações",
+      "grupo": "Muros",
+      "estado": "estado-atual",
+      "confianca": "alta",
+      "descricao": "Muros de pedra dispersos, associados às casas (Loureiro 1999). Traçado da planta de 1930; altura hipotética. Fase: —.",
+      "fontes": [
+        "cardozo1930",
+        "loureiro1999"
+      ],
+      "medidas": "largura ≈ 0,8 m",
+      "resumo": "Muros de pedra dispersos, associados às casas (Loureiro 1999)"
+    },
+    {
+      "id": "W07",
+      "nome": "Muro associado às habitações",
+      "grupo": "Muros",
+      "estado": "estado-atual",
+      "confianca": "alta",
+      "descricao": "Muros de pedra dispersos, associados às casas (Loureiro 1999). Traçado da planta de 1930; altura hipotética. Fase: —.",
+      "fontes": [
+        "cardozo1930",
+        "loureiro1999"
+      ],
+      "medidas": "largura ≈ 0,8 m",
+      "resumo": "Muros de pedra dispersos, associados às casas (Loureiro 1999)"
+    },
+    {
+      "id": "W08",
+      "nome": "Muro associado às habitações",
+      "grupo": "Muros",
+      "estado": "estado-atual",
+      "confianca": "alta",
+      "descricao": "Muros de pedra dispersos, associados às casas (Loureiro 1999). Traçado da planta de 1930; altura hipotética. Fase: —.",
+      "fontes": [
+        "cardozo1930",
+        "loureiro1999"
+      ],
+      "medidas": "largura ≈ 0,8 m",
+      "resumo": "Muros de pedra dispersos, associados às casas (Loureiro 1999)"
+    },
+    {
+      "id": "W09",
+      "nome": "Muro associado às habitações",
+      "grupo": "Muros",
+      "estado": "estado-atual",
+      "confianca": "alta",
+      "descricao": "Muros de pedra dispersos, associados às casas (Loureiro 1999). Traçado da planta de 1930; altura hipotética. Fase: —.",
+      "fontes": [
+        "cardozo1930",
+        "loureiro1999"
+      ],
+      "medidas": "largura ≈ 0,8 m",
+      "resumo": "Muros de pedra dispersos, associados às casas (Loureiro 1999)"
+    },
+    {
+      "id": "W10",
+      "nome": "Muro associado às habitações",
+      "grupo": "Muros",
+      "estado": "estado-atual",
+      "confianca": "alta",
+      "descricao": "Muros de pedra dispersos, associados às casas (Loureiro 1999). Traçado da planta de 1930; altura hipotética. Fase: —.",
+      "fontes": [
+        "cardozo1930",
+        "loureiro1999"
+      ],
+      "medidas": "largura ≈ 0,8 m",
+      "resumo": "Muros de pedra dispersos, associados às casas (Loureiro 1999)"
+    },
+    {
+      "id": "W11",
+      "nome": "Muro associado às habitações",
+      "grupo": "Muros",
+      "estado": "estado-atual",
+      "confianca": "alta",
+      "descricao": "Muros de pedra dispersos, associados às casas (Loureiro 1999). Traçado da planta de 1930; altura hipotética. Fase: —.",
+      "fontes": [
+        "cardozo1930",
+        "loureiro1999"
+      ],
+      "medidas": "largura ≈ 0,8 m",
+      "resumo": "Muros de pedra dispersos, associados às casas (Loureiro 1999)"
+    },
+    {
+      "id": "W12",
+      "nome": "Muro associado às habitações",
+      "grupo": "Muros",
+      "estado": "estado-atual",
+      "confianca": "alta",
+      "descricao": "Muros de pedra dispersos, associados às casas (Loureiro 1999). Traçado da planta de 1930; altura hipotética. Fase: —.",
+      "fontes": [
+        "cardozo1930",
+        "loureiro1999"
+      ],
+      "medidas": "largura ≈ 0,8 m",
+      "resumo": "Muros de pedra dispersos, associados às casas (Loureiro 1999)"
+    },
+    {
+      "id": "W13",
+      "nome": "Muro associado às habitações",
+      "grupo": "Muros",
+      "estado": "estado-atual",
+      "confianca": "alta",
+      "descricao": "Muros de pedra dispersos, associados às casas (Loureiro 1999). Traçado da planta de 1930; altura hipotética. Fase: —.",
+      "fontes": [
+        "cardozo1930",
+        "loureiro1999"
+      ],
+      "medidas": "largura ≈ 0,8 m",
+      "resumo": "Muros de pedra dispersos, associados às casas (Loureiro 1999)"
+    },
+    {
+      "id": "W14",
+      "nome": "Muro associado às habitações",
+      "grupo": "Muros",
+      "estado": "estado-atual",
+      "confianca": "alta",
+      "descricao": "Muros de pedra dispersos, associados às casas (Loureiro 1999). Traçado da planta de 1930; altura hipotética. Fase: —.",
+      "fontes": [
+        "cardozo1930",
+        "loureiro1999"
+      ],
+      "medidas": "largura ≈ 0,8 m",
+      "resumo": "Muros de pedra dispersos, associados às casas (Loureiro 1999)"
+    },
+    {
+      "id": "W15",
+      "nome": "Muro associado às habitações",
+      "grupo": "Muros",
+      "estado": "estado-atual",
+      "confianca": "alta",
+      "descricao": "Muros de pedra dispersos, associados às casas (Loureiro 1999). Traçado da planta de 1930; altura hipotética. Fase: —.",
+      "fontes": [
+        "cardozo1930",
+        "loureiro1999"
+      ],
+      "medidas": "largura ≈ 0,8 m",
+      "resumo": "Muros de pedra dispersos, associados às casas (Loureiro 1999)"
+    },
+    {
+      "id": "W16",
+      "nome": "Muro associado às habitações",
+      "grupo": "Muros",
+      "estado": "estado-atual",
+      "confianca": "alta",
+      "descricao": "Muros de pedra dispersos, associados às casas (Loureiro 1999). Traçado da planta de 1930; altura hipotética. Fase: —.",
+      "fontes": [
+        "cardozo1930",
+        "loureiro1999"
+      ],
+      "medidas": "largura ≈ 0,8 m",
+      "resumo": "Muros de pedra dispersos, associados às casas (Loureiro 1999)"
+    },
+    {
+      "id": "H01",
+      "nome": "Casa circular 1",
+      "grupo": "Casas",
+      "estado": "estado-atual",
+      "confianca": "alta",
+      "descricao": "Planta circular em pedra. Reconstituição: paredes com 2,10 m, altura da reconstituição de Martins Sarmento no Museu de Guimarães (Pereira 1938). A cobertura cónica é hipotética: o material (vegetal ou placas de xisto, proposta de Sarmento nunca confirmada) é desconhecido. A posição das portas não está documentada e não foi representada. Fase: tabuleiro superior (norte).",
+      "fontes": [
+        "cardozo1930",
+        "sarmento1909",
+        "pereira1938",
+        "cruz2015"
+      ],
+      "medidas": "diâmetro ≈ 4.5 m (medido na planta de 1930)",
+      "resumo": "Sarmento contou 35 casas redondas"
+    },
+    {
+      "id": "H02",
+      "nome": "Casa circular 2",
+      "grupo": "Casas",
+      "estado": "estado-atual",
+      "confianca": "alta",
+      "descricao": "Planta circular em pedra. Reconstituição: paredes com 2,10 m, altura da reconstituição de Martins Sarmento no Museu de Guimarães (Pereira 1938). A cobertura cónica é hipotética: o material (vegetal ou placas de xisto, proposta de Sarmento nunca confirmada) é desconhecido. A posição das portas não está documentada e não foi representada. Fase: tabuleiro superior (norte).",
+      "fontes": [
+        "cardozo1930",
+        "sarmento1909",
+        "pereira1938",
+        "cruz2015"
+      ],
+      "medidas": "diâmetro ≈ 4.0 m (medido na planta de 1930)",
+      "resumo": "Planta circular em pedra"
+    },
+    {
+      "id": "H03",
+      "nome": "Casa circular 3",
+      "grupo": "Casas",
+      "estado": "estado-atual",
+      "confianca": "alta",
+      "descricao": "Planta circular em pedra. Reconstituição: paredes com 2,10 m, altura da reconstituição de Martins Sarmento no Museu de Guimarães (Pereira 1938). A cobertura cónica é hipotética: o material (vegetal ou placas de xisto, proposta de Sarmento nunca confirmada) é desconhecido. A posição das portas não está documentada e não foi representada. Fase: tabuleiro superior (norte).",
+      "fontes": [
+        "cardozo1930",
+        "sarmento1909",
+        "pereira1938",
+        "cruz2015"
+      ],
+      "medidas": "diâmetro ≈ 4.5 m (medido na planta de 1930)",
+      "resumo": "Planta circular em pedra"
+    },
+    {
+      "id": "H04",
+      "nome": "Casa circular 4",
+      "grupo": "Casas",
+      "estado": "estado-atual",
+      "confianca": "alta",
+      "descricao": "Planta circular em pedra. Reconstituição: paredes com 2,10 m, altura da reconstituição de Martins Sarmento no Museu de Guimarães (Pereira 1938). A cobertura cónica é hipotética: o material (vegetal ou placas de xisto, proposta de Sarmento nunca confirmada) é desconhecido. A posição das portas não está documentada e não foi representada. Fase: tabuleiro superior (norte).",
+      "fontes": [
+        "cardozo1930",
+        "sarmento1909",
+        "pereira1938",
+        "cruz2015"
+      ],
+      "medidas": "diâmetro ≈ 4.9 m (medido na planta de 1930)",
+      "resumo": "Planta circular em pedra"
+    },
+    {
+      "id": "H05",
+      "nome": "Casa circular 5",
+      "grupo": "Casas",
+      "estado": "estado-atual",
+      "confianca": "alta",
+      "descricao": "Planta circular em pedra. Reconstituição: paredes com 2,10 m, altura da reconstituição de Martins Sarmento no Museu de Guimarães (Pereira 1938). A cobertura cónica é hipotética: o material (vegetal ou placas de xisto, proposta de Sarmento nunca confirmada) é desconhecido. A posição das portas não está documentada e não foi representada. Fase: tabuleiro superior (norte).",
+      "fontes": [
+        "cardozo1930",
+        "sarmento1909",
+        "pereira1938",
+        "cruz2015"
+      ],
+      "medidas": "diâmetro ≈ 5.3 m (medido na planta de 1930)",
+      "resumo": "Planta circular em pedra"
+    },
+    {
+      "id": "H06",
+      "nome": "Casa circular 6",
+      "grupo": "Casas",
+      "estado": "estado-atual",
+      "confianca": "alta",
+      "descricao": "Planta circular em pedra. Reconstituição: paredes com 2,10 m, altura da reconstituição de Martins Sarmento no Museu de Guimarães (Pereira 1938). A cobertura cónica é hipotética: o material (vegetal ou placas de xisto, proposta de Sarmento nunca confirmada) é desconhecido. A posição das portas não está documentada e não foi representada. Fase: tabuleiro superior (norte).",
+      "fontes": [
+        "cardozo1930",
+        "sarmento1909",
+        "pereira1938",
+        "cruz2015"
+      ],
+      "medidas": "diâmetro ≈ 4.5 m (medido na planta de 1930)",
+      "resumo": "Planta circular em pedra"
+    },
+    {
+      "id": "H07",
+      "nome": "Casa circular 7",
+      "grupo": "Casas",
+      "estado": "estado-atual",
+      "confianca": "alta",
+      "descricao": "Planta circular em pedra. Reconstituição: paredes com 2,10 m, altura da reconstituição de Martins Sarmento no Museu de Guimarães (Pereira 1938). A cobertura cónica é hipotética: o material (vegetal ou placas de xisto, proposta de Sarmento nunca confirmada) é desconhecido. A posição das portas não está documentada e não foi representada. Fase: tabuleiro superior (norte).",
+      "fontes": [
+        "cardozo1930",
+        "sarmento1909",
+        "pereira1938",
+        "cruz2015"
+      ],
+      "medidas": "diâmetro ≈ 4.5 m (medido na planta de 1930)",
+      "resumo": "Planta circular em pedra"
+    },
+    {
+      "id": "C1",
+      "nome": "Cisterna",
+      "grupo": "Estruturas hidráulicas",
+      "estado": "estado-atual",
+      "confianca": "alta",
+      "descricao": "Identificada como cisterna (n.º 1) na legenda da planta de 1930. Fase: —.",
+      "fontes": [
+        "cardozo1930"
+      ],
+      "medidas": "diâmetro ≈ 4.0 m",
+      "resumo": "Assinalada na legenda da planta de Mário Cardozo, de 1930",
+      "ancora": [
+        -24.14,
+        16.51,
+        -72.64
+      ]
+    },
+    {
+      "id": "H08",
+      "nome": "Casa circular 8",
+      "grupo": "Casas",
+      "estado": "estado-atual",
+      "confianca": "alta",
+      "descricao": "Planta circular em pedra. Reconstituição: paredes com 2,10 m, altura da reconstituição de Martins Sarmento no Museu de Guimarães (Pereira 1938). A cobertura cónica é hipotética: o material (vegetal ou placas de xisto, proposta de Sarmento nunca confirmada) é desconhecido. A posição das portas não está documentada e não foi representada. Fase: tabuleiro superior (norte).",
+      "fontes": [
+        "cardozo1930",
+        "sarmento1909",
+        "pereira1938",
+        "cruz2015"
+      ],
+      "medidas": "diâmetro ≈ 4.9 m (medido na planta de 1930)",
+      "resumo": "Planta circular em pedra"
+    },
+    {
+      "id": "H09",
+      "nome": "Casa circular 9",
+      "grupo": "Casas",
+      "estado": "estado-atual",
+      "confianca": "alta",
+      "descricao": "Planta circular em pedra. Reconstituição: paredes com 2,10 m, altura da reconstituição de Martins Sarmento no Museu de Guimarães (Pereira 1938). A cobertura cónica é hipotética: o material (vegetal ou placas de xisto, proposta de Sarmento nunca confirmada) é desconhecido. A posição das portas não está documentada e não foi representada. Fase: tabuleiro superior (norte).",
+      "fontes": [
+        "cardozo1930",
+        "sarmento1909",
+        "pereira1938",
+        "cruz2015"
+      ],
+      "medidas": "diâmetro ≈ 4.0 m (medido na planta de 1930)",
+      "resumo": "Planta circular em pedra"
+    },
+    {
+      "id": "H10",
+      "nome": "Casa circular 10",
+      "grupo": "Casas",
+      "estado": "estado-atual",
+      "confianca": "alta",
+      "descricao": "Planta circular em pedra. Reconstituição: paredes com 2,10 m, altura da reconstituição de Martins Sarmento no Museu de Guimarães (Pereira 1938). A cobertura cónica é hipotética: o material (vegetal ou placas de xisto, proposta de Sarmento nunca confirmada) é desconhecido. A posição das portas não está documentada e não foi representada. Fase: tabuleiro superior (norte).",
+      "fontes": [
+        "cardozo1930",
+        "sarmento1909",
+        "pereira1938",
+        "cruz2015"
+      ],
+      "medidas": "diâmetro ≈ 4.5 m (medido na planta de 1930)",
+      "resumo": "Planta circular em pedra"
+    },
+    {
+      "id": "H11",
+      "nome": "Casa circular 11",
+      "grupo": "Casas",
+      "estado": "estado-atual",
+      "confianca": "alta",
+      "descricao": "Planta circular em pedra. Reconstituição: paredes com 2,10 m, altura da reconstituição de Martins Sarmento no Museu de Guimarães (Pereira 1938). A cobertura cónica é hipotética: o material (vegetal ou placas de xisto, proposta de Sarmento nunca confirmada) é desconhecido. A posição das portas não está documentada e não foi representada. Fase: tabuleiro superior (norte).",
+      "fontes": [
+        "cardozo1930",
+        "sarmento1909",
+        "pereira1938",
+        "cruz2015"
+      ],
+      "medidas": "diâmetro ≈ 4.5 m (medido na planta de 1930)",
+      "resumo": "Planta circular em pedra"
+    },
+    {
+      "id": "H12",
+      "nome": "Casa circular 12",
+      "grupo": "Casas",
+      "estado": "estado-atual",
+      "confianca": "alta",
+      "descricao": "Planta circular em pedra. Reconstituição: paredes com 2,10 m, altura da reconstituição de Martins Sarmento no Museu de Guimarães (Pereira 1938). A cobertura cónica é hipotética: o material (vegetal ou placas de xisto, proposta de Sarmento nunca confirmada) é desconhecido. A posição das portas não está documentada e não foi representada. Fase: tabuleiro superior (norte).",
+      "fontes": [
+        "cardozo1930",
+        "sarmento1909",
+        "pereira1938",
+        "cruz2015"
+      ],
+      "medidas": "diâmetro ≈ 4.9 m (medido na planta de 1930)",
+      "resumo": "Planta circular em pedra"
+    },
+    {
+      "id": "H13",
+      "nome": "Casa circular 13",
+      "grupo": "Casas",
+      "estado": "estado-atual",
+      "confianca": "alta",
+      "descricao": "Planta circular em pedra. Reconstituição: paredes com 2,10 m, altura da reconstituição de Martins Sarmento no Museu de Guimarães (Pereira 1938). A cobertura cónica é hipotética: o material (vegetal ou placas de xisto, proposta de Sarmento nunca confirmada) é desconhecido. A posição das portas não está documentada e não foi representada. Fase: tabuleiro superior (norte).",
+      "fontes": [
+        "cardozo1930",
+        "sarmento1909",
+        "pereira1938",
+        "cruz2015"
+      ],
+      "medidas": "diâmetro ≈ 4.0 m (medido na planta de 1930)",
+      "resumo": "Planta circular em pedra"
+    },
+    {
+      "id": "H14",
+      "nome": "Casa circular 14",
+      "grupo": "Casas",
+      "estado": "estado-atual",
+      "confianca": "alta",
+      "descricao": "Planta circular em pedra. Reconstituição: paredes com 2,10 m, altura da reconstituição de Martins Sarmento no Museu de Guimarães (Pereira 1938). A cobertura cónica é hipotética: o material (vegetal ou placas de xisto, proposta de Sarmento nunca confirmada) é desconhecido. A posição das portas não está documentada e não foi representada. Fase: tabuleiro superior (norte).",
+      "fontes": [
+        "cardozo1930",
+        "sarmento1909",
+        "pereira1938",
+        "cruz2015"
+      ],
+      "medidas": "diâmetro ≈ 4.5 m (medido na planta de 1930)",
+      "resumo": "Planta circular em pedra"
+    },
+    {
+      "id": "H15",
+      "nome": "Casa circular 15",
+      "grupo": "Casas",
+      "estado": "estado-atual",
+      "confianca": "alta",
+      "descricao": "Planta circular em pedra. Reconstituição: paredes com 2,10 m, altura da reconstituição de Martins Sarmento no Museu de Guimarães (Pereira 1938). A cobertura cónica é hipotética: o material (vegetal ou placas de xisto, proposta de Sarmento nunca confirmada) é desconhecido. A posição das portas não está documentada e não foi representada. Fase: tabuleiro superior (norte).",
+      "fontes": [
+        "cardozo1930",
+        "sarmento1909",
+        "pereira1938",
+        "cruz2015"
+      ],
+      "medidas": "diâmetro ≈ 4.5 m (medido na planta de 1930)",
+      "resumo": "Planta circular em pedra"
+    },
+    {
+      "id": "H16",
+      "nome": "Casa circular 16",
+      "grupo": "Casas",
+      "estado": "estado-atual",
+      "confianca": "alta",
+      "descricao": "Planta circular em pedra. Reconstituição: paredes com 2,10 m, altura da reconstituição de Martins Sarmento no Museu de Guimarães (Pereira 1938). A cobertura cónica é hipotética: o material (vegetal ou placas de xisto, proposta de Sarmento nunca confirmada) é desconhecido. A posição das portas não está documentada e não foi representada. Fase: tabuleiro superior (norte).",
+      "fontes": [
+        "cardozo1930",
+        "sarmento1909",
+        "pereira1938",
+        "cruz2015"
+      ],
+      "medidas": "diâmetro ≈ 4.0 m (medido na planta de 1930)",
+      "resumo": "Planta circular em pedra"
+    },
+    {
+      "id": "H17",
+      "nome": "Casa circular 17",
+      "grupo": "Casas",
+      "estado": "estado-atual",
+      "confianca": "alta",
+      "descricao": "Planta circular em pedra. Reconstituição: paredes com 2,10 m, altura da reconstituição de Martins Sarmento no Museu de Guimarães (Pereira 1938). A cobertura cónica é hipotética: o material (vegetal ou placas de xisto, proposta de Sarmento nunca confirmada) é desconhecido. A posição das portas não está documentada e não foi representada. Fase: tabuleiro superior (norte).",
+      "fontes": [
+        "cardozo1930",
+        "sarmento1909",
+        "pereira1938",
+        "cruz2015"
+      ],
+      "medidas": "diâmetro ≈ 4.5 m (medido na planta de 1930)",
+      "resumo": "Planta circular em pedra"
+    },
+    {
+      "id": "H18",
+      "nome": "Casa circular 18",
+      "grupo": "Casas",
+      "estado": "estado-atual",
+      "confianca": "alta",
+      "descricao": "Planta circular em pedra. Reconstituição: paredes com 2,10 m, altura da reconstituição de Martins Sarmento no Museu de Guimarães (Pereira 1938). A cobertura cónica é hipotética: o material (vegetal ou placas de xisto, proposta de Sarmento nunca confirmada) é desconhecido. A posição das portas não está documentada e não foi representada. Fase: tabuleiro superior (norte).",
+      "fontes": [
+        "cardozo1930",
+        "sarmento1909",
+        "pereira1938",
+        "cruz2015"
+      ],
+      "medidas": "diâmetro ≈ 4.5 m (medido na planta de 1930)",
+      "resumo": "Planta circular em pedra"
+    },
+    {
+      "id": "H19",
+      "nome": "Casa circular 19",
+      "grupo": "Casas",
+      "estado": "estado-atual",
+      "confianca": "alta",
+      "descricao": "Planta circular em pedra. Reconstituição: paredes com 2,10 m, altura da reconstituição de Martins Sarmento no Museu de Guimarães (Pereira 1938). A cobertura cónica é hipotética: o material (vegetal ou placas de xisto, proposta de Sarmento nunca confirmada) é desconhecido. A posição das portas não está documentada e não foi representada. Fase: tabuleiro superior (norte).",
+      "fontes": [
+        "cardozo1930",
+        "sarmento1909",
+        "pereira1938",
+        "cruz2015"
+      ],
+      "medidas": "diâmetro ≈ 4.5 m (medido na planta de 1930)",
+      "resumo": "Planta circular em pedra"
+    },
+    {
+      "id": "H20",
+      "nome": "Casa circular 20",
+      "grupo": "Casas",
+      "estado": "estado-atual",
+      "confianca": "alta",
+      "descricao": "Planta circular em pedra. Reconstituição: paredes com 2,10 m, altura da reconstituição de Martins Sarmento no Museu de Guimarães (Pereira 1938). A cobertura cónica é hipotética: o material (vegetal ou placas de xisto, proposta de Sarmento nunca confirmada) é desconhecido. A posição das portas não está documentada e não foi representada. Fase: tabuleiro superior (norte).",
+      "fontes": [
+        "cardozo1930",
+        "sarmento1909",
+        "pereira1938",
+        "cruz2015"
+      ],
+      "medidas": "diâmetro ≈ 4.0 m (medido na planta de 1930)",
+      "resumo": "Planta circular em pedra"
+    },
+    {
+      "id": "H21",
+      "nome": "Casa circular 21",
+      "grupo": "Casas",
+      "estado": "estado-atual",
+      "confianca": "alta",
+      "descricao": "Planta circular em pedra. Reconstituição: paredes com 2,10 m, altura da reconstituição de Martins Sarmento no Museu de Guimarães (Pereira 1938). A cobertura cónica é hipotética: o material (vegetal ou placas de xisto, proposta de Sarmento nunca confirmada) é desconhecido. A posição das portas não está documentada e não foi representada. Fase: tabuleiro superior (norte).",
+      "fontes": [
+        "cardozo1930",
+        "sarmento1909",
+        "pereira1938",
+        "cruz2015"
+      ],
+      "medidas": "diâmetro ≈ 5.3 m (medido na planta de 1930)",
+      "resumo": "Planta circular em pedra"
+    },
+    {
+      "id": "H22",
+      "nome": "Casa circular 22",
+      "grupo": "Casas",
+      "estado": "estado-atual",
+      "confianca": "alta",
+      "descricao": "Planta circular em pedra. Reconstituição: paredes com 2,10 m, altura da reconstituição de Martins Sarmento no Museu de Guimarães (Pereira 1938). A cobertura cónica é hipotética: o material (vegetal ou placas de xisto, proposta de Sarmento nunca confirmada) é desconhecido. A posição das portas não está documentada e não foi representada. Fase: tabuleiro superior (norte).",
+      "fontes": [
+        "cardozo1930",
+        "sarmento1909",
+        "pereira1938",
+        "cruz2015"
+      ],
+      "medidas": "diâmetro ≈ 4.0 m (medido na planta de 1930)",
+      "resumo": "Planta circular em pedra"
+    },
+    {
+      "id": "H23",
+      "nome": "Casa circular 23",
+      "grupo": "Casas",
+      "estado": "estado-atual",
+      "confianca": "alta",
+      "descricao": "Planta circular em pedra. Reconstituição: paredes com 2,10 m, altura da reconstituição de Martins Sarmento no Museu de Guimarães (Pereira 1938). A cobertura cónica é hipotética: o material (vegetal ou placas de xisto, proposta de Sarmento nunca confirmada) é desconhecido. A posição das portas não está documentada e não foi representada. Fase: tabuleiro superior (norte).",
+      "fontes": [
+        "cardozo1930",
+        "sarmento1909",
+        "pereira1938",
+        "cruz2015"
+      ],
+      "medidas": "diâmetro ≈ 4.0 m (medido na planta de 1930)",
+      "resumo": "Planta circular em pedra"
+    },
+    {
+      "id": "H24",
+      "nome": "Casa circular 24",
+      "grupo": "Casas",
+      "estado": "estado-atual",
+      "confianca": "alta",
+      "descricao": "Planta circular em pedra. Reconstituição: paredes com 2,10 m, altura da reconstituição de Martins Sarmento no Museu de Guimarães (Pereira 1938). A cobertura cónica é hipotética: o material (vegetal ou placas de xisto, proposta de Sarmento nunca confirmada) é desconhecido. A posição das portas não está documentada e não foi representada. Fase: tabuleiro superior (norte).",
+      "fontes": [
+        "cardozo1930",
+        "sarmento1909",
+        "pereira1938",
+        "cruz2015"
+      ],
+      "medidas": "diâmetro ≈ 4.9 m (medido na planta de 1930)",
+      "resumo": "Planta circular em pedra"
+    },
+    {
+      "id": "H25",
+      "nome": "Casa circular 25",
+      "grupo": "Casas",
+      "estado": "estado-atual",
+      "confianca": "alta",
+      "descricao": "Planta circular em pedra. Reconstituição: paredes com 2,10 m, altura da reconstituição de Martins Sarmento no Museu de Guimarães (Pereira 1938). A cobertura cónica é hipotética: o material (vegetal ou placas de xisto, proposta de Sarmento nunca confirmada) é desconhecido. A posição das portas não está documentada e não foi representada. Fase: tabuleiro superior (norte).",
+      "fontes": [
+        "cardozo1930",
+        "sarmento1909",
+        "pereira1938",
+        "cruz2015"
+      ],
+      "medidas": "diâmetro ≈ 4.5 m (medido na planta de 1930)",
+      "resumo": "Planta circular em pedra"
+    },
+    {
+      "id": "H26",
+      "nome": "Casa circular 26",
+      "grupo": "Casas",
+      "estado": "estado-atual",
+      "confianca": "alta",
+      "descricao": "Planta circular em pedra. Reconstituição: paredes com 2,10 m, altura da reconstituição de Martins Sarmento no Museu de Guimarães (Pereira 1938). A cobertura cónica é hipotética: o material (vegetal ou placas de xisto, proposta de Sarmento nunca confirmada) é desconhecido. A posição das portas não está documentada e não foi representada. Fase: tabuleiro superior (norte).",
+      "fontes": [
+        "cardozo1930",
+        "sarmento1909",
+        "pereira1938",
+        "cruz2015"
+      ],
+      "medidas": "diâmetro ≈ 4.0 m (medido na planta de 1930)",
+      "resumo": "Planta circular em pedra"
+    },
+    {
+      "id": "H27",
+      "nome": "Casa circular 27",
+      "grupo": "Casas",
+      "estado": "estado-atual",
+      "confianca": "alta",
+      "descricao": "Planta circular em pedra. Reconstituição: paredes com 2,10 m, altura da reconstituição de Martins Sarmento no Museu de Guimarães (Pereira 1938). A cobertura cónica é hipotética: o material (vegetal ou placas de xisto, proposta de Sarmento nunca confirmada) é desconhecido. A posição das portas não está documentada e não foi representada. Fase: tabuleiro superior (norte).",
+      "fontes": [
+        "cardozo1930",
+        "sarmento1909",
+        "pereira1938",
+        "cruz2015"
+      ],
+      "medidas": "diâmetro ≈ 3.6 m (medido na planta de 1930)",
+      "resumo": "Planta circular em pedra"
+    },
+    {
+      "id": "H28",
+      "nome": "Casa circular 28",
+      "grupo": "Casas",
+      "estado": "estado-atual",
+      "confianca": "alta",
+      "descricao": "Planta circular em pedra. Reconstituição: paredes com 2,10 m, altura da reconstituição de Martins Sarmento no Museu de Guimarães (Pereira 1938). A cobertura cónica é hipotética: o material (vegetal ou placas de xisto, proposta de Sarmento nunca confirmada) é desconhecido. A posição das portas não está documentada e não foi representada. Fase: tabuleiro superior (norte).",
+      "fontes": [
+        "cardozo1930",
+        "sarmento1909",
+        "pereira1938",
+        "cruz2015"
+      ],
+      "medidas": "diâmetro ≈ 3.5 m (medido na planta de 1930)",
+      "resumo": "Planta circular em pedra"
+    },
+    {
+      "id": "H29",
+      "nome": "Casa circular 29",
+      "grupo": "Casas",
+      "estado": "estado-atual",
+      "confianca": "alta",
+      "descricao": "Planta circular em pedra. Reconstituição: paredes com 2,10 m, altura da reconstituição de Martins Sarmento no Museu de Guimarães (Pereira 1938). A cobertura cónica é hipotética: o material (vegetal ou placas de xisto, proposta de Sarmento nunca confirmada) é desconhecido. A posição das portas não está documentada e não foi representada. Fase: tabuleiro superior (norte).",
+      "fontes": [
+        "cardozo1930",
+        "sarmento1909",
+        "pereira1938",
+        "cruz2015"
+      ],
+      "medidas": "diâmetro ≈ 3.5 m (medido na planta de 1930)",
+      "resumo": "Planta circular em pedra"
+    },
+    {
+      "id": "H30",
+      "nome": "Casa circular 30",
+      "grupo": "Casas",
+      "estado": "estado-atual",
+      "confianca": "alta",
+      "descricao": "Planta circular em pedra. Reconstituição: paredes com 2,10 m, altura da reconstituição de Martins Sarmento no Museu de Guimarães (Pereira 1938). A cobertura cónica é hipotética: o material (vegetal ou placas de xisto, proposta de Sarmento nunca confirmada) é desconhecido. A posição das portas não está documentada e não foi representada. Fase: tabuleiro superior (norte).",
+      "fontes": [
+        "cardozo1930",
+        "sarmento1909",
+        "pereira1938",
+        "cruz2015"
+      ],
+      "medidas": "diâmetro ≈ 5.3 m (medido na planta de 1930)",
+      "resumo": "Planta circular em pedra"
+    },
+    {
+      "id": "H31",
+      "nome": "Casa circular 31",
+      "grupo": "Casas",
+      "estado": "estado-atual",
+      "confianca": "alta",
+      "descricao": "Planta circular em pedra. Reconstituição: paredes com 2,10 m, altura da reconstituição de Martins Sarmento no Museu de Guimarães (Pereira 1938). A cobertura cónica é hipotética: o material (vegetal ou placas de xisto, proposta de Sarmento nunca confirmada) é desconhecido. A posição das portas não está documentada e não foi representada. Fase: tabuleiro superior (norte).",
+      "fontes": [
+        "cardozo1930",
+        "sarmento1909",
+        "pereira1938",
+        "cruz2015"
+      ],
+      "medidas": "diâmetro ≈ 3.6 m (medido na planta de 1930)",
+      "resumo": "Planta circular em pedra"
+    },
+    {
+      "id": "H32",
+      "nome": "Casa circular 32",
+      "grupo": "Casas",
+      "estado": "estado-atual",
+      "confianca": "alta",
+      "descricao": "Planta circular em pedra. Reconstituição: paredes com 2,10 m, altura da reconstituição de Martins Sarmento no Museu de Guimarães (Pereira 1938). A cobertura cónica é hipotética: o material (vegetal ou placas de xisto, proposta de Sarmento nunca confirmada) é desconhecido. A posição das portas não está documentada e não foi representada. Fase: tabuleiro superior (norte).",
+      "fontes": [
+        "cardozo1930",
+        "sarmento1909",
+        "pereira1938",
+        "cruz2015"
+      ],
+      "medidas": "diâmetro ≈ 3.6 m (medido na planta de 1930)",
+      "resumo": "Planta circular em pedra"
+    },
+    {
+      "id": "H33",
+      "nome": "Casa circular 33",
+      "grupo": "Casas",
+      "estado": "estado-atual",
+      "confianca": "alta",
+      "descricao": "Planta circular em pedra. Reconstituição: paredes com 2,10 m, altura da reconstituição de Martins Sarmento no Museu de Guimarães (Pereira 1938). A cobertura cónica é hipotética: o material (vegetal ou placas de xisto, proposta de Sarmento nunca confirmada) é desconhecido. A posição das portas não está documentada e não foi representada. Fase: tabuleiro superior (norte).",
+      "fontes": [
+        "cardozo1930",
+        "sarmento1909",
+        "pereira1938",
+        "cruz2015"
+      ],
+      "medidas": "diâmetro ≈ 3.5 m (medido na planta de 1930)",
+      "resumo": "Planta circular em pedra"
+    },
+    {
+      "id": "X1",
+      "nome": "Estrutura circular preenchida",
+      "grupo": "Estruturas indeterminadas",
+      "estado": "estado-atual",
+      "confianca": "alta",
+      "descricao": "Representada a cheio na planta de 1930; função não identificada nas fontes consultadas. Fase: —.",
+      "fontes": [
+        "cardozo1930"
+      ],
+      "medidas": "diâmetro ≈ 2,6 m",
+      "resumo": "Representada a cheio na planta de 1930; função não identificada nas fontes consultadas"
+    },
+    {
+      "id": "X2",
+      "nome": "Estrutura circular preenchida",
+      "grupo": "Estruturas indeterminadas",
+      "estado": "estado-atual",
+      "confianca": "alta",
+      "descricao": "Representada a cheio na planta de 1930; função não identificada nas fontes consultadas. Fase: —.",
+      "fontes": [
+        "cardozo1930"
+      ],
+      "medidas": "diâmetro ≈ 2,6 m",
+      "resumo": "Representada a cheio na planta de 1930; função não identificada nas fontes consultadas"
+    },
+    {
+      "id": "vegetacao",
+      "nome": "Vegetação",
+      "grupo": "Envolvente",
+      "estado": "estado-atual",
+      "confianca": "média",
+      "descricao": "posições e alturas reais do modelo de copas do LiDAR (MDS − MDT); dentro das muralhas ficam só 10 % (recinto superior) a 15 % das árvores, e nenhuma a menos de 5 m das muralhas, para se lerem as ruínas. A largura da copa de cada árvore vem do LiDAR; a espécie não vem do LiDAR: segundo o Tiago, a mata atual é sobretudo de eucalipto, com castanheiros, carvalhos e sobreiros; as copas altas e estreitas são tratadas como eucaliptos e as largas como castanheiros (cerca de 60 % eucaliptos, 16 % castanheiros, 16 % carvalhos, 8 % sobreiros).",
+      "fontes": [
+        "lidar"
+      ]
+    }
+  ]
+}

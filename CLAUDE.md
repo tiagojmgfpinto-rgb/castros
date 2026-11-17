@@ -8,9 +8,15 @@ Escreve em português (muitas vezes no telemóvel); responder sempre em portugu�
   Para atualizar: Artifact `publish` com `file_path` = `app/index.html` e `url` = esse link; ficheiros de apoio em `files`
   (`{"caminho/publicado": {"from": "app/..."}}`). Ler o artifact primeiro (`action: read`) numa conversa nova.
   As `capabilities` (user, db com coleções comments/history/extra, assets) passam de versão para versão: omitir o campo.
-- **Site público (GitHub Pages):** https://tiagojmgfpinto-rgb.github.io/castros/ — o workflow `.github/workflows/publicar.yml`
-  corre `python3 build.py` e `python3 tools/site.py` (→ `_site/`, com esqueleto HTML e metas; `tools/pages.py` gera `/castros/`, `/castro/<id>/` com canónico, Open Graph e schema.org, `/creditos/`, `sitemap.xml` e `robots.txt`, tudo a partir dos dados) a cada push no `main`, como no castelos-site.
-  Sem `window.claude` a app corre só em leitura (sem comentários, histórico editado nem castros acrescentados pela base de dados do artifact).
+- **Site público (GitHub Pages):** https://tiagojmgfpinto-rgb.github.io/castros/ — desde nov. 2026 é o projeto **`site/`**, uma cópia do
+  site dos Castelos (repo `tiagojmgfpinto-rgb/castelos-site`: Astro + React Three Fiber, relevo Copernicus, visor 3D dos Castelos) com
+  símbolos castrejos no lugar dos castelos (marca com tríscele, casa redonda, citânia, pedra formosa, roda). Ver `site/README.md`.
+  Fichas: `python3 tools/site_conteudo.py` (data.json → `site/src/content/monumentos/*.md`); maquetas: `node tools/gltf/castelos.mjs`
+  (GLB do artifact → `site/public/maquetas/<id>/<id>.glb` + `site/src/data/maquetas/<id>.json`; só o estado atual, peças A/AB); capas:
+  `node tests/capas.mjs`. O workflow `.github/workflows/publicar.yml` compila `site/` a cada push no `main`. Regra dos Castelos: o mapa
+  só mostra os sítios com maqueta publicada; os outros estão em «Próximas adições». Endereços antigos `/castro/<id>/` reencaminham.
+  Os textos da tese («Análise do Local no Estudo») e o diário de campo não entram no site: o Tiago decide depois onde ficam.
+  O antigo site (`tools/site.py`, `tools/pages.py`) já não é publicado; a app do artifact (`app/`, `build.py`) continua igual.
 - Estilo visual pedido: como **castillos.site** (maqueta 3D inclinada do noroeste, miniaturas brancas, título Cinzel com escudo).
 
 ## Estrutura

@@ -1,0 +1,900 @@
+import { Canvas, useFrame, useThree, type ThreeEvent } from "@react-three/fiber";
+import { OrbitControls, useGLTF } from "@react-three/drei";
+import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import * as THREE from "three";
+import { MeshBVH, acceleratedRaycast } from "three-mesh-bvh";
+import { BASE } from "../../lib/base";
+import { CAMADAS_TERRENO, ESTADOS, elementosComPlaca, vistaEpoca, type DadosMaqueta, type ElementoMaqueta, type EpocaMaqueta } from "./dados";
+import { alturaLinha, disporPlacas, type Caixa, type OpcoesDisposicao } from "./placas";
+import { Ambiente, Desenho, LUZ, aplicarTom, ecraTatil } from "./Luz";
+
+interface Controlos {
+  target: THREE.Vector3;
+  getAzimuthalAngle(): number;
+  addEventListener(t: string, f: () => void): void;
+  removeEventListener(t: string, f: () => void): void;
+  update(): void;
+}
+
+interface Alvo {
+  centro: THREE.Vector3;
+  topo: THREE.Vector3;
+  raio: number;
+}
+
+const DIRECAO_INICIAL = new THREE.Vector3(-0.62, 0.6, 0.5).normalize(); // de sudoeste, como as fotografias aéreas
+const DESTAQUE = new THREE.Color("#c0602f");
+const EIXO_Y = new THREE.Vector3(0, 1, 0);
+const VEL_GIRO = (2 * Math.PI) / 90; // uma volta em 90 s
+const RETOMA_GIRO = 5; // segundos sem interação até o giro recomeçar
+const SEM_PLACA_OCULTA = ["vegetacao"]; // as copas não escondem placas (pisca-pisca entre folhas)
+const NENHUM = new Set<string>();
+const semRaio = () => undefined;
+const raioOriginal = new WeakMap<THREE.Mesh, THREE.Mesh["raycast"]>();
+
+/** Estado de cada placa flutuante, atualizado a cada fotograma sem passar pelo React. */
+interface Placa {
+  id: string;
+  ancora: THREE.Vector3;
+  el: HTMLElement;
+  cartao: HTMLElement;
+  linha: HTMLElement;
+  w: number;
+  h: number;
+  op: number;
+  dy: number;
+  dx: number;
+  inicio: number;
+  tapada: boolean;
+  /** O cartão está por baixo do ponto (não coube por cima). */
+  baixo: boolean;
+}
+
+/**
+ * Grupos que não contam para o enquadramento: o terreno, o casario e o que fica à volta do monumento.
+ * A câmara abre centrada no resto (muralhas, torres, portas, paço…), à distância que o faz caber no visor.
+ */
+const FORA_DO_ENQUADRAMENTO = /^(Terreno|Vegetacao|Envolvente|Vila|Caminhos|Afloramentos|Rochedos|Edificios|Espigueiros|Santuario|Muralha_vila)_grupo$/;
+/** Margens do enquadramento no ecrã (coordenadas -1…1): por cima fica mais folga, para as placas. */
+const MARGEM = { x: 0.86, baixo: -0.84, cima: 0.66 };
+const ALTURA_MINIMA = 3; // a câmara nunca desce a menos de 3 m do chão
+
+/**
+ * Teclado (com o visor em foco): setas ou WASD deslocam, Q/E ou Shift+←/→ rodam, R/F ou Shift+↑/↓ inclinam,
+ * + e − aproximam e afastam.
+ */
+const TECLAS: Record<string, string> = {
+  ArrowUp: "frente", KeyW: "frente", ArrowDown: "tras", KeyS: "tras", ArrowLeft: "esquerda", KeyA: "esquerda", ArrowRight: "direita", KeyD: "direita",
+  KeyQ: "rodarEsq", KeyE: "rodarDir", KeyR: "subir", KeyF: "descer",
+  Equal: "aproximar", NumpadAdd: "aproximar", PageUp: "aproximar", Minus: "afastar", NumpadSubtract: "afastar", PageDown: "afastar",
+};
+const COM_SHIFT: Record<string, string> = { ArrowLeft: "rodarEsq", ArrowRight: "rodarDir", ArrowUp: "subir", ArrowDown: "descer" };
+function acaoDaTecla(e: KeyboardEvent): string | undefined {
+  if (e.ctrlKey || e.metaKey || e.altKey) return undefined;
+  if (e.key === "+") return "aproximar";
+  if (e.key === "-") return "afastar";
+  return (e.shiftKey && COM_SHIFT[e.code]) || TECLAS[e.code];
+}
+
+/**
+ * Distância a que os pontos cabem no visor, vistos na direção `dir` (do centro para a câmara) e apontados ao centro.
+ * Usam-se pontos do próprio monumento (e não os cantos da caixa, que em diagonal o afastavam demais).
+ */
+export function distanciaParaCaber(cantos: THREE.Vector3[], c: THREE.Vector3, dir: THREE.Vector3, fov: number, aspeto: number): number {
+  const cam = new THREE.PerspectiveCamera(fov, aspeto, 0.1, 1e6);
+  const v = new THREE.Vector3();
+  const cabe = (d: number) => {
+    cam.position.copy(c).addScaledVector(dir, d);
+    cam.lookAt(c);
+    cam.updateMatrixWorld();
+    return cantos.every((p) => {
+      v.copy(p).project(cam);
+      return v.z < 1 && Math.abs(v.x) <= MARGEM.x && v.y >= MARGEM.baixo && v.y <= MARGEM.cima;
+    });
+  };
+  let [lo, hi] = [1, 20000];
+  for (let i = 0; i < 40; i++) {
+    const d = (lo + hi) / 2;
+    if (cabe(d)) hi = d;
+    else lo = d;
+  }
+  return hi;
+}
+
+const reduzMovimento = () => typeof matchMedia === "function" && matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+/**
+ * Visor da maqueta 3D: abre logo com o giro e as placas (a capa fica por trás enquanto carrega),
+ * com Giro, Placas, Enquadrar, Ampliar, Terreno e seleção de cada elemento com a sua ficha.
+ */
+export default function Maqueta({ url, capa, dados, provisoria, onVoltarMapa }: {
+  url: string;
+  capa?: string;
+  dados: DadosMaqueta;
+  provisoria: boolean;
+  onVoltarMapa?: () => void;
+}) {
+  const [ampliada, setAmpliada] = useState(false);
+  const [giro, setGiro] = useState(() => !reduzMovimento());
+  const [rotulos, setRotulos] = useState(true);
+  const [terreno, setTerreno] = useState(true);
+  const [sel, setSel] = useState<string | null>(null);
+  const [notas, setNotas] = useState(false);
+  const [pedidoEnquadrar, setPedidoEnquadrar] = useState(0);
+  const [epocaId, setEpocaId] = useState<string | null>(null);
+  const caixa = useRef<HTMLDivElement>(null);
+  const bussola = useRef<HTMLDivElement>(null);
+  const escala = useRef<HTMLDivElement>(null);
+  const escalaTexto = useRef<HTMLSpanElement>(null);
+  const camadaPlacas = useRef<HTMLDivElement>(null);
+  const pausa = useRef(false);
+  const teclas = useRef(new Set<string>());
+  const tatil = useMemo(ecraTatil, []);
+  const [visivel, setVisivel] = useState(true);
+  const [carregada, setCarregada] = useState(false);
+  const marcarCarregada = useCallback(() => setCarregada(true), []);
+  const elementos = useMemo(() => new Map(dados.elementos.map((e) => [e.id, e])), [dados]);
+  const elemento = sel ? elementos.get(sel) : undefined;
+  const placas = useMemo(() => elementosComPlaca(dados), [dados]);
+  const epoca = dados.epocas?.find((e) => e.id === epocaId) ?? null;
+  const vista = useMemo(() => vistaEpoca(dados, epoca), [dados, epoca]);
+
+  // Ao mudar de época, larga o elemento selecionado se ele ainda não existia
+  useEffect(() => {
+    if (sel && vista.ocultos.has(sel)) setSel(null);
+  }, [sel, vista]);
+
+  const ampliar = useCallback(() => {
+    const el = caixa.current;
+    if (!el) return;
+    if (!ampliada) {
+      setAmpliada(true);
+      el.requestFullscreen?.().catch(() => undefined);
+    } else {
+      setAmpliada(false);
+      if (document.fullscreenElement) document.exitFullscreen().catch(() => undefined);
+    }
+  }, [ampliada]);
+
+  // Fora do ecrã (a página desceu), o visor não desenha
+  useEffect(() => {
+    const el = caixa.current;
+    if (!el || typeof IntersectionObserver !== "function") return;
+    const obs = new IntersectionObserver(([e]) => setVisivel(e.isIntersecting || !!document.fullscreenElement));
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, []);
+
+  // Teclado: as teclas carregadas guardam-se e a cena move a câmara a cada fotograma enquanto estão em baixo
+  useEffect(() => {
+    const el = caixa.current;
+    if (!el) return;
+    const baixo = (e: KeyboardEvent) => {
+      const alvo = e.target as HTMLElement;
+      if (alvo.closest("input, textarea, select, .maqueta-notas, .maqueta-elemento, .maqueta-epoca")) return;
+      const a = acaoDaTecla(e);
+      if (!a) return;
+      e.preventDefault();
+      teclas.current.add(a);
+    };
+    const cima = (e: KeyboardEvent) => {
+      const a = acaoDaTecla(e);
+      if (a) teclas.current.delete(a);
+      // ao largar o Shift, as setas voltam a deslocar
+      if (e.key === "Shift") ["rodarEsq", "rodarDir", "subir", "descer"].forEach((x) => teclas.current.delete(x));
+    };
+    const limpar = () => teclas.current.clear();
+    el.addEventListener("keydown", baixo);
+    el.addEventListener("keyup", cima);
+    el.addEventListener("focusout", limpar);
+    window.addEventListener("blur", limpar);
+    return () => {
+      el.removeEventListener("keydown", baixo);
+      el.removeEventListener("keyup", cima);
+      el.removeEventListener("focusout", limpar);
+      window.removeEventListener("blur", limpar);
+    };
+  }, []);
+
+  // Em ecrã grande, o visor fica logo pronto para o teclado
+  useEffect(() => {
+    if (ampliada) caixa.current?.focus({ preventScroll: true });
+  }, [ampliada]);
+
+  useEffect(() => {
+    const sair = () => !document.fullscreenElement && setAmpliada(false);
+    document.addEventListener("fullscreenchange", sair);
+    const tecla = (e: KeyboardEvent) => {
+      if (e.key !== "Escape") return;
+      if (sel) setSel(null);
+      e.stopPropagation();
+    };
+    caixa.current?.addEventListener("keydown", tecla);
+    const c = caixa.current;
+    return () => {
+      document.removeEventListener("fullscreenchange", sair);
+      c?.removeEventListener("keydown", tecla);
+    };
+  }, [sel]);
+
+  const botoes: [string, boolean | undefined, () => void][] = [
+    ["Giro", giro, () => setGiro((v) => !v)],
+    ["Placas", rotulos, () => setRotulos((v) => !v)],
+    ["Enquadrar", undefined, () => { setSel(null); setPedidoEnquadrar((n) => n + 1); }],
+    [ampliada ? "Reduzir" : "Ampliar", undefined, ampliar],
+    ["Terreno", terreno, () => setTerreno((v) => !v)],
+  ];
+
+  return (
+    <div className={`maqueta${ampliada ? " maqueta--ampliada" : ""}`} ref={caixa} tabIndex={-1} aria-keyshortcuts="ArrowUp ArrowDown ArrowLeft ArrowRight W A S D Q E R F + -">
+      <div className="maqueta-palco">
+        {capa && !carregada && <img className="maqueta-capa-fundo" src={`${BASE}${capa}`} alt={`Maqueta 3D de ${dados.titulo}, vista de sudoeste`} />}
+        <Canvas
+          shadows={{ type: THREE.PCFShadowMap }}
+          dpr={[1, 1.5]}
+          frameloop={visivel ? "always" : "never"}
+          camera={{ fov: 32, near: 1, far: 4000, position: [-300, 300, 250] }}
+          gl={{ antialias: tatil, alpha: true }}
+          onCreated={({ gl }) => aplicarTom(gl)}
+          onPointerDown={() => caixa.current?.focus({ preventScroll: true })}
+        >
+          <Suspense fallback={null}>
+            <Cena
+              url={url}
+              elementos={elementos}
+              sel={sel}
+              setSel={setSel}
+              giro={giro}
+              rotulos={rotulos}
+              placas={placas}
+              distancia={dados.distancia}
+              direcao={dados.direcao}
+              sol={dados.sol}
+              distanciaMinima={dados.distanciaMinima ?? 22}
+              camadaPlacas={camadaPlacas}
+              pausa={pausa}
+              terreno={terreno}
+              ocultos={vista.ocultos}
+              pedidoEnquadrar={pedidoEnquadrar}
+              bussola={bussola}
+              escala={escala}
+              escalaTexto={escalaTexto}
+              teclas={teclas}
+              tatil={tatil}
+              onCarregada={marcarCarregada}
+            />
+          </Suspense>
+        </Canvas>
+        <div className="maqueta-placas" ref={camadaPlacas} aria-hidden={!rotulos}>
+          {placas.map((e, i) => (
+            <div key={e.id} className="maqueta-placa" data-placa={e.id} data-ativo={sel === e.id ? "1" : "0"} style={{ zIndex: placas.length - i }}>
+              <span className="maqueta-placa-linha" />
+              <button
+                className="maqueta-placa-cartao"
+                tabIndex={rotulos ? 0 : -1}
+                aria-label={`${e.nome}: ver descrição`}
+                onPointerEnter={() => (pausa.current = true)}
+                onPointerLeave={() => (pausa.current = false)}
+                onClick={() => setSel(sel === e.id ? null : e.id)}
+              >
+                <strong>{e.nome.replace(/ \(.*\)$/, "")}</strong>
+                {e.resumo && <em>{e.resumo}</em>}
+              </button>
+            </div>
+          ))}
+        </div>
+        <div className="maqueta-norte" ref={bussola} aria-hidden="true"><span>N</span></div>
+        {!carregada && <p className="maqueta-carregar">A carregar a maqueta…</p>}
+        <div className="maqueta-escala" aria-hidden="true"><div ref={escala} /><span ref={escalaTexto}>10 m</span></div>
+        {provisoria && (
+          <button className="maqueta-selo" onClick={() => setNotas((v) => !v)} aria-expanded={notas}>
+            Versão provisória · fontes e limitações
+          </button>
+        )}
+        {ampliada && onVoltarMapa && (
+          <button className="maqueta-voltar" onClick={() => { ampliar(); onVoltarMapa(); }}>← Voltar ao mapa</button>
+        )}
+        {elemento && <FichaElemento e={elemento} dados={dados} onFechar={() => setSel(null)} />}
+        {notas && (
+          <div className="maqueta-notas" role="dialog" aria-label="Fontes e limitações">
+            <button className="fechar" aria-label="Fechar" onClick={() => setNotas(false)}>×</button>
+            <h4>Fontes e método</h4>
+            <p>
+              {dados.titulo}, {ESTADOS[dados.variante as ElementoMaqueta["estado"]]?.toLowerCase() ?? dados.variante}, versão {dados.versao} ({dados.data}).
+              Modelado em Blender com Python à escala 1:1, georreferenciado ({dados.origem.lat}, {dados.origem.lon}), norte geográfico.
+            </p>
+            <ul>{dados.limitacoes.map((l) => <li key={l}>{l}</li>)}</ul>
+            <ul className="maqueta-fontes">
+              {Object.entries(dados.fontes).map(([k, f]) => <li key={k}>{f.url ? <a href={f.url} target="_blank" rel="noopener">{f.titulo}</a> : f.titulo}</li>)}
+            </ul>
+          </div>
+        )}
+      </div>
+      <div className="ficha-maqueta-botoes maqueta-botoes" role="toolbar" aria-label="Controlos da maqueta">
+        {botoes.map(([nome, ativo, f]) => (
+          <button key={nome} aria-pressed={ativo} onClick={f}>{nome}</button>
+        ))}
+      </div>
+      {dados.epocas && dados.epocas.length > 0 && (
+        <SeletorEpoca epocas={dados.epocas} epoca={epoca} dados={dados} semData={vista.semData} nOcultos={vista.ocultos.size} onEscolher={setEpocaId} onIr={setSel} />
+      )}
+      <p className="maqueta-ajuda">
+        Arraste para rodar · roda ou dois dedos para aproximar · botão direito para deslocar · clique numa placa ou num elemento para o identificar.
+        {!tatil && <span className="maqueta-ajuda-teclas"> Teclado: setas ou WASD deslocam · Q/E rodam · R/F inclinam · + e − aproximam.</span>}
+      </p>
+    </div>
+  );
+}
+
+/**
+ * Épocas da maqueta: cada uma mostra só o que hoje existe e que, segundo as fontes, já existia nesse tempo.
+ * As partes desaparecidas não se reconstroem (não se inventa); o que está de pé mostra-se na forma atual.
+ */
+function SeletorEpoca({ epocas, epoca, dados, semData, nOcultos, onEscolher, onIr }: {
+  epocas: EpocaMaqueta[];
+  epoca: EpocaMaqueta | null;
+  dados: DadosMaqueta;
+  semData: ElementoMaqueta[];
+  nOcultos: number;
+  onEscolher: (id: string | null) => void;
+  onIr: (id: string) => void;
+}) {
+  const opcoes: [string | null, string][] = [...epocas.map((e): [string, string] => [e.id, e.nome]), [null, "Hoje"]];
+  return (
+    <div className="maqueta-epocas">
+      <div className="maqueta-epocas-botoes" role="toolbar" aria-label="Épocas históricas">
+        {opcoes.map(([id, nome]) => (
+          <button key={id ?? "hoje"} aria-pressed={(epoca?.id ?? null) === id} onClick={() => onEscolher(id)}>{nome}</button>
+        ))}
+      </div>
+      {epoca && (
+        <div className="maqueta-epoca" aria-live="polite">
+          <p className="maqueta-epoca-periodo">{epoca.periodo}</p>
+          <p>{epoca.texto}</p>
+          <p className="maqueta-epoca-nota">
+            {nOcultos === 1 ? "Esconde-se o elemento posterior a esta época. " : nOcultos > 1 ? `Escondem-se os ${nOcultos} elementos posteriores a esta época. ` : ""}
+            O que fica à vista está na forma de hoje: as partes que entretanto desapareceram não se reconstituem, e o terreno e o casario são os atuais.
+          </p>
+          {semData.length > 0 && (
+            <p className="maqueta-epoca-nota">
+              Sem data nas fontes (ficam à vista):{" "}
+              {semData.map((e, i) => (
+                <span key={e.id}>{i > 0 && ", "}<button type="button" className="maqueta-epoca-ir" onClick={() => onIr(e.id)}>{e.nome}</button></span>
+              ))}.
+            </p>
+          )}
+          <ul className="maqueta-fontes">
+            {epoca.fontes.map((k) => {
+              const f = dados.fontes[k];
+              if (!f) return null;
+              return <li key={k}>{f.url ? <a href={f.url} target="_blank" rel="noopener">{f.titulo}</a> : f.titulo}</li>;
+            })}
+          </ul>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function FichaElemento({ e, dados, onFechar }: { e: ElementoMaqueta; dados: DadosMaqueta; onFechar: () => void }) {
+  return (
+    <div className="maqueta-elemento" role="dialog" aria-label={e.nome}>
+      <button className="fechar" aria-label="Fechar" onClick={onFechar}>×</button>
+      <p className="maqueta-elemento-grupo">{e.grupo}</p>
+      <h4>{e.nome}</h4>
+      <ul className="maqueta-elemento-estado">
+        <li>{ESTADOS[e.estado]}</li>
+        <li>Confiança {e.confianca}</li>
+      </ul>
+      <p>{e.descricao}</p>
+      {e.desdeTexto && <p className="maqueta-elemento-medidas">Data: {e.desdeTexto}.</p>}
+      {e.medidas && <p className="maqueta-elemento-medidas">{e.medidas}</p>}
+      <ul className="maqueta-fontes">
+        {e.fontes.map((k) => {
+          const f = dados.fontes[k];
+          if (!f) return null;
+          return <li key={k}>{f.url ? <a href={f.url} target="_blank" rel="noopener">{f.titulo}</a> : f.titulo}</li>;
+        })}
+      </ul>
+    </div>
+  );
+}
+
+function Cena({ url, elementos, sel, setSel, giro, rotulos, placas, distancia: distanciaDados, direcao, sol, distanciaMinima, camadaPlacas, pausa, terreno, ocultos = NENHUM, pedidoEnquadrar, bussola, escala, escalaTexto, teclas, tatil, onCarregada }: {
+  url: string;
+  elementos: Map<string, ElementoMaqueta>;
+  sel: string | null;
+  setSel: (id: string | null) => void;
+  giro: boolean;
+  rotulos: boolean;
+  placas: ElementoMaqueta[];
+  distancia?: number;
+  direcao?: [number, number, number];
+  sol?: [number, number, number];
+  distanciaMinima: number;
+  camadaPlacas: React.RefObject<HTMLDivElement | null>;
+  pausa: React.RefObject<boolean>;
+  terreno: boolean;
+  ocultos?: Set<string>;
+  pedidoEnquadrar: number;
+  bussola: React.RefObject<HTMLDivElement | null>;
+  escala: React.RefObject<HTMLDivElement | null>;
+  escalaTexto: React.RefObject<HTMLSpanElement | null>;
+  teclas: React.RefObject<Set<string>>;
+  tatil: boolean;
+  onCarregada: () => void;
+}) {
+  const { scene } = useGLTF(url, `${BASE}draco/`);
+  const { camera, size, gl } = useThree();
+  const controlos = useRef<Controlos>(null);
+  const objetivo = useRef<{ alvo: THREE.Vector3; pos: THREE.Vector3 } | null>(null);
+  const rodar = useRef({ v: 0, agarrada: false, ultima: -Infinity });
+  const estados = useRef<Placa[]>([]);
+  const entrada = useRef<{ atraso: number; passo: number } | null>({ atraso: 0.6, passo: 0.35 });
+  const oclusores = useRef<THREE.Object3D[]>([]);
+  const aux = useMemo(() => ({ v: new THREE.Vector3(), dir: new THREE.Vector3(), w: new THREE.Vector3(), raio: Object.assign(new THREE.Raycaster(), { firstHitOnly: true }), chao: Object.assign(new THREE.Raycaster(), { firstHitOnly: true }) }), []);
+  // Fotogramas que ainda é preciso desenhar com a câmara parada (o visor só desenha quando algo muda)
+  const sujo = useRef(4);
+  // A câmara está como o enquadramento a deixou (ninguém lhe mexeu): ao mudar o tamanho do visor, reenquadra-se
+  const enquadrada = useRef(true);
+
+  // Preparação: sombras, materiais próprios por elemento (para o destaque) e caixas de cada elemento.
+  const { alvos, centro, pontos, terreno: area, chao, porElemento, malhas, idDe } = useMemo(() => {
+    const porElemento = new Map<string, THREE.Mesh[]>();
+    const malhas: THREE.Mesh[] = [];
+    const chao: THREE.Mesh[] = [];
+    const idDe = new Map<THREE.Object3D, string>();
+    scene.updateMatrixWorld(true);
+    scene.traverse((o) => {
+      const m = o as THREE.Mesh;
+      if (!m.isMesh) return;
+      malhas.push(m);
+      const terrenoBase = /terreno|base/i.test(m.name) || /^(Terreno|Base)$/.test(m.parent?.name ?? "");
+      m.castShadow = !terrenoBase;
+      if (terrenoBase) chao.push(m);
+      m.receiveShadow = true;
+      let p: THREE.Object3D | null = m;
+      while (p && !p.userData.elemento) p = p.parent;
+      const id = p?.userData.elemento as string | undefined;
+      if (!id) return;
+      idDe.set(m, id);
+      m.material = Array.isArray(m.material) ? m.material.map((x) => x.clone()) : m.material.clone();
+      porElemento.set(id, [...(porElemento.get(id) ?? []), m]);
+    });
+    const alvos = new Map<string, Alvo>();
+    for (const [id, meshes] of porElemento) {
+      const b = new THREE.Box3();
+      meshes.forEach((m) => b.expandByObject(m));
+      const c = b.getCenter(new THREE.Vector3());
+      const s = b.getSize(new THREE.Vector3());
+      alvos.set(id, { centro: c, topo: new THREE.Vector3(c.x, b.max.y + 1.5, c.z), raio: Math.max(s.x, s.z, s.y) / 2 });
+    }
+    // O enquadramento abrange o monumento: os grupos da maqueta menos o terreno, o casario e a envolvente
+    // (em Guimarães entra o Paço; em Lindoso ficam de fora os espigueiros, que puxavam o centro para baixo)
+    const caixaMonumento = new THREE.Box3();
+    let doMonumento: THREE.Mesh[] = [];
+    scene.traverse((o) => {
+      if (!/_grupo$/.test(o.name) || FORA_DO_ENQUADRAMENTO.test(o.name) || /_grupo$/.test(o.parent?.name ?? "")) return;
+      caixaMonumento.expandByObject(o);
+      o.traverse((m) => (m as THREE.Mesh).isMesh && doMonumento.push(m as THREE.Mesh));
+    });
+    if (caixaMonumento.isEmpty()) {
+      doMonumento = placas.flatMap((e) => porElemento.get(e.id) ?? []);
+      doMonumento.forEach((m) => caixaMonumento.expandByObject(m));
+      if (caixaMonumento.isEmpty()) caixaMonumento.setFromObject(scene);
+    }
+    const centro = caixaMonumento.getCenter(new THREE.Vector3());
+    // Até ~3000 pontos do monumento, para medir a distância a que cabe no visor
+    const pontos: THREE.Vector3[] = [];
+    const total = doMonumento.reduce((n, m) => n + m.geometry.getAttribute("position").count, 0);
+    const passo = Math.max(1, Math.floor(total / 3000));
+    for (const m of doMonumento) {
+      const pos = m.geometry.getAttribute("position");
+      for (let i = 0; i < pos.count; i += passo) {
+        pontos.push(new THREE.Vector3().fromBufferAttribute(pos, i).applyMatrix4(m.matrixWorld));
+      }
+    }
+    if (pontos.length < 8) {
+      for (let i = 0; i < 8; i++) pontos.push(new THREE.Vector3(i & 1 ? caixaMonumento.max.x : caixaMonumento.min.x, i & 2 ? caixaMonumento.max.y : caixaMonumento.min.y, i & 4 ? caixaMonumento.max.z : caixaMonumento.min.z));
+    }
+    // A área da maqueta (terreno) limita o alvo da câmara e a caixa das sombras
+    const terreno = new THREE.Box3().setFromObject(scene.getObjectByName("Terreno") ?? scene);
+    // Índice espacial para os raios de oclusão das placas (e dos cliques): o terreno tem 140 mil triângulos
+    for (const m of malhas) {
+      if (SEM_PLACA_OCULTA.includes(idDe.get(m) ?? "")) continue;
+      const g = m.geometry as THREE.BufferGeometry & { boundsTree?: MeshBVH };
+      g.boundsTree ??= new MeshBVH(g);
+      m.raycast = acceleratedRaycast;
+    }
+    return { alvos, centro, pontos, terreno, chao, porElemento, malhas, idDe };
+  }, [scene, placas]);
+
+  // Ponto de cada placa: o indicado nos dados ou o topo do elemento junto ao centro da sua planta
+  const ancoras = useMemo(() => {
+    const r = new Map<string, THREE.Vector3>();
+    for (const e of placas) {
+      if (e.ancora) { r.set(e.id, new THREE.Vector3(...e.ancora)); continue; }
+      const a = alvos.get(e.id);
+      const meshes = porElemento.get(e.id);
+      if (!a || !meshes) continue;
+      const pts: THREE.Vector3[] = [];
+      for (const m of meshes) {
+        const pos = m.geometry.getAttribute("position");
+        for (let i = 0; i < pos.count; i++) pts.push(new THREE.Vector3().fromBufferAttribute(pos, i).applyMatrix4(m.matrixWorld));
+      }
+      const dh = (p: THREE.Vector3, q: THREE.Vector3) => Math.hypot(p.x - q.x, p.z - q.z);
+      const perto = pts.reduce((b, p) => (dh(p, a.centro) < dh(b, a.centro) ? p : b), pts[0]);
+      const topo = pts.filter((p) => dh(p, perto) < 2.5).reduce((y, p) => Math.max(y, p.y), perto.y);
+      r.set(e.id, new THREE.Vector3(perto.x, topo + 0.6, perto.z));
+    }
+    return r;
+  }, [placas, alvos, porElemento]);
+
+  useEffect(() => {
+    const camada = camadaPlacas.current;
+    if (!camada) return;
+    estados.current = placas.flatMap((e) => {
+      const el = camada.querySelector<HTMLElement>(`[data-placa="${e.id}"]`);
+      const ancora = ancoras.get(e.id);
+      if (!el || !ancora) return [];
+      return [{ id: e.id, ancora, el, cartao: el.querySelector<HTMLElement>(".maqueta-placa-cartao")!, linha: el.querySelector<HTMLElement>(".maqueta-placa-linha")!, w: 0, h: 0, op: 0, dy: 0, dx: 0, inicio: Infinity, tapada: false, baixo: false }];
+    });
+    entrada.current = { atraso: 0.6, passo: 0.35 };
+  }, [placas, ancoras, camadaPlacas]);
+
+  // Ao voltar a ligar as placas, entram de novo em sequência, mais depressa
+  const primeira = useRef(true);
+  useEffect(() => {
+    if (primeira.current) { primeira.current = false; return; }
+    if (rotulos) entrada.current = { atraso: 0, passo: 0.08 };
+  }, [rotulos]);
+
+  // Remedir os cartões (e as zonas do selo e da bússola) quando o visor muda de tamanho
+  const bloqueadas = useRef<Caixa[] | null>(null);
+  useEffect(() => {
+    estados.current.forEach((p) => (p.w = 0));
+    bloqueadas.current = null;
+  }, [size.width, size.height]);
+
+  // Depois de fechar a ficha de um elemento, o giro espera como depois de uma interação
+  useEffect(() => {
+    if (!sel) rodar.current.ultima = performance.now() / 1000;
+  }, [sel]);
+
+  const dirInicial = useMemo(() => (direcao ? new THREE.Vector3(...direcao).normalize() : DIRECAO_INICIAL), [direcao]);
+  const fov = (camera as THREE.PerspectiveCamera).fov;
+  const aspeto = size.width / Math.max(1, size.height);
+  // Distância a que o monumento cabe no visor com o tamanho atual (num ecrã largo fica mais perto)
+  const distancia = useMemo(
+    () => Math.max(distanciaMinima * 1.3, distanciaParaCaber(pontos, centro, dirInicial, fov, aspeto)),
+    [pontos, centro, dirInicial, fov, aspeto, distanciaMinima],
+  );
+
+  const enquadrar = useCallback((instantaneo = false, dirAtual?: THREE.Vector3) => {
+    const dir = dirAtual ?? dirInicial;
+    const d = dirAtual ? Math.max(distanciaMinima * 1.3, distanciaParaCaber(pontos, centro, dir, fov, aspeto)) : distancia;
+    const pos = centro.clone().addScaledVector(dir, d);
+    enquadrada.current = true;
+    if (instantaneo && controlos.current) {
+      camera.position.copy(pos);
+      controlos.current.target.copy(centro);
+      controlos.current.update();
+    } else {
+      objetivo.current = { alvo: centro.clone(), pos };
+    }
+  }, [camera, centro, distancia, dirInicial, pontos, fov, aspeto, distanciaMinima]);
+
+  // Para os testes no browser (como window.__atlas no mapa)
+  useEffect(() => {
+    (window as unknown as { __maqueta?: object }).__maqueta = { gl, scene, camera, controlos };
+  }, [gl, scene, camera]);
+
+  // Primeiro enquadramento, logo que a maqueta chega
+  const primeiroEnq = useRef(false);
+  useEffect(() => {
+    if (primeiroEnq.current) return;
+    primeiroEnq.current = true;
+    enquadrar(true);
+    onCarregada();
+  }, [enquadrar, onCarregada]);
+
+  // Ao mudar o tamanho do visor (ecrã grande, rodar o telemóvel), se ninguém mexeu na câmara, o monumento volta a
+  // caber, visto do mesmo lado em que o giro o deixou
+  useEffect(() => {
+    if (!primeiroEnq.current || !enquadrada.current || !controlos.current || objetivo.current) return;
+    enquadrar(true, camera.position.clone().sub(controlos.current.target).normalize());
+  }, [size.width, size.height]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Qualquer mudança na cena pede uns fotogramas novos
+  useEffect(() => {
+    sujo.current = Math.max(sujo.current, 3);
+  });
+  useEffect(() => {
+    if (pedidoEnquadrar) enquadrar();
+  }, [pedidoEnquadrar, enquadrar]);
+
+  // Aproximar suavemente ao elemento selecionado, mantendo o rumo atual da câmara
+  useEffect(() => {
+    porElemento.forEach((meshes, id) => {
+      for (const m of meshes) {
+        for (const mat of (Array.isArray(m.material) ? m.material : [m.material]) as THREE.MeshStandardMaterial[]) {
+          mat.emissive?.copy(id === sel ? DESTAQUE : new THREE.Color(0));
+          mat.emissiveIntensity = id === sel ? 0.28 : 0;
+        }
+      }
+    });
+    const a = sel ? alvos.get(sel) : undefined;
+    if (!a || !controlos.current) return;
+    const olhar = sel ? elementos.get(sel)?.olhar : undefined;
+    const dir = olhar ? new THREE.Vector3(...olhar).normalize() : camera.position.clone().sub(controlos.current.target).normalize();
+    enquadrada.current = false;
+    const dist = THREE.MathUtils.clamp(a.raio * 3.6, Math.min(60, (distanciaDados ?? distancia) * 0.6), 260);
+    objetivo.current = { alvo: a.centro.clone(), pos: a.centro.clone().addScaledVector(dir, dist) };
+  }, [sel, alvos, porElemento, camera, elementos, distancia, distanciaDados]);
+
+  useEffect(() => {
+    // Época: os elementos que ainda não existiam escondem-se e deixam de apanhar cliques e de tapar placas
+    porElemento.forEach((meshes, id) => {
+      const fora = ocultos.has(id);
+      for (const m of meshes) {
+        if (!raioOriginal.has(m)) raioOriginal.set(m, m.raycast);
+        m.visible = !fora;
+        m.raycast = fora ? semRaio : raioOriginal.get(m)!;
+      }
+    });
+    CAMADAS_TERRENO.forEach((n) => {
+      const o = scene.getObjectByName(n);
+      if (o) o.visible = terreno;
+    });
+    const base = scene.getObjectByName("Base");
+    if (base) base.visible = terreno;
+    const visivel = (o: THREE.Object3D | null): boolean => !o || (o.visible && visivel(o.parent));
+    oclusores.current = malhas.filter((m) => visivel(m) && !SEM_PLACA_OCULTA.includes(idDe.get(m) ?? ""));
+    // O sol e a maqueta não se mexem: o mapa de sombras só se refaz quando aparece ou desaparece alguma coisa
+    gl.shadowMap.autoUpdate = false;
+    gl.shadowMap.needsUpdate = true;
+  }, [terreno, ocultos, scene, malhas, idDe, porElemento, gl]);
+
+  useEffect(() => {
+    const c = controlos.current;
+    if (!c) return;
+    const agarrar = () => {
+      objetivo.current = null;
+      enquadrada.current = false;
+      rodar.current.agarrada = true;
+      rodar.current.v = 0;
+    };
+    const largar = () => {
+      rodar.current.agarrada = false;
+      rodar.current.ultima = performance.now() / 1000;
+    };
+    c.addEventListener("start", agarrar);
+    c.addEventListener("end", largar);
+    return () => {
+      c.removeEventListener("start", agarrar);
+      c.removeEventListener("end", largar);
+    };
+  }, []);
+
+  useFrame((estado, dtBruto) => {
+    const c = controlos.current;
+    if (!c) return;
+    const dt = Math.min(dtBruto, 0.1);
+    // Giro automático: arranca devagar, para ao agarrar a maqueta e retoma após uns segundos parada
+    const g = rodar.current;
+    const agora = performance.now() / 1000;
+    const quer = giro && !g.agarrada && !pausa.current && !sel && !objetivo.current && agora - g.ultima > RETOMA_GIRO;
+    g.v += ((quer ? VEL_GIRO : 0) - g.v) * (1 - Math.exp(-dt * (quer ? 0.7 : 4)));
+    if (g.v > 1e-5) {
+      aux.v.copy(camera.position).sub(c.target).applyAxisAngle(EIXO_Y, g.v * dt);
+      camera.position.copy(c.target).add(aux.v);
+    }
+    moverComTeclado(c, dt, agora);
+    const o = objetivo.current;
+    if (o) {
+      const k = 1 - Math.exp(-dt * 4);
+      camera.position.lerp(o.pos, k);
+      c.target.lerp(o.alvo, k);
+      if (camera.position.distanceTo(o.pos) < 0.3 && c.target.distanceTo(o.alvo) < 0.1) objetivo.current = null;
+    }
+    // manter o alvo dentro da maqueta
+    // (a margem de 40 m não cabe nas maquetas pequenas, como a torre de Braga com 44 m: aí usa-se um quarto da largura)
+    const mx = Math.min(40, (area.max.x - area.min.x) / 4);
+    const mz = Math.min(40, (area.max.z - area.min.z) / 4);
+    c.target.x = THREE.MathUtils.clamp(c.target.x, area.min.x + mx, area.max.x - mx);
+    c.target.z = THREE.MathUtils.clamp(c.target.z, area.min.z + mz, area.max.z - mz);
+    c.target.y = THREE.MathUtils.clamp(c.target.y, centro.y - 40, centro.y + 40);
+    manterAcimaDoChao();
+    // A câmara olha já para o alvo deste fotograma: o desenho e as placas usam exatamente a mesma câmara
+    // (antes a orientação vinha do fotograma anterior, e no giro as placas e o 3D desencontravam-se e tremiam)
+    camera.lookAt(c.target);
+    camera.updateMatrixWorld();
+    if (bussola.current) bussola.current.style.transform = `rotate(${THREE.MathUtils.radToDeg(c.getAzimuthalAngle())}deg)`;
+    if (escala.current) {
+      const d = camera.position.distanceTo(c.target);
+      const pxPorM = size.height / (2 * d * Math.tan(THREE.MathUtils.degToRad((camera as THREE.PerspectiveCamera).fov / 2)));
+      const m = [1, 2, 5, 10, 20, 50, 100, 200].filter((v) => v * pxPorM <= 140).pop() ?? 1;
+      escala.current.style.width = `${m * pxPorM}px`;
+      if (escalaTexto.current) escalaTexto.current.textContent = `${m} m`;
+    }
+    atualizarPlacas(estado.clock.elapsedTime, dt);
+  });
+
+  /** Teclado: deslocar no plano do chão, rodar à volta do alvo, inclinar e aproximar, à velocidade da distância. */
+  function moverComTeclado(c: Controlos, dt: number, agora: number) {
+    const k = teclas.current;
+    if (!k.size) return;
+    objetivo.current = null;
+    enquadrada.current = false;
+    rodar.current.v = 0;
+    rodar.current.ultima = agora;
+    const { v, w } = aux;
+    const off = v.copy(camera.position).sub(c.target);
+    const dist = off.length();
+    // deslocar: em frente é para onde a câmara olha, projetado no chão
+    const frente = (k.has("frente") ? 1 : 0) - (k.has("tras") ? 1 : 0);
+    const lado = (k.has("direita") ? 1 : 0) - (k.has("esquerda") ? 1 : 0);
+    if (frente || lado) {
+      const az = Math.atan2(off.x, off.z);
+      w.set(-Math.sin(az) * frente + Math.cos(az) * lado, 0, -Math.cos(az) * frente - Math.sin(az) * lado);
+      w.normalize().multiplyScalar(dist * 0.7 * dt);
+      c.target.add(w);
+      camera.position.add(w);
+    }
+    // rodar à volta do alvo e inclinar
+    const giroT = (k.has("rodarEsq") ? 1 : 0) - (k.has("rodarDir") ? 1 : 0);
+    const incl = (k.has("descer") ? 1 : 0) - (k.has("subir") ? 1 : 0);
+    const zoom = (k.has("afastar") ? 1 : 0) - (k.has("aproximar") ? 1 : 0);
+    if (giroT || incl || zoom) {
+      const esf = new THREE.Spherical().setFromVector3(off);
+      esf.theta += giroT * THREE.MathUtils.degToRad(70) * dt;
+      esf.phi = THREE.MathUtils.clamp(esf.phi + incl * THREE.MathUtils.degToRad(45) * dt, 0.08, 1.36);
+      esf.radius = THREE.MathUtils.clamp(esf.radius * Math.exp(zoom * 1.4 * dt), distanciaMinima, maxDistancia);
+      off.setFromSpherical(esf);
+      camera.position.copy(c.target).add(off);
+    }
+  }
+
+  /** A câmara não entra no terreno (ao aproximar junto a uma encosta, ou ao inclinar até ao horizonte). */
+  function manterAcimaDoChao() {
+    if (!terreno || !chao.length) return;
+    const r = aux.chao;
+    r.set(aux.w.set(camera.position.x, area.max.y + 50, camera.position.z), aux.dir.set(0, -1, 0));
+    r.far = Infinity;
+    const hit = r.intersectObjects(chao, false)[0];
+    if (hit && camera.position.y < hit.point.y + ALTURA_MINIMA) camera.position.y = hit.point.y + ALTURA_MINIMA;
+  }
+
+  function atualizarPlacas(t: number, dt: number) {
+    const ps = estados.current;
+    if (!ps.length) return;
+    const e = entrada.current;
+    if (e) {
+      ps.forEach((p, i) => (p.inicio = t + e.atraso + i * e.passo));
+      entrada.current = null;
+    }
+    // os cartões não entram por baixo do selo «Versão provisória» nem da bússola
+    if (!bloqueadas.current) {
+      const camada = camadaPlacas.current;
+      const r0 = camada?.getBoundingClientRect();
+      bloqueadas.current = r0
+        ? [...(camada!.parentElement?.querySelectorAll<HTMLElement>(".maqueta-selo, .maqueta-norte, .maqueta-escala") ?? [])].map((el) => {
+            const r = el.getBoundingClientRect();
+            return { x0: r.left - r0.left - 4, y0: r.top - r0.top - 4, x1: r.right - r0.left + 4, y1: r.bottom - r0.top + 4 };
+          })
+        : [];
+    }
+    const o: OpcoesDisposicao = { linha: size.width < 560 ? 26 : 42, folga: 6, niveis: 2, topo: 44, bloqueadas: bloqueadas.current, altura: size.height, largura: size.width, base: 8 };
+    const { v, dir, raio } = aux;
+    const noEcra = ps.map((p) => {
+      if (!p.w) { p.w = p.cartao.offsetWidth; p.h = p.cartao.offsetHeight; }
+      v.copy(p.ancora).project(camera);
+      const x = (v.x + 1) / 2 * size.width;
+      const y = (1 - v.y) / 2 * size.height;
+      const dentro = v.z < 1 && x > -p.w / 2 && x < size.width + p.w / 2 && y > 0 && y < size.height + 20;
+      // Oclusão: um raio da câmara ao ponto da placa; se bater antes noutro elemento, a placa esconde-se
+      if (dentro && rotulos) {
+        dir.copy(p.ancora).sub(camera.position);
+        const dist = dir.length();
+        raio.set(camera.position, dir.divideScalar(dist));
+        raio.far = dist - 0.8;
+        const hit = raio.intersectObjects(oclusores.current, false)[0];
+        p.tapada = !!hit && idDe.get(hit.object) !== p.id;
+      }
+      return { x, y, w: p.w, h: p.h, candidata: rotulos && dentro && !p.tapada && !ocultos.has(p.id) && t >= p.inicio };
+    });
+    const lugares = disporPlacas(noEcra, o);
+    const kOp = 1 - Math.exp(-dt * 5);
+    const kDy = 1 - Math.exp(-dt * 7);
+    ps.forEach((p, i) => {
+      const { nivel, lado, baixo = false } = lugares[i];
+      const { x, y } = noEcra[i];
+      if (nivel >= 0 && baixo !== p.baixo) {
+        // muda de lado do ponto: a linha recomeça curta do lado novo, em vez de atravessar o ponto
+        p.baixo = baixo;
+        p.dy = o.linha * 0.4;
+        p.el.dataset.baixo = baixo ? "1" : "0";
+      }
+      p.op += ((nivel >= 0 ? 1 : 0) - p.op) * kOp;
+      if (nivel >= 0) {
+        p.dy += (alturaLinha(nivel, p.h, o) - p.dy) * kDy;
+        // o cartão desliza para dentro do visor quando o ponto está junto à borda (não fica cortado)
+        const alvoDx = THREE.MathUtils.clamp(lado * p.w, p.w / 2 + 4 - x, size.width - p.w / 2 - 4 - x);
+        p.dx += (alvoDx - p.dx) * kDy;
+      } else if (p.op < 0.02) {
+        p.dy = o.linha * 0.4; // ao reaparecer, a linha cresce de novo
+      }
+      p.el.style.transform = `translate3d(${x.toFixed(1)}px, ${y.toFixed(1)}px, 0)`;
+      p.el.style.opacity = p.op.toFixed(3);
+      p.el.style.visibility = p.op < 0.02 ? "hidden" : "visible";
+      p.linha.style.height = `${p.dy.toFixed(1)}px`;
+      // por cima, o fundo do cartão fica a dy do ponto; por baixo, o topo (a posição vem do CSS por data-baixo)
+      p.cartao.style.setProperty("--dy", `${p.dy.toFixed(1)}px`);
+      p.cartao.style.setProperty("--dx", `${p.dx.toFixed(1)}px`);
+    });
+  }
+
+  const clicar = (e: ThreeEvent<MouseEvent>) => {
+    if (e.delta > 5) return;
+    e.stopPropagation();
+    let p: THREE.Object3D | null = e.object;
+    while (p && !p.userData.elemento) p = p.parent;
+    const id = p?.userData.elemento as string | undefined;
+    setSel(id && elementos.has(id) && !["terreno", "vegetacao", "caminhos"].includes(id) ? id : null);
+  };
+
+  const maxDistancia = Math.max(560, distancia * 1.6, (distanciaDados ?? 0) * 1.5);
+
+  // A caixa das sombras cobre a área toda da maqueta
+  const solC = area.getCenter(new THREE.Vector3());
+  // posição do sol: por omissão de noroeste; uma maqueta pode pedir outra direção (a torre de Braga tem as
+  // faces principais a sul e a nascente, que de noroeste ficavam sempre na sombra)
+  const solD = sol ? new THREE.Vector3(...sol).normalize().multiplyScalar(300) : new THREE.Vector3(...(LUZ.sol.direcao as [number, number, number]));
+  const meiaSombra = Math.max(area.max.x - area.min.x, area.max.z - area.min.z) / 2 + 5;
+  // 4096 px no computador (antes 2048 nas maquetas pequenas): as ameias, os matacães e as copas já fazem sombra
+  // própria; nos ecrãs táteis, 2048. O normalBias acompanha o tamanho do píxel de sombra.
+  const mapaSombra = Math.min(tatil ? LUZ.sombra.mapaToque : LUZ.sombra.mapa, gl.capabilities.maxTextureSize);
+  const pixelSombra = (2 * meiaSombra) / mapaSombra;
+
+  return (
+    <>
+      {/* Luz partilhada (src/data/luz.json), calibrada com os renders Cycles dos construir.py: sol com a mesma força,
+          céu com a cor do "mundo" e chão neutro, tone mapping AgX. A luz de ambiente e a oclusão ambiental fazem
+          aqui o papel da luz indireta do Cycles. */}
+      <hemisphereLight args={[LUZ.hemisferio.ceu, LUZ.hemisferio.chao, LUZ.hemisferio.intensidade]} />
+      <Ambiente />
+      <Desenho raio={meiaSombra} tatil={tatil} sujo={sujo} />
+      <directionalLight
+        position={[solC.x + solD.x, centro.y + solD.y, solC.z + solD.z]}
+        color={LUZ.sol.cor}
+        intensity={LUZ.sol.intensidade}
+        castShadow
+        shadow-mapSize={[mapaSombra, mapaSombra]}
+        shadow-camera-left={-meiaSombra}
+        shadow-camera-right={meiaSombra}
+        shadow-camera-top={meiaSombra}
+        shadow-camera-bottom={-meiaSombra}
+        shadow-camera-near={10}
+        shadow-camera-far={Math.max(700, 400 + 2 * meiaSombra)}
+        shadow-bias={LUZ.sombra.bias}
+        shadow-normalBias={Math.max(0.15, pixelSombra * 2.2)}
+        shadow-radius={LUZ.sombra.raio}
+      >
+        <object3D attach="target" position={[solC.x, centro.y, solC.z]} />
+      </directionalLight>
+      <primitive object={scene} onClick={clicar} onPointerMissed={() => setSel(null)} />
+      <OrbitControls
+        ref={controlos as never}
+        makeDefault
+        enableDamping
+        dampingFactor={0.08}
+        minDistance={distanciaMinima}
+        maxDistance={maxDistancia}
+        minPolarAngle={0.08}
+        maxPolarAngle={1.36}
+        // cada passo da roda do rato aproxima ~11 % (com 0,9 eram ~4,5 % e o zoom parecia lento)
+        zoomSpeed={2.2}
+      />
+    </>
+  );
+}
