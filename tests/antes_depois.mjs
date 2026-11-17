@@ -34,7 +34,7 @@ const SHOTS = {
     ['07-ficha-com-maqueta', '#' + BRIT, async p => { await espera(30000); }],
     ['08-ficha-sem-maqueta', null],
     ['09-catalogo', 'castros/', null, true],
-    ['10-pagina-com-maqueta', 'castros/' + BRIT + '/', async p => { await p.locator('.maqueta').first().scrollIntoViewIfNeeded().catch(() => {}); await espera(25000); await p.evaluate(() => scrollTo(0, 0)); }, true],
+    ['10-pagina-com-maqueta', 'citanias/' + BRIT + '/', async p => { await p.locator('.maqueta').first().scrollIntoViewIfNeeded().catch(() => {}); await espera(25000); await p.evaluate(() => scrollTo(0, 0)); }, true],
     ['11-pagina-sem-maqueta', 'castros/' + POP + '/', null, true],
     ['12-proximas-adicoes', 'proximas-adicoes/', null, true],
     ['13-creditos', 'creditos/', null, true],
