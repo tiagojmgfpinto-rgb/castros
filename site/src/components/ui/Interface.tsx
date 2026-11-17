@@ -341,7 +341,7 @@ function Novidades({ monumentos, todos }: { monumentos: MonumentoResumo[]; todos
       {aba === "novos" ? (
         <ul className="lista-novos" id="lista-novos" role="tabpanel" aria-labelledby="aba-novos">
           {novos.map(({ m, data }) => (
-            <li key={m.id}>
+            <li key={m.id} data-id={m.id}>
               <button type="button" onClick={() => escolher(m)}>
                 <b>{m.nome}</b>
                 <span>
@@ -359,7 +359,7 @@ function Novidades({ monumentos, todos }: { monumentos: MonumentoResumo[]; todos
           </p>
           <ul className="lista-proximos">
             {proximos.map((m) => (
-              <li key={m.id} data-fase={m.fase}>
+              <li key={m.id} data-id={m.id} data-fase={m.fase}>
                 <a href={`${BASE}${caminhoFicha(m)}`}>
                   <span className="proximo-imagem">{m.imagem ? <img src={`${BASE}${m.imagem}`} alt="" loading="lazy" decoding="async" /> : <IconeTipo tipo={m.tipologia} />}</span>
                   <b>{m.nome}</b>

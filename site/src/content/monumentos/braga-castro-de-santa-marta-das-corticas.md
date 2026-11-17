@@ -15,7 +15,7 @@ classificacao:
   categoria: "Imóvel de Interesse Público (1955)"
 estadoFicha: "publicada"
 estadoMaqueta: "concluida"
-adicionado: "2026-10-27T23:41:11Z"
+adicionado: "2026-11-02T00:00:00Z"
 prioritario: true
 resumo: "No alto do monte da Falperra (522 m), em Esporões, sobrepõem-se vestígios de várias épocas. Há um castro de pequenas casas circulares com três muralhas, habitado do Bronze Final até, pelo menos, a época romana. Há também uma basílica paleocristã de três naves, talvez dos séculos V a VI, e um grande edifício interpretado como palácio suevo, possivelmente destruído em 585 na conquista visigoda. Há ainda 46 referências escritas a um castelo entre 900 e 1147, e a capela mandada construir por D. Diogo de Sousa em 1520."
 fichaTecnica:

@@ -15,7 +15,7 @@ classificacao:
   categoria: "Monumento Nacional (1910)"
 estadoFicha: "publicada"
 estadoMaqueta: "concluida"
-adicionado: "2026-10-27T23:41:11Z"
+adicionado: "2026-10-27T00:00:00Z"
 prioritario: true
 resumo: "A Citânia de Briteiros ocupa o topo do Monte de São Romão, em São Salvador de Briteiros, Guimarães. É um dos povoados proto-históricos mais expressivos da Península Ibérica, pela dimensão e pela monumentalidade das muralhas, do urbanismo e da arquitetura. A utilização do monte remonta ao Neolítico Final e ao Calcolítico, quando se gravaram painéis de arte rupestre na encosta nascente. Como povoado, a ocupação data dos primórdios do I milénio a.C., no Bronze Atlântico. A fase áurea vai do século II a.C. à mudança da Era, e o povoado continuou habitado nos séculos I e II d.C. No século X ergueu-se uma pequena ermida cristã na acrópole."
 fichaTecnica:

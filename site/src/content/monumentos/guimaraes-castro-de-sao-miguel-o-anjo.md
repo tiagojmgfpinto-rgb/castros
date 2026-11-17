@@ -15,7 +15,7 @@ classificacao:
   categoria: "Sem classificação legal"
 estadoFicha: "publicada"
 estadoMaqueta: "concluida"
-adicionado: "2026-10-27T23:41:11Z"
+adicionado: "2026-11-02T00:00:00Z"
 prioritario: true
 resumo: "O Castro de São Miguel-o-Anjo, em Guimarães (não confundir com o homónimo de Vila Nova de Famalicão), ocupa o monte do mesmo nome, hoje com uma capela e um parque de merendas. As ruínas já eram conhecidas como obra «dos mouros» no século XVIII, e Francisco Martins Sarmento fez aqui pequenos trabalhos."
 fichaTecnica:

@@ -117,7 +117,8 @@ def main():
             fm['classificacao'] = {'categoria': protecao}
         fm['estadoFicha'] = 'publicada' if fontes and par else 'em-preparacao'
         fm['estadoMaqueta'] = 'concluida' if sid in MAQUETAS else 'pendente'
-        fm['adicionado'] = ADICIONADO
+        # um sítio com maqueta entra no mapa no dia em que a maqueta foi publicada
+        fm['adicionado'] = MAQUETAS[sid] + 'T00:00:00Z' if sid in MAQUETAS else ADICIONADO
         fm['prioritario'] = sid in MAQUETAS
         if par:
             fm['resumo'] = par[0]

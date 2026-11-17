@@ -36,11 +36,11 @@ test("atlas: Novidades com as abas Novos castros e Próximas adições", async (
   await page.getByRole("button", { name: "Novidades" }).click();
   const painel = page.locator("#novidades");
   await expect(painel.getByRole("tab", { name: /Novos castros/ })).toHaveAttribute("aria-selected", "true");
-  const novos = await painel.locator(".lista-novos b").allTextContents();
+  const novos = await painel.locator(".lista-novos li").evaluateAll((l) => l.map((e) => e.getAttribute("data-id")));
   expect(novos.length).toBeGreaterThan(0);
   await painel.getByRole("tab", { name: /Próximas adições/ }).click();
-  const proximos = await painel.locator(".lista-proximos li b").allTextContents();
+  const proximos = await painel.locator(".lista-proximos li").evaluateAll((l) => l.map((e) => e.getAttribute("data-id")));
   expect(proximos.length).toBeGreaterThan(0);
-  // as duas listas não se repetem: quem tem maqueta não está nas próximas adições
+  // as duas listas não se repetem: quem tem maqueta não está nas próximas adições (por id: há castros com o mesmo nome)
   expect(proximos.filter((n) => novos.includes(n))).toEqual([]);
 });

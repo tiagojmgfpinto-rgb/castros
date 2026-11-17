@@ -15,7 +15,7 @@ classificacao:
   categoria: "Imóvel de Interesse Público (1985)"
 estadoFicha: "publicada"
 estadoMaqueta: "concluida"
-adicionado: "2026-10-27T23:41:11Z"
+adicionado: "2026-11-03T00:00:00Z"
 prioritario: true
 resumo: "O Castro Máximo, ou Monte do Castro, situa-se em São Vicente, muito perto do centro histórico de Braga. Terá sido o principal povoado castrejo da área onde foi fundada Bracara Augusta, por volta de 16 a.C., e acredita-se que foi abandonado com a fundação da cidade romana. Está classificado como Imóvel de Interesse Público desde 1985."
 fichaTecnica:

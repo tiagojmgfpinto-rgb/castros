@@ -15,7 +15,7 @@ classificacao:
   categoria: "Monumento Nacional (1910)"
 estadoFicha: "publicada"
 estadoMaqueta: "concluida"
-adicionado: "2026-10-27T23:41:11Z"
+adicionado: "2026-10-27T00:00:00Z"
 prioritario: true
 resumo: "O Castro de Sabroso, em São Lourenço de Sande, Guimarães, é um povoado fortificado habitado na segunda metade do I milénio a.C. Ocupa cerca de 3 hectares numa pequena elevação, com cota máxima de 277 metros, sobre a margem direita do Ave, a 2,7 km da Citânia de Briteiros. Ali vivia uma comunidade de agricultores e pastores que dominava a metalurgia, a olaria e o trabalho do granito. O povoado foi abandonado há cerca de dois mil anos, após o domínio romano, quando a população desceu para o vale."
 fichaTecnica:

@@ -33,7 +33,7 @@ for (const [nome, viewport] of [["computador", { width: 1280, height: 860 }], ["
   test(`visor 3D: nenhum texto sai das caixas (${nome})`, async ({ page }) => {
     await page.setViewportSize(viewport);
     const paginas = await paginasComMaqueta(page);
-    expect(paginas.length).toBeGreaterThan(5);
+    expect(paginas.length).toBeGreaterThanOrEqual(5); // as cinco maquetas publicadas
     // o GLB fica pendente: chega a interface do visor, que é o que se mede, sem esperar pelo desenho
     await page.route(/\.glb/, () => undefined);
     const problemas: string[] = [];
@@ -62,7 +62,7 @@ test("visor 3D: teclado, enquadramento centrado e ecrã grande com a altura toda
   const erros = errosDaPagina(page);
   await page.setViewportSize({ width: 1280, height: 860 });
   await page.emulateMedia({ reducedMotion: "reduce" }); // sem giro: a câmara só se mexe com o teclado
-  const [pagina] = (await paginasComMaqueta(page)).filter((p) => p.includes("braga"));
+  const [pagina] = (await paginasComMaqueta(page)).filter((p) => p.includes("sabroso"));
   await page.goto(pagina);
   await page.locator(".maqueta").scrollIntoViewIfNeeded();
   await expect(page.locator(".maqueta-carregar")).toHaveCount(0, { timeout: 150_000 });
