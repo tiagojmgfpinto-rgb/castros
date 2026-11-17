@@ -1,5 +1,8 @@
 name: Publicar o site
 
+# O site público (GitHub Pages) é o de site/, construído sobre o site dos Castelos (Astro + React Three Fiber).
+# A app do artifact do claude.ai (app/, build.py) continua à parte e não entra aqui.
+
 on:
   push:
     branches: [main]
@@ -18,19 +21,73 @@ concurrency:
 jobs:
   compilar:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: site
     steps:
       - uses: actions/checkout@v4
+
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - name: Compilar a app e montar o site
+          cache: pip
+          cache-dependency-path: site/pipeline/requirements.txt
+      - run: pip install -r pipeline/requirements.txt
+
+      - name: Cache do relevo e do Natural Earth
+        uses: actions/cache@v4
+        with:
+          path: site/.cache
+          key: relevo-${{ hashFiles('site/pipeline/terrain/fetch_*.py') }}
+
+      - name: Relevo Copernicus GLO-30
         run: |
-          python3 build.py
-          python3 tools/site.py
+          for r in continente acores madeira; do
+            [ -f .cache/dem_${r}_3s.tif ] || python pipeline/terrain/fetch_dem.py --region $r --arcsec 3
+            [ -f .cache/bathy_${r}_z9.tif ] || python pipeline/terrain/fetch_bathy.py --region $r --zoom 9
+          done
+          [ -f .cache/bathy_continente-moldura_z8.tif ] || python pipeline/terrain/fetch_bathy.py --region continente-moldura --zoom 8
+          [ -f .cache/bathy_portugal-moldura_z7.tif ] || python pipeline/terrain/fetch_bathy.py --region portugal-moldura --zoom 7
+          bash pipeline/terrain/naturalearth.sh
+          python -W ignore pipeline/terrain/build_tiles.py
+
+      - name: Fotografias das fichas (recortadas das tiras de app/ph)
+        run: python ../tools/site_conteudo.py --imagens
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: site/package-lock.json
+      - run: npm ci
+      - run: npm test
+      - name: Compilar o site
+        run: npm run build
+        env:
+          BASE_PATH: /${{ github.event.repository.name }}/
+          SITE_URL: https://${{ github.repository_owner }}.github.io
+
+      # Testes no browser sobre o site compilado (atlas, catálogo, página do castro com a maqueta, lightbox e texto
+      # dentro das caixas do visor). Correm antes de publicar: se falharem, o site não muda.
+      - name: Browser dos testes (Playwright)
+        run: npx playwright install --with-deps chromium
+      - name: Testes no browser
+        run: npx playwright test
+        env:
+          BASE_PATH: /${{ github.event.repository.name }}/
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: relatorio-playwright
+          path: |
+            site/playwright-report
+            site/test-results
+          retention-days: 7
+
       - uses: actions/upload-pages-artifact@v3
         if: github.ref == 'refs/heads/main'
         with:
-          path: _site
+          path: site/dist
 
   publicar:
     if: github.ref == 'refs/heads/main'

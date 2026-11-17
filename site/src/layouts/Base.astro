@@ -1,0 +1,41 @@
+---
+import "../styles/global.css";
+interface Props {
+  titulo?: string;
+  descricao?: string;
+  classe?: string;
+}
+const { titulo, descricao = "Atlas 3D dos castros do Noroeste de Portugal, em relevo real, a partir da tese de doutoramento de Tiago Pinto (USC).", classe } = Astro.props;
+const tituloCompleto = titulo ? `${titulo} · Castros do Noroeste` : "Castros do Noroeste · Atlas 3D dos castros do Noroeste de Portugal";
+---
+<!doctype html>
+<html lang="pt-PT">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>{tituloCompleto}</title>
+    <meta name="description" content={descricao} />
+    <meta name="theme-color" content="#15110d" />
+    {/* Política de segurança mínima: sem plugins, sem <base> alheio e formulários só para o próprio site. */}
+    <meta http-equiv="Content-Security-Policy" content="object-src 'none'; base-uri 'self'; form-action 'self'" />
+    <meta name="referrer" content="strict-origin-when-cross-origin" />
+    <meta property="og:title" content={tituloCompleto} />
+    <meta property="og:description" content={descricao} />
+    <meta property="og:locale" content="pt_PT" />
+    <link rel="sitemap" href={`${import.meta.env.BASE_URL}sitemap-index.xml`} />
+    {Astro.site && <link rel="canonical" href={new URL(Astro.url.pathname, Astro.site)} />}
+    <link rel="icon" href={`${import.meta.env.BASE_URL}favicon.svg`} type="image/svg+xml" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Alegreya:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Alegreya+Sans+SC:wght@500;600;700&family=Cinzel:wght@500;600;700&display=swap"
+    />
+  </head>
+  <body class={classe}>
+    <slot />
+    <footer class="rodape-site">
+      Website inspirado no website <a href="https://castillos.site/" rel="noopener">Castillos de España</a> (castillos.site)
+    </footer>
+  </body>
+</html>
