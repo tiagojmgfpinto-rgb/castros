@@ -35,6 +35,7 @@ Escreve em português (muitas vezes no telemóvel); responder sempre em portugu�
 | `geo/`, `osm/` | limites (CAOP, geoBoundaries), rios, OSM (`braga.pbf`, `mask_sites.json` = estradas/água por sítio) |
 | `tests/` | scripts Playwright de captura (`mock.html` simula o runtime `window.claude`) |
 | `docs/blocos_lidar_castros.md` | blocos LiDAR DGT a pedir para cada um dos 100 sítios, por prioridade |
+| `docs/prompt-fichas-maquetas.md` | prompt que o Tiago cola para pedir uma nova ficha + maqueta «metro a metro» (critérios, validação, entrega) |
 
 ## Ambiente (reinstalar numa sessão nova)
 
