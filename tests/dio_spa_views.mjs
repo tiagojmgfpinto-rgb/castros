@@ -15,7 +15,7 @@ await p.waitForSelector('#dio',{timeout:60000});
 await p.evaluate(()=>document.querySelector('#dio').scrollIntoView({block:'center'}));
 await p.waitForSelector('#dioStage canvas',{timeout:120000});await p.waitForTimeout(6000);
 const bx=await p.locator('#dioStage canvas').boundingBox();const clip={x:bx.x,y:bx.y,width:bx.width,height:bx.height};
-const shot=async(n,c,t,f)=>{await p.evaluate(([c,t,f])=>__dio.cur.setCam(...c,...t,f),[c,t,f]);await p.waitForTimeout(3500);await p.screenshot({path:D+n+'.png',clip})};
+const shot=async(n,c,t,f)=>{await p.evaluate(([c,t,f])=>__dio.cur.setCam([...c,...t],f),[c,t,f]);await p.waitForTimeout(3500);await p.screenshot({path:D+n+'.png',clip})};
 await p.addStyleTag({content:'.dio-lbls{display:none!important}'});
 for(const [k,v] of Object.entries(V)){await shot(k+'-A',v.cam,v.tgt,v.fov)}
 await shot('top-A',[0,260,0.01],[0,0,0],40);
