@@ -1,0 +1,26 @@
+{
+ "input": "app/dio/pacos-de-ferreira-citania-de-sanfins.glb",
+ "terrain": {
+  "before": 1798000,
+  "after": 150000,
+  "checked": 900001,
+  "of": 900001,
+  "err_cm": {
+   "median": 1.5,
+   "p95": 5.5,
+   "p99": 7.9,
+   "max": 32.3
+  }
+ },
+ "textures": [
+  {
+   "name": "ground",
+   "from": "3072x3072",
+   "to": 2048,
+   "kb": [
+    1247,
+    442
+   ]
+  }
+ ]
+}
