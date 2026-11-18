@@ -1,0 +1,26 @@
+{
+ "input": "app/dio/vila-do-conde-castro-de-sao-paio.glb",
+ "terrain": {
+  "before": 593100,
+  "after": 60000,
+  "checked": 297001,
+  "of": 297001,
+  "err_cm": {
+   "median": 1,
+   "p95": 4,
+   "p99": 6,
+   "max": 47.4
+  }
+ },
+ "textures": [
+  {
+   "name": "ground",
+   "from": "3072x3072",
+   "to": 2048,
+   "kb": [
+    1692,
+    555
+   ]
+  }
+ ]
+}

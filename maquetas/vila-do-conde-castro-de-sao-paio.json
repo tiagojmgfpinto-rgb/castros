@@ -1,0 +1,82 @@
+{
+ "id": "vila-do-conde-castro-de-sao-paio",
+ "order": 6,
+ "cap": "Sem planta publicada. Terreno do LiDAR da DGT (2025): nuvem de pontos com 25 cm do lado de terra e MDT de 50 cm no castro (bloco 149480); talude nascente traçado no relevo; áreas escavadas, estrutura circular, caminhos e cores do solo lidos na ortofotografia alinhada ao LiDAR; capela e edifícios com a altura do MDS; mar ao nível dos retornos LiDAR sobre a água. Sem exagero vertical. Casas da reconstituição hipotéticas.",
+ "layers": [
+  [
+   "walls",
+   "Talude e muralha"
+  ],
+  [
+   "houses",
+   "Áreas escavadas e casas"
+  ],
+  [
+   "roofs",
+   "Coberturas (reconstituição)"
+  ],
+  [
+   "modern",
+   "Capela e edifícios"
+  ],
+  [
+   "trees",
+   "Vegetação"
+  ],
+  [
+   "lbl",
+   "Rótulos"
+  ]
+ ],
+ "cam": {
+  "az": 70,
+  "el": 30
+ },
+ "tour": [
+  {
+   "sid": "T1",
+   "title": "O talude nascente",
+   "text": "O povoado era defendido por um talude coroado por uma muralha de pedra, de que resta só o alicerce. É bem marcado a nascente (Almeida et al. 2012): no LiDAR de 2025, cerca de 100 m de rebordo com um talude de 3 a 5 m para os campos."
+  },
+  {
+   "sid": "E1",
+   "title": "As Ruínas de Habitação",
+   "text": "Área escavada e protegida junto ao passadiço: uma construção circular com lareira central e piso decorado com círculos, ligada a um pátio e a um lajeado, do nível mais recente do castro (painel do sítio)."
+  },
+  {
+   "sid": "E2",
+   "title": "Um conjunto à volta de um pátio",
+   "text": "Três ou quatro compartimentos à volta de um pequeno pátio, talvez fechado por um muro; no interior apareceram uma fíbula, uma mó manual redonda e uma lareira decorada (painel do sítio)."
+  },
+  {
+   "sid": "CH",
+   "title": "A capela de São Paio",
+   "text": "No extremo sul do castro. Tem elementos provavelmente do século XVII, a data de 1885 no interior e foi quase toda refeita nos anos 70 do século XX; o altar-mor é um rochedo tirado da penedia (Almeida et al. 2012)."
+  },
+  {
+   "sid": "C1",
+   "title": "Uma estrutura circular por identificar",
+   "text": "Junto ao Centro Interpretativo vê-se uma estrutura circular de pedra com cerca de 5 m de diâmetro. Não aparece nas fontes consultadas: pode ser uma casa consolidada ou uma obra moderna."
+  },
+  {
+   "sid": "CI",
+   "title": "O Centro Interpretativo e o mar",
+   "text": "O Centro abriu no fim de 2012, num edifício encaixado na encosta. A poente, a penedia de granito foi explorada como pedreira antes dos anos 90; é o único castro do atual território português em que o mar toca as defesas (Município de Vila do Conde)."
+  }
+ ],
+ "gaps": [
+  "Não há planta publicada do castro. Nenhuma muralha, casa ou rua foi desenhada a partir de planta: o talude foi traçado no LiDAR e as áreas escavadas na ortofotografia. Falta consultar o relatório e as plantas das escavações de 1993-1996 (C. A. Brochado de Almeida e P. J. L. Costa Pinto) e da sondagem de 2004, que devem estar no arquivo da DGPC / Gabinete de Arqueologia de Vila do Conde.",
+  "Terreno do castro com 50 cm e não 25 cm: o núcleo fica no bloco 149480, de que só há MDT/MDS de 50 cm. Com a nuvem de pontos LO-149480-07-2025 o terreno passaria a 25 cm, como do lado de terra (bloco 150480).",
+  "Só o talude nascente é claro no LiDAR. A norte foi cortado pela estrada e pelos edifícios do Centro Interpretativo; a poente o povoado acaba na penedia, explorada como pedreira (Almeida et al. 2012); a sul o rebordo confunde-se com o adro da capela. Esses troços não foram desenhados.",
+  "Muralha: largura, altura e aparelho não publicados. A reconstituição (2,5 m de largura, 1,6 m acima da crista) é hipotética.",
+  "Fosso: hipótese sem confirmação arqueológica (um fosso que deixaria entrar o mar na maré-alta); se existir está entulhado (Almeida et al. 2012). Não se vê no LiDAR e não foi representado.",
+  "Entrada: «julga-se que só teria uma entrada», sem localização publicada. Não representada.",
+  "Casas: número, diâmetros e posições não publicados. As três casas da reconstituição (uma nas «Ruínas de Habitação», duas no conjunto do pátio) usam o diâmetro interior de 4,2 m da estrutura circular C1 e posições hipotéticas dentro das áreas escavadas. Vestíbulos, lajeados, pátio e portas não foram desenhados por não haver planta.",
+  "Estrutura circular C1 (junto ao Centro Interpretativo): visível na ortofotografia mas ausente das fontes consultadas; não se sabe se é castreja.",
+  "As duas áreas escavadas foram medidas na ortofotografia de satélite (0,11 m por píxel), alinhada ao LiDAR com um desvio corrigido de cerca de 1 m; erro estimado ≤ 1 m.",
+  "Capela, Centro Interpretativo e edifícios: formas simplificadas a partir do MDS (cobertura) e da ortofotografia. A cobertura do Centro Interpretativo está à cota do terreno e foi classificada como solo pela DGT; aparece no relevo e não como edifício.",
+  "Vegetação: posições e alturas das árvores do LiDAR (MDS − MDT); as espécies não vêm do LiDAR (eucalipto, castanheiro, carvalho e sobreiro escolhidos pela forma da copa). O canavial a sueste e a vegetação das dunas não foram modelados como árvores.",
+  "Penedos amoladoiros e gravuras: posição aproximada pelas coordenadas dos painéis; as rochas gravadas não foram identificadas no LiDAR.",
+  "Mar: superfície plana a 0,3 m, nível dos retornos LiDAR sobre a água no dia do voo; não representa a maré."
+ ]
+}

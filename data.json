@@ -11117,7 +11117,241 @@
 "r": "M52.4 68Q67.4 65 82.4 68M58.4 64.5Q67.4 61.5 76.4 64.5",
 "u": "M64.2 60h6.4v-3.2h-6.4zM63.2 56.8L67.4 52L71.6 56.8z"
 },
-"mk": 86
+"mk": 86,
+"fic": {
+"refs": {
+"alm": {
+"t": "Almeida, P. B. de; Araújo, M. A.; Abrunhosa, M. J.; Teixeira, J.; Cruz, V. (2012). O Castro de S. Paio (Labruge, Vila do Conde). Vila do Conde: Câmara Municipal. ISBN 978-972-9453-95-3.",
+"u": "https://hdl.handle.net/10216/22268"
+},
+"pa": {
+"t": "DGPC (s.d.). Portal do Arqueólogo: São Paio, povoado fortificado (CNS 3560).",
+"u": "https://arqueologia.patrimoniocultural.pt/index.php?sid=sitios&subsid=49316"
+},
+"bra": {
+"t": "Brandão, D. de P.; Lanhas, F. (1969). Inventário de objectos e lugares com interesse arqueológico. Revista de Etnografia, 12 (2), pp. 295-344 (citado no Portal do Arqueólogo)."
+},
+"pin": {
+"t": "Pinto, P. J. L. C. (2000). Castro de S. Paio. Al-Madan, 2.ª série, 9, pp. 147-150 (citado no Portal do Arqueólogo)."
+},
+"pan": {
+"t": "Município de Vila do Conde. Painéis do passadiço do Castro de São Paio («Ruínas de Habitação», conjunto habitacional, penedos amoladoiros, gravuras). Fotografados pelo autor em 2025."
+},
+"hmdb": {
+"t": "The Historical Marker Database (2023). Ruínas de Habitação / Family House; Os penedos amoladoiros; Gravuras da área de S. Paio (fotografias de A. Ruppenstein, 2 set. 2023).",
+"u": "https://www.hmdb.org/m.asp?m=233697"
+},
+"muni": {
+"t": "Município de Vila do Conde (Visit Vila do Conde). Castro de São Paio; Rota do Castro de São Paio.",
+"u": "https://www.visitviladoconde.pt/fazer/patrimonio/patrimonio-arqueologico/geo_artigo/castro-de-sao-paio-43"
+},
+"tes": {
+"t": "Pinto, T. — Castros do Noroeste de Portugal (tese de doutoramento, Univ. de Santiago de Compostela). Visitas em 2022 e 2025.",
+"u": "https://www.castrosdonoroestedeportugal.pt/vila-do-conde/"
+},
+"lid": {
+"t": "DGT (2025). LiDAR 2025: nuvem de pontos do bloco 150480 e MDT/MDS de 50 cm dos blocos 149480 e 150480. Direção-Geral do Território.",
+"u": "https://cdd.dgterritorio.gov.pt"
+}
+},
+"med": [
+[
+"Altitude",
+"16,1 m (Portal do Arqueólogo); vértice geodésico a 20 m",
+[
+"pa",
+"alm"
+]
+],
+[
+"Talude nascente (LiDAR 2025)",
+"≈ 103 m de comprimento; desnível de ≈ 3 a 5 m para os campos (mediana ≈ 3,6 m)",
+[
+"lid"
+]
+],
+[
+"Crista do talude sobre o interior (LiDAR 2025)",
+"≈ 0,5 m",
+[
+"lid"
+]
+],
+[
+"Área escavada «Ruínas de Habitação» (ortofotografia)",
+"≈ 9,9 × 3,4 m",
+[
+"lid",
+"pan"
+]
+],
+[
+"Área escavada do conjunto habitacional (ortofotografia)",
+"≈ 7,1 × 3,9 m",
+[
+"lid",
+"pan"
+]
+],
+[
+"Capela de São Paio (LiDAR 2025)",
+"corpo ≈ 10,8 × 9,1 m; cumeeira ≈ 5,7 m acima do solo",
+[
+"lid"
+]
+]
+],
+"cro": [
+[
+"Paleolítico",
+"Indústria lítica na envolvente do promontório.",
+[
+"alm",
+"pa"
+]
+],
+[
+"Meados do séc. VI a.C. – meados do séc. II a.C.",
+"Primeira fase do povoado.",
+[
+"pa"
+]
+],
+[
+"Meados do séc. II a.C. – séc. I a.C.",
+"Segunda fase, com as casas circulares em pedra hoje visíveis.",
+[
+"pa",
+"pan"
+]
+],
+[
+"c. 20 a.C.",
+"Abandono do povoado com a chegada dos romanos.",
+[
+"muni"
+]
+],
+[
+"Séc. XVII",
+"Elementos mais antigos da Capela de São Paio; no interior há a data de 1885.",
+[
+"alm"
+]
+],
+[
+"Anos 50 do séc. XX",
+"Descoberta por Fernando Lanhas e D. Domingos de Pinho Brandão; publicação em 1969.",
+[
+"muni",
+"bra"
+]
+],
+[
+"Anos 70 do séc. XX",
+"Escavações de curiosos (uma delas em 1973) e remodelação da capela, que só manteve a fachada principal.",
+[
+"pa",
+"alm"
+]
+],
+[
+"1993-1996",
+"Escavações de C. A. Brochado de Almeida e P. J. L. Costa Pinto.",
+[
+"pa",
+"pin"
+]
+],
+[
+"2004-2005",
+"Sondagem e levantamento.",
+[
+"pa"
+]
+],
+[
+"2012",
+"Livro do município e Centro de Interpretação.",
+[
+"alm",
+"tes"
+]
+],
+[
+"2025",
+"Voo LiDAR da DGT; visita do autor.",
+[
+"lid",
+"tes"
+]
+]
+],
+"sab": [
+[
+"É apresentado pelo município como o único castro da parte portuguesa do Noroeste em que o mar toca as defesas.",
+[
+"muni"
+]
+],
+[
+"As casas eram circulares, com vestíbulo e cobertura cónica de colmo; nos pisos de argila e nas lareiras há círculos estampilhados.",
+[
+"alm",
+"pan"
+]
+],
+[
+"Entre os achados estão pesos de rede, mós, cossoiros, escórias, contas de vidro azul e uma fíbula.",
+[
+"alm",
+"pa"
+]
+],
+[
+"O altar-mor da capela é um rochedo tirado da penedia.",
+[
+"alm"
+]
+],
+[
+"Não tem classificação legal.",
+[
+"tes"
+]
+]
+],
+"ver": [
+[
+"O passadiço com painéis em português e inglês, desde o Centro de Interpretação.",
+[
+"tes",
+"muni"
+]
+],
+[
+"As duas áreas escavadas protegidas: as «Ruínas de Habitação», junto à capela, e o conjunto habitacional à volta de um pátio.",
+[
+"pan",
+"hmdb"
+]
+],
+[
+"O talude da muralha, bem marcado do lado nascente, sobre os campos.",
+[
+"alm",
+"lid"
+]
+],
+[
+"Na Praia dos Castros, os penedos amoladoiros e as outras gravuras.",
+[
+"hmdb",
+"muni"
+]
+]
+]
+}
 },
 {
 "id": "vila-do-conde-cividade-de-bagunte",

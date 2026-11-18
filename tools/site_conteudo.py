@@ -25,7 +25,8 @@ TIPO_NOME = {'castro': 'Castro', 'citania': 'Citânia', 'cividade': 'Cividade', 
 # maquetas publicadas: dia do primeiro commit do GLB em app/dio
 MAQUETAS = {'guimaraes-citania-de-briteiros': '2026-10-27', 'guimaraes-castro-de-sabroso': '2026-10-27',
             'guimaraes-castro-de-sao-miguel-o-anjo': '2026-11-02', 'braga-castro-de-santa-marta-das-corticas': '2026-11-02',
-            'braga-castro-maximo': '2026-11-03', 'pacos-de-ferreira-citania-de-sanfins': '2026-11-17'}
+            'braga-castro-maximo': '2026-11-03', 'pacos-de-ferreira-citania-de-sanfins': '2026-11-17',
+            'vila-do-conde-castro-de-sao-paio': '2026-11-17'}
 
 
 def q(s):
