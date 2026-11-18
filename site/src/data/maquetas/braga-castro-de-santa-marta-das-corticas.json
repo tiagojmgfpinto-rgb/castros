@@ -1,0 +1,320 @@
+{
+  "monumento": "braga-castro-de-santa-marta-das-corticas",
+  "titulo": "Castro de Santa Marta das Cortiças",
+  "variante": "estado-atual",
+  "versao": "1.0",
+  "data": "2025-07-12",
+  "origem": {
+    "lat": 41.514194,
+    "lon": -8.395389,
+    "nota": "Ponto do sítio na tese. Eixos da maqueta: x para este, y para cima, z para sul, em metros; o relevo está exagerado 1,15× na vertical."
+  },
+  "fontes": {
+    "barroca": {
+      "titulo": "Barroca, M. J.; Arezes, A.; Morais, R. A basílica paleocristã e o edifício palatino de St.ª Marta das Cortiças (Falperra): as escavações de F. Russell Cortez e de J. J. Rigaud de Sousa (pp. 129-148). Repositório Aberto da U. Porto. Medidas da basílica (25 × 16 m; naves de 7,2 e 3,5 m) e do edifício palatino (34,2 × 12,6 m; sete pilares), coordenadas dos núcleos A e B (nota 2), duas linhas de muralha segundo Martins Sarmento, escavação de Belino (1899) entre a primeira e a segunda muralhas. As plantas (fig. 2 a 6) não puderam ser descarregadas."
+    },
+    "wiki": {
+      "titulo": "Wikipédia — Estação Arqueológica de Santa Marta das Cortiças (consultada em 2026-11): castro com três muralhas, do Bronze Final à época romana; basílica de três naves (séc. V-VI); edifício palatino; 46 referências a um castelo (900-1147); capela de 1520 (D. Diogo de Sousa); monumento de Nossa Senhora da Assunção, com muros à sua base; escavações de 1899, 1953-56, 1966-68, 1973-74 e 1984-85."
+    },
+    "tese": {
+      "titulo": "Pinto, T. — Castros do Noroeste de Portugal (tese de doutoramento, Univ. de Santiago de Compostela); visitas em 2022 e 2025: em 2022 viam-se, entre o mato, buracos das escavações, ruínas de casas e do palácio com uma parede e uma coluna; em 2025 a vegetação tapava tudo; baloiço panorâmico inaugurado em 2023; projeto de espaço museológico não realizado."
+    },
+    "osm": {
+      "titulo": "OpenStreetMap (extrato de 2026): capela, monumento (estátua), vértice geodésico Santa Marta (561,84 m), posto de vigia, torre de telecomunicações, mastro, cruzeiro, baloiço, parque de merendas, estrada de acesso e caminhos."
+    },
+    "photo": {
+      "titulo": "Fotografias enviadas pelo Tiago (2026-11): fachada da capela com o anexo lateral, o muro do adro e as árvores (fotografia de Ana Ferreira, 03/2023, Google Maps); monumento de coluna com a imagem branca sobre o penedo."
+    },
+    "lidar": {
+      "titulo": "DGT — LiDAR 2025, blocos 177505, 177506, 178505 e 178506: nuvens de pontos classificadas (LO-*-07-2025, ≈ 7,4 pontos de solo por m²) e MDT/MDS de 50 cm. Terreno de 25 cm interpolado dos pontos de solo; as duas linhas foram traçadas no relevo (com os penedos retirados) e ajustadas ao ponto de maior declive de cada talude; capela e monumento pela classe edifício e pelo MDS; árvores com a altura real do modelo de copas (MDS − MDT). Relevo exagerado 1,15×."
+    }
+  },
+  "limitacoes": [
+    "As plantas das escavações não puderam ser consultadas: as duas linhas de muralha foram traçadas no relevo do LiDAR da DGT (2025, nuvem de pontos, terreno de 25 cm); basílica e edifício palatino com as medidas publicadas, em posição aproximada; capela e monumento pelo LiDAR, pelo OpenStreetMap e por fotografias; relevo exagerado 1,15×; árvores nas posições e alturas medidas pelo LiDAR, rareadas dentro das muralhas.",
+    "Muralhas: Martins Sarmento referiu duas linhas e outras fontes (Wikipédia, SIPA) três. No LiDAR identificam-se duas: o rebordo da plataforma do cume, que fecha cerca de 2,2 ha, e um segundo talude a norte e a nascente. A terceira não foi identificada. Os traçados não foram verificados no terreno; a poente e a sul a estrada de acesso corre sobre a primeira linha e cortou-a.",
+    "As plantas publicadas (planta geral de Russell Cortez, 1954; planta da basílica; planta do edifício palatino de Rigaud de Sousa, 1970; síntese de M. Real, 2001) estão no artigo de Barroca, Arezes e Morais, mas o ficheiro não pôde ser descarregado. Com elas a basílica e o palácio podem ser georreferenciados com rigor.",
+    "Posição da basílica e do palácio: o artigo dá as coordenadas do núcleo A (estruturas habitacionais) e do núcleo B (basílica), mas o texto põe a basílica na crista, cortada pelo caminho entre a capela e o monumento, e o núcleo A junto à estrada de acesso. As coordenadas parecem trocadas; o modelo põe a basílica na coordenada do núcleo A, onde passa esse caminho, e o palácio a sul dela. A confirmar com as plantas.",
+    "Basílica: medidas publicadas (25 × 16 m; nave central de 7,2 m, laterais de 3,5 m; abside inscrita a nascente); a posição dos seis pilares, a espessura dos muros e a forma exata da abside são esquemáticas. Não se sabe a altura das paredes: na reconstituição sobem a 1,4 m só para se ler a planta.",
+    "Edifício palatino: medidas publicadas (34,2 × 12,6 m; sete pilares); a divisão interior segue a descrição, sem a planta; o ângulo em relação à basílica («levemente divergente») não está publicado.",
+    "Núcleo A (estruturas habitacionais junto à estrada) e os muros «em labirinto» junto à base do monumento: sem planta consultada, não representados.",
+    "Casas castrejas (pequenas casas circulares): sem posições publicadas que se pudessem consultar; não representadas.",
+    "Castelo medieval (46 referências entre 900 e 1147): sem vestígios conhecidos; talvez junto à capela, zona que nunca foi escavada. Não representado.",
+    "Capela: planta e alturas do LiDAR (classe edifício) e forma da fotografia de 2023; o interior e as traseiras não estão documentados. O muro do adro foi traçado no rebordo do terraço, de forma aproximada.",
+    "Monumento a Nossa Senhora da Assunção: data e autor não apurados; proporções dos andares tiradas de uma fotografia, com a base e a altura total medidas no LiDAR.",
+    "Torre de telecomunicações, posto de vigia, mastro, baloiço e cruzeiro: posições do OpenStreetMap e alturas do LiDAR; formas simplificadas.",
+    "Cronologia: o modelo junta numa só cena o castro (Bronze Final à época romana), a basílica e o palácio (séculos V a VII) e a capela (1520); não separa fases.",
+    "Árvores: posições, alturas e largura da copa reais do LiDAR (MDS − MDT); dentro da primeira muralha fica só 10 % das árvores, e nenhuma a menos de 6 m das estruturas, para se lerem as ruínas; mantêm-se as árvores do adro da capela, que se veem na fotografia. A espécie não vem do LiDAR."
+  ],
+  "placas": [
+    "CH",
+    "MN",
+    "BA",
+    "PA",
+    "VG",
+    "TV",
+    "SW",
+    "M1",
+    "M2"
+  ],
+  "elementos": [
+    {
+      "id": "M1",
+      "nome": "Primeira muralha, à volta da plataforma do cume",
+      "grupo": "Muralhas",
+      "estado": "estado-atual",
+      "confianca": "alta",
+      "descricao": "Rebordo da plataforma do cume, com um talude de cerca de 3.6 m no modelo do terreno LiDAR. A poente e a sul a estrada de acesso dá a volta ao alto por cima desta linha e cortou-a; a nascente coincide com os afloramentos sobre a encosta. Fecha a plataforma onde estão a capela, o monumento, a basílica e o edifício palatino. Traçado no modelo do terreno do LiDAR da DGT (2025), sem planta publicada que se pudesse consultar; a pedra está soterrada e coberta de mato, por isso no estado atual a linha aparece como um cordão de pedra sobre o talude. A altura original não está publicada: valor hipotético. Fase: Idade do Ferro.",
+      "fontes": [
+        "lidar",
+        "barroca",
+        "wiki"
+      ],
+      "medidas": "comprimento ≈ 561 m · recinto com 2.25 ha · desnível atual na linha ≈ 3.6 m (LiDAR) · reconstituição: 1.8 m acima do terraço",
+      "resumo": "O rebordo da plataforma do cume, com um talude de 3 a 4 m no LiDAR de 2025",
+      "ancora": [
+        75.41,
+        -3.9,
+        11
+      ]
+    },
+    {
+      "id": "M2",
+      "nome": "Segunda muralha, a norte e a nascente",
+      "grupo": "Muralhas",
+      "estado": "estado-atual",
+      "confianca": "alta",
+      "descricao": "Segundo talude, 40 a 75 m para fora da primeira linha, visível a norte e a nascente (cerca de 2.6 m de desnível). A poente e a sul perde-se entre os penedos de granito e os caminhos e não foi desenhada. Belino escavou em 1899 «pelo lado sul, entre a primeira e a segunda muralhas». Traçado no modelo do terreno do LiDAR da DGT (2025), sem planta publicada que se pudesse consultar; a pedra está soterrada e coberta de mato, por isso no estado atual a linha aparece como um cordão de pedra sobre o talude. A altura original não está publicada: valor hipotético. Fase: Idade do Ferro.",
+      "fontes": [
+        "lidar",
+        "barroca",
+        "wiki"
+      ],
+      "medidas": "comprimento ≈ 418 m · desnível atual na linha ≈ 2.6 m (LiDAR) · reconstituição: 1.5 m acima do terraço",
+      "resumo": "Um segundo talude a norte e a nascente",
+      "ancora": [
+        11.58,
+        -35.62,
+        -114.11
+      ]
+    },
+    {
+      "id": "CH",
+      "nome": "Capela de Santa Marta das Cortiças",
+      "grupo": "Capela",
+      "estado": "estado-atual",
+      "confianca": "alta",
+      "descricao": "Mandada construir pelo arcebispo D. Diogo de Sousa em 1520, sobre um culto mais antigo (o monte de Santa Marta aparece nos documentos desde 900). Nave com fachada empenada virada a sudoeste, cunhais e molduras de granito, porta e janela gradeada, cruz no vértice; anexo mais baixo com telhado de uma água do lado sudeste. Forma tirada da fotografia de 2023 e alturas do LiDAR; a escavação de 1953-54 não sondou a zona da capela, onde Barroca, Arezes e Morais admitem que estaria o castelo medieval. Fase: 1520.",
+      "fontes": [
+        "photo",
+        "lidar",
+        "osm",
+        "barroca",
+        "wiki"
+      ],
+      "medidas": "planta ≈ 14.6 × 11.0 m (LiDAR, classe edifício): nave ≈ 6.6 m de largura e anexo lateral ≈ 4.4 m; cumeeira ≈ 6,3 m (LiDAR)",
+      "resumo": "Mandada construir por D. Diogo de Sousa em 1520, num monte já referido em 900",
+      "ancora": [
+        54.2,
+        7.86,
+        -1.9
+      ]
+    },
+    {
+      "id": "CW",
+      "nome": "Muro do adro da capela",
+      "grupo": "Envolvente",
+      "estado": "estado-atual",
+      "confianca": "alta",
+      "descricao": "Muro baixo de pedra que limita o adro da capela sobre a encosta, visível na fotografia de 2023. Traçado no rebordo do terraço do LiDAR (onde o terreno desce mais de 1,2 m), aproximado. Fase: atual.",
+      "fontes": [
+        "photo",
+        "lidar"
+      ],
+      "medidas": "≈ 0,8 m de altura (fotografia)",
+      "resumo": "Muro baixo de pedra que limita o adro da capela sobre a encosta"
+    },
+    {
+      "id": "BD",
+      "nome": "Edifício de apoio junto à capela",
+      "grupo": "Envolvente",
+      "estado": "estado-atual",
+      "confianca": "alta",
+      "descricao": "Edifício moderno a sudeste da capela. Função e data não apuradas; forma simplificada. Só no estado atual. Fase: atual.",
+      "fontes": [
+        "osm",
+        "lidar"
+      ],
+      "medidas": "planta ≈ 18.7 × 6.1 m (OpenStreetMap)",
+      "resumo": "Edifício moderno a sudeste da capela"
+    },
+    {
+      "id": "MN",
+      "nome": "Monumento a Nossa Senhora da Assunção",
+      "grupo": "Monumentos",
+      "estado": "estado-atual",
+      "confianca": "alta",
+      "descricao": "Coluna de granito em andares: base de alvenaria sobre o afloramento, plinto oitavado em degraus, pedestal e fuste quadrados com um brasão, e a imagem branca de Nossa Senhora da Assunção, de braço erguido e com resplendor. Fica num penedo com escadas e um caminho à volta. Proporções tiradas da fotografia e altura total do LiDAR; data de construção não apurada. Segundo a Wikipédia, junto à sua base apareceram alicerces de vários muros, «um labirinto», de função desconhecida. Fase: moderno.",
+      "fontes": [
+        "photo",
+        "lidar",
+        "osm",
+        "wiki",
+        "barroca"
+      ],
+      "medidas": "≈ 16 m de altura sobre o penedo (LiDAR: 16,3 m); base ≈ 5,8 × 5,2 m (LiDAR); imagem branca no topo",
+      "resumo": "Coluna de granito com cerca de 16 m sobre um penedo",
+      "ancora": [
+        -74.3,
+        21.96,
+        28.5
+      ]
+    },
+    {
+      "id": "BA",
+      "nome": "Basílica paleocristã",
+      "grupo": "Basílica",
+      "estado": "estado-atual",
+      "confianca": "baixa",
+      "descricao": "Escavada em 1953-54 por Arlindo da Cunha e Russell Cortez: igreja de três naves, fachada ocidental reta, abside de ferradura inscrita (curva por dentro e reta por fora) e dois compartimentos ao lado dela (diaconicon a norte, prothesis a sul); seis bases de pilares ou colunas. Russell Cortez considerou-a a melhor igreja paleocristã do Norte de Portugal. A planta do relatório de 1954 não pôde ser consultada: as medidas são as publicadas, mas a posição dos pilares e a espessura dos muros são esquemáticas. A posição segue uma das coordenadas publicadas (ver lacunas). Hoje está tapada pelo mato; no estado atual aparece como um cordão baixo de pedra. Na reconstituição o muro sobe a 1,4 m só para se ler a planta (alçado não publicado). Fase: séc. V-VI.",
+      "fontes": [
+        "barroca",
+        "wiki"
+      ],
+      "medidas": "25 × 16 m · três naves: central 7,2 m, laterais 3,5 m · abside inscrita a nascente · orientada nascente-poente (publicado)",
+      "resumo": "Escavada em 1953-54: três naves e abside a nascente, 25 × 16 m",
+      "ancora": [
+        -34.8,
+        4.46,
+        27.9
+      ]
+    },
+    {
+      "id": "PA",
+      "nome": "Edifício palatino («palácio suevo»)",
+      "grupo": "Edifício palatino",
+      "estado": "estado-atual",
+      "confianca": "baixa",
+      "descricao": "Escavado por Rigaud de Sousa em 1966-70, a pouca distância a sul da basílica e com um alinhamento ligeiramente divergente (imposto pelo terreno e pelos penedos). Grande sala de duas naves separadas por sete pilares, dois compartimentos alongados a norte e, no topo leste, dois compartimentos e um corredor estreito. Capitéis jónicos e um coríntio de acantos lisos (séc. VI-VII). A planta faz lembrar o palácio visigótico de Recópolis; a destruição violenta, talvez em 585, na conquista visigoda, apoia a atribuição a um palácio suevo. A planta de 1970 não pôde ser consultada: a divisão interior é esquemática, segundo a descrição, e a posição e o ângulo são aproximados (ver lacunas). Fase: séc. VI.",
+      "fontes": [
+        "barroca",
+        "wiki",
+        "tese"
+      ],
+      "medidas": "34,2 × 12,6 m · grande sala de duas naves com sete pilares de secção quadrada (publicado)",
+      "resumo": "A sul da basílica, uma grande sala de duas naves com sete pilares, 34,2 × 12,6 m",
+      "ancora": [
+        -34.5,
+        2.81,
+        52
+      ]
+    },
+    {
+      "id": "PC",
+      "nome": "Coluna junto a um muro do palácio",
+      "grupo": "Ruínas",
+      "estado": "estado-atual",
+      "confianca": "baixa",
+      "descricao": "Na visita de 2022 o Tiago ainda viu, entre o mato, uma parede do palácio com uma coluna pegada a ela; em 2025 a vegetação tapava tudo. Posição aproximada. Fase: séc. VI.",
+      "fontes": [
+        "tese"
+      ],
+      "medidas": "posição e altura aproximadas",
+      "resumo": "Na visita de 2022 o Tiago ainda viu, entre o mato"
+    },
+    {
+      "id": "TV",
+      "nome": "Torre de telecomunicações «Braga»",
+      "grupo": "Envolvente",
+      "estado": "estado-atual",
+      "confianca": "alta",
+      "descricao": "Torre metálica treliçada de televisão e telemóvel, a noroeste do alto. Só no estado atual. Fase: atual.",
+      "fontes": [
+        "osm",
+        "lidar"
+      ],
+      "medidas": "≈ 41 m (LiDAR)",
+      "resumo": "Torre metálica treliçada de televisão e telemóvel, a noroeste do alto",
+      "ancora": [
+        -108.3,
+        26.19,
+        -82.4
+      ]
+    },
+    {
+      "id": "LK",
+      "nome": "Posto de vigia de incêndios",
+      "grupo": "Envolvente",
+      "estado": "estado-atual",
+      "confianca": "alta",
+      "descricao": "Torre metálica com cabine, junto ao vértice geodésico. Só no estado atual. Fase: atual.",
+      "fontes": [
+        "osm",
+        "lidar"
+      ],
+      "medidas": "≈ 11 m (LiDAR; OSM: 10 m)",
+      "resumo": "Torre metálica com cabine, junto ao vértice geodésico"
+    },
+    {
+      "id": "MS",
+      "nome": "Mastro do repetidor de radioamador",
+      "grupo": "Envolvente",
+      "estado": "estado-atual",
+      "confianca": "alta",
+      "descricao": "Só no estado atual. Fase: atual.",
+      "fontes": [
+        "osm",
+        "lidar"
+      ],
+      "medidas": "≈ 10 m (LiDAR)",
+      "resumo": "Só no estado atual"
+    },
+    {
+      "id": "VG",
+      "nome": "Vértice geodésico Santa Marta",
+      "grupo": "Monumentos",
+      "estado": "estado-atual",
+      "confianca": "alta",
+      "descricao": "Ponto mais alto do monte, num grande penedo de granito. Fase: atual.",
+      "fontes": [
+        "osm"
+      ],
+      "medidas": "561,84 m de altitude; pilar de 3 m (DGT)",
+      "resumo": "Ponto mais alto do monte, num grande penedo de granito",
+      "ancora": [
+        9.8,
+        10.26,
+        48.3
+      ]
+    },
+    {
+      "id": "SW",
+      "nome": "Baloiço panorâmico de Esporões",
+      "grupo": "Envolvente",
+      "estado": "estado-atual",
+      "confianca": "alta",
+      "descricao": "Inaugurado em 2023. Segundo a tese, foi a única obra feita do projeto de valorização prometido para o sítio (espaço museológico orçado em 130 mil euros). Só no estado atual. Fase: 2023.",
+      "fontes": [
+        "tese",
+        "osm"
+      ],
+      "medidas": "forma e altura aproximadas",
+      "resumo": "Inaugurado em 2023",
+      "ancora": [
+        -92,
+        -0.59,
+        35.8
+      ]
+    },
+    {
+      "id": "vegetacao",
+      "nome": "Vegetação",
+      "grupo": "Envolvente",
+      "estado": "estado-atual",
+      "confianca": "média",
+      "descricao": "posições, alturas e largura da copa reais do LiDAR (MDS − MDT); dentro da primeira muralha fica só 10 % das árvores, e nenhuma a menos de 6 m das estruturas, para se lerem as ruínas; mantêm-se as árvores do adro da capela, que se veem na fotografia. A espécie não vem do LiDAR.",
+      "fontes": [
+        "lidar"
+      ]
+    }
+  ]
+}

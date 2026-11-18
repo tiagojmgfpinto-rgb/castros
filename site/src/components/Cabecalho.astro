@@ -1,0 +1,16 @@
+---
+import { Escudo } from "./ui/Icones";
+const base = import.meta.env.BASE_URL;
+---
+<header class="cabecalho">
+  <a class="marca-nome" href={base}>
+    <Escudo />
+    Castros do Noroeste
+  </a>
+  <nav>
+    <a href={base}>Mapa 3D</a>
+    <a href={`${base}castros/`}>Todos os castros</a>
+    <a href={`${base}proximas-adicoes/`}>Próximas adições</a>
+    <a href={`${base}creditos/`}>Créditos</a>
+  </nav>
+</header>

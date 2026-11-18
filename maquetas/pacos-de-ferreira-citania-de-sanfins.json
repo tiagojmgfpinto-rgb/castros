@@ -1,0 +1,77 @@
+{
+ "id": "pacos-de-ferreira-citania-de-sanfins",
+ "order": 6,
+ "cap": "Estruturas medidas na nuvem de pontos LiDAR da DGT (2025, blocos 178484, 178485, 179484 e 179485): os muros escavados sobressaem 0,15 a 2 m no modelo de superfície; 138 casas redondas ajustadas por mínimos quadrados, muros dos pátios e arruamentos, muralha poente e norte conferida na ortofoto de 2021. Relevo de 25 cm sem exagero; árvores nas posições e alturas do LiDAR, rareadas dentro das muralhas.",
+ "layers": [
+  [
+   "walls",
+   "Muralha e muros"
+  ],
+  [
+   "houses",
+   "Casas"
+  ],
+  [
+   "roofs",
+   "Coberturas (reconstituição)"
+  ],
+  [
+   "modern",
+   "Núcleo reconstruído e marco geodésico"
+  ],
+  [
+   "trees",
+   "Vegetação"
+  ],
+  [
+   "lbl",
+   "Rótulos"
+  ]
+ ],
+ "tour": [
+  {
+   "sid": "V1",
+   "title": "A acrópole",
+   "text": "O ponto mais alto da Citânia, a 570 m (LiDAR 2025), com o marco geodésico de meados do séc. XIX; a poente ficava a capela de S. Romão com a necrópole medieval de 34 sepulturas (Silva e Centeno 1980), ainda sem posição publicada."
+  },
+  {
+   "sid": "M1",
+   "title": "A muralha poente e norte",
+   "text": "453 m de muro de pedra visíveis no LiDAR e na ortofoto, com 0,8 m de altura atual mediana. As fontes falam de três a seis linhas de muralha; a numeração não foi confirmada numa planta."
+  },
+  {
+   "sid": "H001",
+   "title": "As casas redondas",
+   "text": "138 casas circulares leem-se no LiDAR, com diâmetro mediano de 4,5 m no eixo do muro; uma casa escavada em 1977-78 tem 4,30 m de diâmetro interior e paredes de 0,50 m (Silva e Centeno 1980)."
+  },
+  {
+   "sid": "W01",
+   "title": "Pátios e arruamentos",
+   "text": "Muros dos pátios lajeados e das ruas ortogonais: arruamento principal norte–sul com cerca de 4 m e transversais de 2 a 2,5 m (SIPA). Núcleos de 4-5 construções num pátio de 200 a 300 m²."
+  },
+  {
+   "sid": "N1",
+   "title": "O núcleo reconstruído",
+   "text": "Duas casas redondas com cobertura de colmo e um alpendre, reconstruídos em 1995 na plataforma central; volumes medidos no LiDAR de 2025."
+  },
+  {
+   "sid": "S1",
+   "title": "O setor sul",
+   "text": "Muros longos de pedra a sul dos bairros escavados, visíveis no LiDAR e na ortofoto; a função não está identificada nas fontes consultadas."
+  }
+ ],
+ "gaps": [
+  "Planta geral publicada (Silva e Centeno 1980, Est. I; Paço 1953, «A Citânia de Sanfins. I – Muralhas»; Silva 1999, roteiro da Etnos): não consultada. Todas as estruturas vêm do LiDAR de 2025 e da ortofoto de 2021; por isso as muralhas não têm a numeração das publicações.",
+  "Número de linhas de muralha: três (SIPA), quatro (Portal do Arqueólogo) ou seis (e-cultura). Só a muralha poente e norte (M1) e os muros longos do setor sul se seguem no LiDAR; as linhas exteriores na mata a nascente e a sul não foram traçadas.",
+  "Capela de S. Romão e necrópole de 34 sepulturas, a poente do marco geodésico: posições não publicadas nas fontes consultadas; não modeladas.",
+  "Balneário (casa de banhos com a pedra formosa, 18,48 m², no sopé sudoeste; Silva e Maciel): posição exata não identificada no LiDAR; não modelado.",
+  "Estátua de guerreiro e porta da segunda muralha, portas e vestíbulos das casas: não se leem no LiDAR e não têm posição publicada consultada; não modelados.",
+  "Diâmetros das casas: medidos no eixo do muro (mediana 4,5 m; 3,0 a 6,3 m). O diâmetro interior publicado de uma casa (4,30 m) é cerca de 0,5 m menor, como esperado para paredes de 0,5 m.",
+  "Casas com menos de 70 % do anel visível no LiDAR (ou um quadrante com menos de 40 %) ficaram só como muros; é provável que haja mais casas do que as 138 do modelo.",
+  "Reconstituição (camada C): paredes com 2,0 m, coberturas cónicas de colmo e muros dos pátios com 1,6 m são hipotéticos, por paralelo com o núcleo reconstruído em 1995.",
+  "Muro S2 (norte–sul do setor sul): só 26 % do traçado se lê no LiDAR, o resto segue a ortofoto; posição aproximada (± 2 m) nesse troço.",
+  "LiDAR: 6 % das células de 1 m do disco (2,7 % nos 150 m centrais) não têm pontos de solo; aí o relevo é interpolado entre os pontos vizinhos.",
+  "Árvores: posições, alturas e larguras de copa do LiDAR (MDS − MDT); dentro das áreas escavadas ficam só 10 % e no resto do recinto 15 %, nenhuma a menos de 5 m das estruturas. A espécie não vem do LiDAR: segundo o Tiago a mata é sobretudo de eucalipto, com castanheiros, carvalhos e sobreiros, sem pinheiros.",
+  "Relevo: terreno de 25 cm interpolado dos pontos de solo; simplificado para 150 mil triângulos com erro vertical mediano de 1,5 cm e p95 de 5,5 cm (máximo 32 cm em taludes)."
+ ]
+}

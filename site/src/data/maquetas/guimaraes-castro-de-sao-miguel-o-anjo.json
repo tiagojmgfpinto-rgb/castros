@@ -1,0 +1,159 @@
+{
+  "monumento": "guimaraes-castro-de-sao-miguel-o-anjo",
+  "titulo": "Castro de São Miguel-o-Anjo",
+  "variante": "estado-atual",
+  "versao": "1.0",
+  "data": "2025-08-03",
+  "origem": {
+    "lat": 41.457639,
+    "lon": -8.386833,
+    "nota": "Ponto do sítio na tese. Eixos da maqueta: x para este, y para cima, z para sul, em metros; o relevo está exagerado 1,15× na vertical."
+  },
+  "fontes": {
+    "tese": {
+      "titulo": "Pinto, T. — Castros do Noroeste de Portugal (tese de doutoramento, Univ. de Santiago de Compostela); visitas em 2022 e 2025: troço de muralha com cerca de 2 m de altura e 43 m de comprimento descoberto pelo agrupamento de escuteiros local, dentro da sua área vedada; capela, mesas de piquenique; ruínas conhecidas como «dos mouros» no século XVIII; pequenos trabalhos de Martins Sarmento."
+    },
+    "sipa": {
+      "titulo": "Direção-Geral do Património Cultural (2001). Povoado fortificado de São Miguel-o-Anjo, SIPA n.º 9581. (A ficha não pôde ser lida em 2026-11: o site está bloqueado ao acesso automático.)"
+    },
+    "aap": {
+      "titulo": "All About Portugal — Castro de São Miguel-o-Anjo (Guimarães): «povoado fortificado proto-histórico com três linhas de muralhas» e vestígios de estruturas de planta circular (resumo, sem fonte indicada)."
+    },
+    "osm": {
+      "titulo": "OpenStreetMap (extrato de 2026): ponto «Muro Celta» (historic=archaeological_site), Capela de São Miguel, vértice geodésico Anjo (384,87 m), parque de merendas e Avenida Padre Flávio."
+    },
+    "lidar": {
+      "titulo": "DGT — LiDAR 2025, blocos 178499 e 179499: nuvens de pontos classificadas (LO-*-07-2025, ≈ 3,6 pontos de solo por m² sob o eucaliptal) e MDT/MDS de 50 cm (178499, 178500, 179500; MDS 179499). Terreno de 25 cm interpolado dos pontos de solo; as três linhas foram traçadas no relevo local e ajustadas ao ponto de maior declive de cada talude; árvores com a altura real do modelo de copas (MDS − MDT). Relevo exagerado 1,15×."
+    }
+  },
+  "limitacoes": [
+    "Sem planta publicada: as três linhas de muralha foram traçadas no relevo do LiDAR da DGT (2025, nuvem de pontos, terreno de 25 cm); capela, estrada e ponto do troço dos escuteiros do OpenStreetMap; relevo exagerado 1,15×; árvores nas posições e alturas medidas pelo LiDAR, rareadas dentro das muralhas.",
+    "Não há planta publicada nem escavações conhecidas. As três linhas de muralha foram traçadas no modelo do terreno do LiDAR da DGT (2025) e ajustadas ao ponto de maior declive de cada talude; não foram verificadas no terreno.",
+    "A ficha do SIPA (n.º 9581) não pôde ser lida (o site está bloqueado ao acesso automático). As «três linhas de muralhas» vêm de um resumo sem fonte (All About Portugal); no LiDAR identificam-se três taludes, mas a linha interior (rebordo do cume) é pouco marcada e pode não ser uma muralha.",
+    "A linha exterior só se segue a poente e a norte; a nascente e a sul perde-se entre os caminhos florestais e não foi desenhada.",
+    "Portas e entradas: não identificadas nas fontes nem com segurança no LiDAR (os cortes nos taludes coincidem com caminhos modernos); não representadas.",
+    "Casas: há referência a vestígios de estruturas de planta circular, mas sem posições publicadas; sob o eucaliptal (≈ 3,6 pontos de solo por m²) o LiDAR não as distingue. Nenhuma casa foi representada.",
+    "Troço de muralha dos escuteiros (43 m, cerca de 2 m de altura): posição pelo ponto «Muro Celta» do OpenStreetMap, não verificada; fica numa área vedada que o Tiago não pôde visitar em 2022 nem em 2025. Faltam fotografias e a planta do troço.",
+    "Alturas da reconstituição: 2 m acima do terraço na muralha intermédia (altura conservada do troço dos escuteiros); 1,2 m nas outras duas, valor hipotético.",
+    "Capela de São Miguel: planta simplificada do OpenStreetMap, alturas aproximadas e data de construção não apurada. A paliçada e as instalações dos escuteiros não foram representadas (traçado desconhecido).",
+    "Cronologia: sem dados publicados; o modelo não separa fases.",
+    "Árvores: posições, alturas e largura da copa reais do LiDAR (MDS − MDT); dentro da muralha intermédia ficam só 10 a 15 % das árvores, e nenhuma a menos de 5 m das linhas, para se lerem os taludes. A espécie não vem do LiDAR: copas altas e estreitas como eucaliptos, largas como castanheiros, carvalhos e sobreiros.",
+    "Falta o MDT de 50 cm do bloco 179499 (não está nos ficheiros do projeto); não fez falta, porque o terreno foi calculado diretamente da nuvem de pontos LO-179499."
+  ],
+  "placas": [
+    "CH",
+    "M1",
+    "M2",
+    "M3",
+    "S1"
+  ],
+  "elementos": [
+    {
+      "id": "M1",
+      "nome": "Linha interior, à volta da plataforma do cume",
+      "grupo": "Muralhas",
+      "estado": "estado-atual",
+      "confianca": "alta",
+      "descricao": "Rebordo da plataforma do cume, com um talude de cerca de 1.7 m no modelo do terreno LiDAR. É a mais baixa das três linhas e a menos marcada; pode ser uma muralha soterrada ou só o rebordo aplanado do cume. Traçado no modelo do terreno do LiDAR da DGT (2025); a pedra está soterrada e coberta de mato, por isso no estado atual a linha aparece como um cordão de pedra sobre o talude. A altura original não está publicada: valor hipotético. Fase: —.",
+      "fontes": [
+        "lidar",
+        "sipa",
+        "aap"
+      ],
+      "medidas": "comprimento ≈ 332 m · recinto com 0.74 ha · desnível atual na linha ≈ 1.7 m (LiDAR) · reconstituição: 1.2 m acima do terraço",
+      "resumo": "No alto, junto ao vértice geodésico Anjo (385 m), uma plataforma com penedos de granito",
+      "ancora": [
+        43.26,
+        3.78,
+        -47.46
+      ]
+    },
+    {
+      "id": "M2",
+      "nome": "Muralha intermédia, à volta de todo o monte",
+      "grupo": "Muralhas",
+      "estado": "estado-atual",
+      "confianca": "alta",
+      "descricao": "A linha mais forte: um talude de cerca de 3.8 m, contínuo à volta do monte, com um terraço por dentro. O troço de muralha de 43 m posto a descoberto pelos escuteiros fica nesta linha (ponto «Muro Celta» do OpenStreetMap). A altura da reconstituição (2 m acima do terraço) segue a altura conservada desse troço. Traçado no modelo do terreno do LiDAR da DGT (2025); a pedra está soterrada e coberta de mato, por isso no estado atual a linha aparece como um cordão de pedra sobre o talude.  Fase: —.",
+      "fontes": [
+        "lidar",
+        "sipa",
+        "aap",
+        "tese",
+        "osm"
+      ],
+      "medidas": "comprimento ≈ 451 m · recinto com 1.36 ha · desnível atual na linha ≈ 3.8 m (LiDAR) · reconstituição: 2 m acima do terraço",
+      "resumo": "O talude mais forte do monte, com 3 a 6 m de desnível no LiDAR de 2025",
+      "ancora": [
+        36.44,
+        0.9,
+        -119.83
+      ]
+    },
+    {
+      "id": "M3",
+      "nome": "Linha exterior, a poente e a norte",
+      "grupo": "Muralhas",
+      "estado": "estado-atual",
+      "confianca": "alta",
+      "descricao": "Segundo talude, 15 a 30 m para fora da muralha intermédia, visível a poente e a norte (cerca de 2.6 m de desnível). A nascente e a sul perde-se entre os caminhos florestais. Traçado no modelo do terreno do LiDAR da DGT (2025); a pedra está soterrada e coberta de mato, por isso no estado atual a linha aparece como um cordão de pedra sobre o talude. A altura original não está publicada: valor hipotético. Fase: —.",
+      "fontes": [
+        "lidar",
+        "sipa",
+        "aap"
+      ],
+      "medidas": "comprimento ≈ 316 m · desnível atual na linha ≈ 2.6 m (LiDAR) · reconstituição: 1.2 m acima do terraço",
+      "resumo": "Um segundo talude a poente e a norte, 15 a 30 m para fora: com as outras duas",
+      "ancora": [
+        -17.42,
+        -9.44,
+        -136.66
+      ]
+    },
+    {
+      "id": "S1",
+      "nome": "Troço de muralha posto a descoberto pelos escuteiros",
+      "grupo": "Muralhas",
+      "estado": "estado-atual",
+      "confianca": "alta",
+      "descricao": "Troço em excelente estado, descoberto pelo agrupamento de escuteiros local, que lhe pôs uma placa comemorativa. Fica dentro da área vedada dos escuteiros e não se pode visitar. A posição segue o ponto «Muro Celta» do OpenStreetMap (1 m da linha da muralha intermédia), não verificada no terreno; o comprimento é o publicado. Fase: —.",
+      "fontes": [
+        "tese",
+        "osm",
+        "lidar"
+      ],
+      "medidas": "≈ 43 m de comprimento · ≈ 2 m de altura conservada (tese)",
+      "resumo": "Cerca de 43 m de muralha com 2 m de altura"
+    },
+    {
+      "id": "CH",
+      "nome": "Capela de São Miguel",
+      "grupo": "Envolvente",
+      "estado": "estado-atual",
+      "confianca": "alta",
+      "descricao": "Pequena capela no alto do monte, junto ao parque de merendas e à área dos escuteiros. Fica fora das muralhas, cerca de 60 m a sul da muralha intermédia. Data de construção não apurada. Forma simplificada: planta do OpenStreetMap, alturas aproximadas. Fase: atual.",
+      "fontes": [
+        "tese",
+        "osm"
+      ],
+      "medidas": "planta ≈ 5.7 × 5.9 m (OpenStreetMap); altura aproximada",
+      "resumo": "Fora das muralhas, a sul, junto ao parque de merendas e à área dos escuteiros",
+      "ancora": [
+        -15.1,
+        -5.53,
+        139.38
+      ]
+    },
+    {
+      "id": "vegetacao",
+      "nome": "Vegetação",
+      "grupo": "Envolvente",
+      "estado": "estado-atual",
+      "confianca": "média",
+      "descricao": "posições, alturas e largura da copa reais do LiDAR (MDS − MDT); dentro da muralha intermédia ficam só 10 a 15 % das árvores, e nenhuma a menos de 5 m das linhas, para se lerem os taludes. A espécie não vem do LiDAR: copas altas e estreitas como eucaliptos, largas como castanheiros, carvalhos e sobreiros.",
+      "fontes": [
+        "lidar"
+      ]
+    }
+  ]
+}

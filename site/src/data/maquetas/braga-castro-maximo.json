@@ -1,0 +1,200 @@
+{
+  "monumento": "braga-castro-maximo",
+  "titulo": "Castro Máximo",
+  "variante": "estado-atual",
+  "versao": "1.0",
+  "data": "2025-07-12",
+  "origem": {
+    "lat": 41.560611,
+    "lon": -8.427889,
+    "nota": "Ponto do sítio na tese. Eixos da maqueta: x para este, y para cima, z para sul, em metros; o relevo está exagerado 1× na vertical."
+  },
+  "fontes": {
+    "sipa": {
+      "titulo": "Sereno, I.; Dordio, P. (1994). Castro Máximo / Monte de Castro, SIPA n.º 1721 (DGPC): cota máxima 198,2 m; a ação das pedreiras desfigurou em grande medida o povoado; Carlos Teixeira (1935) referiu fossos do lado da cidade, possivelmente duas linhas de muralha e casas circulares de pedra, que hoje não se identificam; Russell Cortez (1953-54); sondagens da U. Minho (1976-78): um muro com paramento externo aparelhado e um piso de argila batida; ocupação mais intensa entre meados do séc. I a.C. e meados do séc. I d.C. IIP (Decreto n.º 29/84) e ZEP (Portaria n.º 281/85)."
+    },
+    "morais": {
+      "titulo": "Morais, R. (2020). Transition from the Pre-Roman World to the Roman World in the Northwest of the Iberian Peninsula: the example of Bracara Augusta. Repositório Aberto da U. Porto: Teixeira descreveu uma linha dupla de muralhas reforçada por fossos a sul; escavação parcial do Gabinete de Arqueologia da Câmara de Braga (Armandino Cunha) no local do estádio, com unidades habitacionais e áreas de circulação organizadas por vários cruzamentos de ruas; ≈ 2 km de Bracara Augusta; abandono talvez no fim do séc. I a.C."
+    },
+    "rocha": {
+      "titulo": "Rocha, D. (2017). O Castro Máximo: contributo para o estudo do povoamento proto-histórico da região de Braga. Dissertação de mestrado, U. Minho (resumo): escavação de 2001 antes do novo estádio, pelo Gabinete de Arqueologia da Câmara com a Unidade de Arqueologia da U. Minho; abandono entre o séc. I a.C. e o início do séc. I d.C. O texto e as plantas não puderam ser consultados."
+    },
+    "blog": {
+      "titulo": "Avenida Central (blogue, 2008). O Castro Máximo: o que resta (a acrópole) ocupa o topo do monte primitivo, com acesso pela Av. Artur Soares; três linhas de muralha e fossos do lado da cidade; Albano Belino (fim do séc. XIX), Teixeira (1935-36), Cortez (anos 1950), sondagens da U. Minho (1977-78) e escavação de 2001."
+    },
+    "tese": {
+      "titulo": "Pinto, T. — Castros do Noroeste de Portugal (tese de doutoramento, Univ. de Santiago de Compostela); visitas em 2022 e 2025: nenhuma ruína visível; as casas circulares apareceram na construção do estádio, sobretudo nos estacionamentos da bancada poente, e foram estudadas numa escavação de emergência de cinco meses; duas lareiras no Museu D. Diogo de Sousa; parte da zona vedada pela ravina da pedreira; evento Nómadas num estacionamento dentro da zona de proteção."
+    },
+    "wiki": {
+      "titulo": "Estádio Municipal de Braga, Wikipédia em português (ligada no OpenStreetMap): projeto do arquiteto Eduardo Souto de Moura e do engenheiro Rui Furtado; 30 286 lugares; apenas duas bancadas laterais, com os topos formados pelos anfiteatros rupestres da encosta do monte; a cobertura inspira-se nas pontes incas; alcunha «A Pedreira»."
+    },
+    "osm": {
+      "titulo": "OpenStreetMap (extrato de 2026): estádio e relvado, parques de estacionamento, rocha nua da pedreira (escarpas de 15 e 30 m), ruas e caminhos, Estabelecimento Prisional, ponto «Castro Máximo»."
+    },
+    "orto": {
+      "titulo": "Ortofotografia enviada pelo Tiago (2026-11), ajustada aos dois relvados do OpenStreetMap (≈ 0,93 m por píxel): telhados das casas e cores do terreno na zona sem LiDAR."
+    },
+    "photo": {
+      "titulo": "Fotografia enviada pelo Tiago (2026-11): o alto do monte com erva e um pequeno monte de terra, com a cidade de Braga ao fundo."
+    },
+    "lidar": {
+      "titulo": "DGT — LiDAR 2025, bloco 175511: nuvem de pontos classificada (LO-175511-07-2025, ≈ 8,6 pontos de solo por m²) e MDT/MDS de 50 cm. Terreno de 25 cm interpolado dos pontos de solo; edifícios pela classe 6 e pelo MDS; árvores com a altura real do modelo de copas. Sem pontos num círculo de ≈ 190 m de raio à volta do Estabelecimento Prisional: aí o relevo vem dos AWS Terrain Tiles (SRTM, ≈ 30 m), ajustado à borda do LiDAR, e é aproximado. Relevo sem exagero."
+    }
+  },
+  "limitacoes": [
+    "Do castro não resta nada à vista: a maqueta mostra o Monte Castro como está hoje, com o terreno, as frentes da pedreira, o estádio e as casas do LiDAR da DGT (2025, nuvem de pontos, terreno de 25 cm), sem exagero do relevo. A zona à volta do Estabelecimento Prisional não tem dados LiDAR: aí o relevo é aproximado e as casas vêm da ortofoto. Sem planta consultada, não se desenhou nenhuma muralha nem casa castreja.",
+    "Não há reconstituição: nenhuma planta do castro pôde ser consultada. A dissertação de D. Rocha (2017, U. Minho), que estuda a escavação de 2001, está num repositório bloqueado ao acesso automático; com as suas plantas, as casas e as ruas escavadas podem ser georreferenciadas e reconstituídas.",
+    "Muralhas e fossos: Carlos Teixeira (1935-36) descreveu fossos do lado da cidade e talvez duas linhas de muralha (três segundo outras fontes); as sondagens da U. Minho (1976-78) só encontraram um muro com paramento externo aparelhado e um piso de argila batida. Sem traçado nem posição publicados que se pudessem consultar, e sem sinal no LiDAR (as encostas a sul estão urbanizadas e as do norte foram desmontadas pela pedreira): nada foi representado.",
+    "Escavação de 2001: só se sabe que foi sobretudo nos estacionamentos da bancada poente; a linha ocre marca o limite dos parques de estacionamento (OpenStreetMap), não a área escavada. Faltam a planta, o número e o diâmetro das casas, e as fotografias tiradas pelos trabalhadores das obras.",
+    "Sondagens de 1976-78 e escavações de 1935 e 1953-54: posições desconhecidas.",
+    "Zona sem dados LiDAR: a DGT não publicou pontos num círculo de cerca de 190 m de raio à volta do Estabelecimento Prisional, que apanha a encosta nascente do cume e o fim da Rua do Castro Máximo, onde está o ponto «Castro Máximo» do OpenStreetMap e o mato visível na ortofoto. Aí o relevo vem dos AWS Terrain Tiles (SRTM, ≈ 30 m, anterior ao estádio), ajustado à borda do LiDAR, e as casas foram tiradas dos telhados da ortofoto com dois pisos assumidos; as árvores dessa zona não foram representadas.",
+    "Cume: o LiDAR dá 199,8 m no ponto mais alto (o SIPA indica 198,2 m); a linha creme é a curva de nível dos 195 m e marca só o alto do monte, não um limite do povoado.",
+    "Edifícios do LiDAR: as casas são blocos de 1 m com a altura do MDS, sem forma de telhado. No estádio, a planta e a altura das coberturas e os 34 cabos são do LiDAR, mas o LiDAR não vê debaixo das coberturas: os degraus das bancadas (cerca de 27°) e as paredes são esquemáticos, sem as cores das cadeiras.",
+    "Texturas: os lugares do estacionamento (2,5 m) e as marcações do relvado (campo de 105 × 68 m) são esquemáticos; as ruas seguem o tipo de piso do OpenStreetMap (cubos de granito ou asfalto) com passeios.",
+    "Árvores: posições, alturas e largura da copa reais do LiDAR (MDS − MDT); no alto do monte fica só cerca de um terço, para se ler o relevo. A espécie não vem do LiDAR."
+  ],
+  "placas": [
+    "CU",
+    "PD",
+    "EX",
+    "ST",
+    "EV",
+    "ED"
+  ],
+  "elementos": [
+    {
+      "id": "ST",
+      "nome": "Estádio Municipal de Braga («A Pedreira»)",
+      "grupo": "Envolvente",
+      "estado": "estado-atual",
+      "confianca": "alta",
+      "descricao": "Projeto de Eduardo Souto de Moura com o engenheiro Rui Furtado, para o Euro 2004: só duas bancadas laterais, e nos topos os anfiteatros de rocha da encosta (Wikipédia). Foi construído na antiga pedreira do Monte Castro, dentro da zona de proteção do castro criada em 1985, que não foi respeitada. Nas obras, sobretudo na zona dos estacionamentos da bancada poente, apareceram casas de planta circular, estudadas numa escavação de emergência de cinco meses e depois destruídas (tese). Planta, altura e inclinação das coberturas e posição dos cabos medidas no LiDAR de 2025, que tem pontos nos próprios cabos. O LiDAR não vê debaixo das coberturas: os degraus das bancadas (inclinação de cerca de 27°) e as paredes são esquemáticos; as cores das cadeiras não estão representadas. As construções mais baixas do estádio são blocos de 1 m com a altura do LiDAR. Fase: Euro 2004.",
+      "fontes": [
+        "wiki",
+        "tese",
+        "osm",
+        "lidar"
+      ],
+      "medidas": "duas bancadas laterais com coberturas de 134 a 143 m de altitude (relvado a 99 m); 34 cabos sobre o relvado, um a cada 3,8 m (LiDAR)",
+      "resumo": "Construído para o Euro 2004 dentro da antiga pedreira e da zona de proteção do castro",
+      "ancora": [
+        -44.3,
+        19.65,
+        -90.3
+      ]
+    },
+    {
+      "id": "ED",
+      "nome": "Casas do bairro",
+      "grupo": "Envolvente",
+      "estado": "estado-atual",
+      "confianca": "alta",
+      "descricao": "Casas a sul e a poente do cume, na Rua da Pedreira, na Rua do Muro e no Bairro de Nossa Senhora do Monte, sobre as encostas que Carlos Teixeira descreveu nos anos 1930 com fossos do lado da cidade. Só no estado atual. Fase: atual.",
+      "fontes": [
+        "lidar",
+        "osm",
+        "sipa"
+      ],
+      "medidas": "telhados com a altura medida no LiDAR (MDS), em blocos de 1 m",
+      "resumo": "Casas a sul e a poente do cume, na Rua da Pedreira",
+      "ancora": [
+        -13.3,
+        48.45,
+        168.8
+      ]
+    },
+    {
+      "id": "EV",
+      "nome": "Casas na zona sem dados LiDAR",
+      "grupo": "Envolvente",
+      "estado": "estado-atual",
+      "confianca": "média",
+      "descricao": "A DGT não publicou pontos LiDAR num círculo de cerca de 190 m de raio à volta do Estabelecimento Prisional, que apanha a encosta nascente do cume, o fim da Avenida Doutor Artur Soares e a Rua do Castro Máximo. Aqui as casas foram tiradas dos telhados da ortofoto enviada pelo Tiago, e o relevo é aproximado. Fase: atual.",
+      "fontes": [
+        "orto",
+        "lidar"
+      ],
+      "medidas": "3 casas · planta pelos telhados da ortofoto · altura não medida (dois pisos)",
+      "resumo": "3 casas · planta pelos telhados da ortofoto · altura não medida (dois pisos)",
+      "ancora": [
+        180,
+        75.2,
+        90
+      ]
+    },
+    {
+      "id": "CU",
+      "nome": "Cume do Monte Castro",
+      "grupo": "Relevo",
+      "estado": "estado-atual",
+      "confianca": "alta",
+      "descricao": "O que resta do povoado (a «acrópole») ocupa o topo do monte (Avenida Central, 2008). É um dos pontos mais altos de Braga e domina o vale do Cávado a norte (SIPA). Nos anos 1930 Carlos Teixeira descreveu fossos do lado da cidade, talvez duas linhas de muralha e casas circulares de pedra; nas sondagens da Universidade do Minho (1976-78) só apareceu um muro com paramento externo aparelhado e um piso de argila batida. Nada disto se identifica hoje, nem no terreno nem no LiDAR. Nas visitas do Tiago, em 2022 e 2025, não havia nenhuma ruína visível. A linha creme não é uma muralha: marca só o alto do monte. Fase: —.",
+      "fontes": [
+        "sipa",
+        "blog",
+        "morais",
+        "tese",
+        "lidar"
+      ],
+      "medidas": "cota máxima 198,2 m (SIPA); 199.8 m no LiDAR de 2025 · a linha é a curva de nível dos 195 m (0.18 ha)",
+      "resumo": "O que resta do povoado ocupa o topo do monte, a 198 m, um dos pontos mais altos de Braga",
+      "ancora": [
+        97.6,
+        81.99,
+        86.6
+      ]
+    },
+    {
+      "id": "PD",
+      "nome": "Frentes da antiga pedreira",
+      "grupo": "Pedreira",
+      "estado": "estado-atual",
+      "confianca": "alta",
+      "descricao": "As pedreiras abertas nas encostas do Monte Castro «desfiguraram em grande medida o povoado fortificado» (SIPA) e não deixam perceber a sua extensão original (Avenida Central, 2008). O estádio foi construído dentro da antiga pedreira; parte da zona arqueológica está hoje vedada pelo perigo de queda da ravina (tese). As frentes de rocha estão marcadas onde o modelo do terreno do LiDAR passa os 52°. Fase: séc. XX.",
+      "fontes": [
+        "sipa",
+        "blog",
+        "tese",
+        "osm",
+        "lidar"
+      ],
+      "medidas": "≈ 5435 m² de rocha com mais de 52° de inclinação (LiDAR); escarpas de 15 e 30 m (OpenStreetMap)",
+      "ancora": [
+        22.87,
+        31.32,
+        73.42
+      ]
+    },
+    {
+      "id": "EX",
+      "nome": "Estacionamentos a poente do estádio: casas castrejas escavadas em 2001",
+      "grupo": "Escavação",
+      "estado": "estado-atual",
+      "confianca": "média",
+      "descricao": "Na construção do estádio, sobretudo na zona dos estacionamentos da bancada poente, apareceram várias casas de planta circular. O Gabinete de Arqueologia da Câmara Municipal de Braga (Armandino Cunha), com a Unidade de Arqueologia da U. Minho, fez uma escavação de emergência de cinco meses: encontraram-se unidades habitacionais e áreas de circulação, organizadas por vários cruzamentos de ruas (Morais 2020). O objetivo foi estudar as ruínas e retirar as peças mais importantes (duas lareiras foram para o Museu D. Diogo de Sousa; outras peças para o Museu Pio XII), não conservá-las: estão destruídas sob o asfalto. A linha ocre marca os parques de estacionamento, não a área escavada, que fica por localizar com as plantas da dissertação de D. Rocha (2017). Fase: 2001.",
+      "fontes": [
+        "tese",
+        "morais",
+        "rocha"
+      ],
+      "medidas": "limite dos parques de estacionamento (OpenStreetMap); a área escavada exata não foi publicada nas fontes consultadas",
+      "resumo": "Nas obras do estádio, sobretudo nos estacionamentos da bancada poente",
+      "ancora": [
+        -69.77,
+        29.92,
+        121.26
+      ]
+    },
+    {
+      "id": "vegetacao",
+      "nome": "Vegetação",
+      "grupo": "Envolvente",
+      "estado": "estado-atual",
+      "confianca": "média",
+      "descricao": "posições, alturas e largura da copa reais do LiDAR (MDS − MDT); no alto do monte fica só cerca de um terço, para se ler o relevo. A espécie não vem do LiDAR.",
+      "fontes": [
+        "lidar"
+      ]
+    }
+  ]
+}

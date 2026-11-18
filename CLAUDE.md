@@ -8,9 +8,15 @@ Escreve em português (muitas vezes no telemóvel); responder sempre em portugu�
   Para atualizar: Artifact `publish` com `file_path` = `app/index.html` e `url` = esse link; ficheiros de apoio em `files`
   (`{"caminho/publicado": {"from": "app/..."}}`; incluir `dio/<id>.drc.glb.png` e `draco/draco_wasm_wrapper.js`, `draco/draco_decoder.wasm`). Ler o artifact primeiro (`action: read`) numa conversa nova.
   As `capabilities` (user, db com coleções comments/history/extra, assets) passam de versão para versão: omitir o campo.
-- **Site público (GitHub Pages):** https://tiagojmgfpinto-rgb.github.io/castros/ — o workflow `.github/workflows/publicar.yml`
-  corre `python3 build.py` e `python3 tools/site.py` (→ `_site/`, com esqueleto HTML e metas; `tools/pages.py` gera `/castros/`, `/castro/<id>/` com canónico, Open Graph e schema.org, `/creditos/`, `sitemap.xml` e `robots.txt`, tudo a partir dos dados) a cada push no `main`, como no castelos-site.
-  Sem `window.claude` a app corre só em leitura (sem comentários, histórico editado nem castros acrescentados pela base de dados do artifact).
+- **Site público (GitHub Pages):** https://tiagojmgfpinto-rgb.github.io/castros/ — desde nov. 2026 é o projeto **`site/`**, uma cópia do
+  site dos Castelos (repo `tiagojmgfpinto-rgb/castelos-site`: Astro + React Three Fiber, relevo Copernicus, visor 3D dos Castelos) com
+  símbolos castrejos no lugar dos castelos (marca com tríscele, casa redonda, citânia, pedra formosa, roda). Ver `site/README.md`.
+  Fichas: `python3 tools/site_conteudo.py` (data.json → `site/src/content/monumentos/*.md`); maquetas: `node tools/gltf/castelos.mjs`
+  (GLB do artifact → `site/public/maquetas/<id>/<id>.glb` + `site/src/data/maquetas/<id>.json`; só o estado atual, peças A/AB); capas:
+  `node tests/capas.mjs`. O workflow `.github/workflows/publicar.yml` compila `site/` a cada push no `main`. Regra dos Castelos: o mapa
+  só mostra os sítios com maqueta publicada; os outros estão em «Próximas adições». Endereços antigos `/castro/<id>/` reencaminham.
+  Os textos da tese («Análise do Local no Estudo») e o diário de campo não entram no site: o Tiago decide depois onde ficam.
+  O antigo site (`tools/site.py`, `tools/pages.py`) já não é publicado; a app do artifact (`app/`, `build.py`) continua igual.
 - Estilo visual pedido: como **castillos.site** (maqueta 3D inclinada do noroeste, miniaturas brancas, título Cinzel com escudo).
 
 ## Estrutura
@@ -25,11 +31,12 @@ Escreve em português (muitas vezes no telemóvel); responder sempre em portugu�
 | `maquetas/<id>.json`, `maquetas/luz.json` | dados do visualizador de cada maqueta (`order`, `cap`, `gaps`, `layers`, `noB`, `cam`, `tour` [{sid,title,text}], `luz` opcional) e luz comum; o `build.py` escreve-os em `DIOS`/`LUZ`. Uma maqueta nova = GLB + `app/dio/<id>.json` do Blender + este ficheiro, sem mexer no código |
 | `app/maq-*.jpg`, `app/maq-h.png` | textura e alturas da maqueta do noroeste (gerados por `tools/maquette.py`) |
 | `blend/` | scripts Blender das maquetas por sítio e dados georreferenciados (plantas, ajustes, casas, muros) |
-| `lidar/` | LiDAR DGT 2025 (`raw/*.tif`: Briteiros 184507/185507, Sabroso 182505, S. Miguel-o-Anjo 178499/178500/179499/179500, Santa Marta das Cortiças 177505/177506/178505/178506, Castro Máximo 175511 v03) e scripts. Castro Máximo: `cmx_laz.py`, `cmx_fill.py` (buraco da prisão), `cmx_osm.py`, `cmx_roofs.py` (casas da ortofoto). Santa Marta: `smc_laz.py`, `smc_lines.py` (linhas de `blend/smc_trace.py`, com os penedos retirados por abertura morfológica). S. Miguel-o-Anjo: `sma_laz.py` (LAZ 178499+179499 → terreno 25 cm), `sma_lines.py` (linhas de `blend/sma_trace.py` ajustadas ao talude). Sabroso: `sab_laz.py` (nuvem LAZ → terreno e copas de 25 cm), `sab_georef.py` (planta de 1930 ajustada ao talude da muralha) |
+| `lidar/` | LiDAR DGT 2025 (`raw/*.tif`: Briteiros 184507/185507, Sabroso 182505, S. Miguel-o-Anjo 178499/178500/179499/179500, Santa Marta das Cortiças 177505/177506/178505/178506, Castro Máximo 175511 v03) e scripts. Castro Máximo: `cmx_laz.py`, `cmx_fill.py` (buraco da prisão), `cmx_osm.py`, `cmx_roofs.py` (casas da ortofoto). Santa Marta: `smc_laz.py`, `smc_lines.py` (linhas de `blend/smc_trace.py`, com os penedos retirados por abertura morfológica). S. Miguel-o-Anjo: `sma_laz.py` (LAZ 178499+179499 → terreno 25 cm), `sma_lines.py` (linhas de `blend/sma_trace.py` ajustadas ao talude). Sabroso: `sab_laz.py` (nuvem LAZ → terreno e copas de 25 cm), `sab_georef.py` (planta de 1930 ajustada ao talude da muralha). Sanfins (178484/178485/179484/179485): `sfn_laz.py` (4 LAZ → terreno/MDS 25 cm), `sfn_walls.py` (muros e 138 casas do MDS−MDT), `sfn_lines.py` (muralha M1 e muros S1–S3 de `blend/sfn_trace.py`) |
 | `dig/`, `tools/` | digitalizações antigas e scripts de dados; **nunca** usar `tools/merge_rev_OLD_do_not_use.py` |
 | `geo/`, `osm/` | limites (CAOP, geoBoundaries), rios, OSM (`braga.pbf`, `mask_sites.json` = estradas/água por sítio) |
 | `tests/` | scripts Playwright de captura (`mock.html` simula o runtime `window.claude`) |
 | `docs/blocos_lidar_castros.md` | blocos LiDAR DGT a pedir para cada um dos 100 sítios, por prioridade |
+| `docs/prompt-fichas-maquetas.md` | prompt que o Tiago cola para pedir uma nova ficha + maqueta «metro a metro» (critérios, validação, entrega) |
 
 ## Ambiente (reinstalar numa sessão nova)
 
@@ -62,7 +69,7 @@ sh tools/fetch_dem.sh            # só para refazer a maqueta do noroeste
    em `tools/gltf/reports/<id>.json`; nov. 2026: p95 5–13 cm, máximo 0,3–1,4 m só em faces verticais de pedreiras), texturas ≤ 2048 px,
    weld + quantize (14/8/12) e sem apagar os nós vazios `LBL-*` (rótulos) → `app/dio/<id>.glb.png`; depois `tools/gltf/draco.mjs`
    (Google Draco, edgebreaker, sem weld nem prune; verifica nós, malhas e triângulos não degenerados; as posições ficam exatas) → `app/dio/<id>.drc.glb.png`,
-   cerca de metade do tamanho (nov. 2026: as 5 maquetas 11,4 → 6,1 MB). O visor carrega o `.drc` e descodifica-o na thread principal com
+   cerca de metade do tamanho (nov. 2026: as 6 maquetas 16,1 → 8,0 MB). O visor carrega o `.drc` e descodifica-o na thread principal com
    `app/draco/` (descodificador glTF do Draco 1.5.7 vindo do three 0.170, WebAssembly; se falhar, a cópia na CDN); se o Draco falhar por
    qualquer motivo, carrega o `.glb.png` normal. Por isso os dois ficheiros são publicados. `NODRACO=1` nos testes `dio_all`/`dio_pick` força o recurso.
    No visor as árvores têm nível de pormenor: uma copa com menos de 24 px no ecrã usa uma cópia simplificada do protótipo (agrupamento de vértices, refeito com a câmara).
@@ -90,6 +97,12 @@ sh tools/fetch_dem.sh            # só para refazer a maqueta do noroeste
   (edifícios = classe 6 + MDS em blocos de 1 m; o estádio inteiro no disco, com bancadas procedimentais, coberturas medidas e os 34 cabos que o LAZ apanha sobre o relvado); a DGT **não tem pontos num círculo de ≈ 190 m à volta da prisão**, que tapa a encosta
   nascente do cume: relevo por SRTM ajustado à borda e casas pela ortofoto; falta a dissertação de D. Rocha 2017, com as plantas de 2001). A nuvem de pontos (LAZ, quando o Tiago a envia) dá terreno de 25 cm, melhor que o MDT de 50 cm.
 - Briteiros: espécies de Sabroso (eucalipto, castanheiro, carvalho, sobreiro, sem pinheiros) postas sem novo Blender com `tools/gltf/graft_protos.mjs` (protótipos) + `tools/brit_species.py` (altura e largura de copa do MDS−MDT); `tools/unpng.py` tira o GLB do PNG. O `blend/dio_brit.py` já não corre de raiz: faltam `lidar/houses.json`, `lidar/walls.json` e `app/t3/<id>-c.jpg` (e os scripts `lidar/walls.py`/`houses.py`). O `lidar/mosaic.py` precisa de rasterio (`/opt/bvenv`).
-- O Tiago quer este nível em **todos** os sítios, um a um. Próximo: **Citânia de Sanfins** (blocos 178484, 178485, 179484, 179485),
-  depois Santa Luzia, Bagunte, Cossourado. (Sabroso já tem LiDAR: o bloco 182506 não é preciso, o disco cabe todo no 182505.) Ver `docs/blocos_lidar_castros.md`.
+- **Citânia de Sanfins** (nov. 2026; `blend/dio_sfn.py`, disco de 225 m, `TRIS=150000 bash mkparts.sh <id>`): sem planta publicada consultada,
+  tudo medido na nuvem de pontos. Os muros escavados sobressaem 0,15–2 m no MDS − MDT (a classe 6 «edifício» da DGT inclui muitos muros);
+  metade das células de 25 cm não tem retorno, por isso a altura dos muros usa só as células com retorno > 0,1 m e o máximo 3×3 fecha as falhas.
+  138 casas por Hough no esqueleto dos muros (≥ 70 % do anel), núcleo reconstruído = bloco com cobertura de uma água + dois cones, marco
+  geodésico com base e pilar medidos. A ortofoto `app/t3/<id>-c.jpg` alinha com o LiDAR. Fotografias do Commons: o browser do app do
+  Tiago abre a API do Commons (curl e web-fetch não); `tests/dio_views.mjs` tira a maqueta do mesmo ponto de vista de uma fotografia.
+  Faltam: plantas de Paço 1953 (Zephyrus 4), Silva e Centeno 1980 (Est. I) e Silva 1999 (roteiro); capela de S. Romão e balneário sem posição.
+- O Tiago quer este nível em **todos** os sítios, um a um. Próximo: Santa Luzia, Bagunte, Cossourado. (Sabroso já tem LiDAR: o bloco 182506 não é preciso, o disco cabe todo no 182505.) Ver `docs/blocos_lidar_castros.md`.
 - Por confirmar com o Tiago: classificação de Roriz e de N.ª Sr.ª da Graça; Ázere MN 1910.

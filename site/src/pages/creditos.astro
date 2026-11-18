@@ -1,0 +1,49 @@
+---
+import Base from "../layouts/Base.astro";
+import Cabecalho from "../components/Cabecalho.astro";
+import { getCollection } from "astro:content";
+
+// As contagens das fotografias saem das próprias fichas, para não ficarem desatualizadas.
+const fichas = await getCollection("monumentos");
+const imagens = fichas.flatMap((f) => f.data.imagens);
+const doCommons = imagens.filter((i) => i.url && /wikimedia\.org/.test(i.url)).length;
+
+const CC_BY_4 = "https://creativecommons.org/licenses/by/4.0/deed.pt";
+const ODBL = "https://opendatacommons.org/licenses/odbl/1-0/";
+
+---
+<Base titulo="Créditos e licenças" classe="pagina-texto">
+  <Cabecalho />
+  <main class="texto creditos-pagina">
+    <h1>Créditos e licenças</h1>
+
+    <h2>Mapa</h2>
+    <p class="credito-rotulo">Relevo</p>
+    <p>Copernicus DEM GLO-30 © DLR e. V. 2010–2014 e © Airbus Defence and Space GmbH 2014–2018, fornecido no âmbito do programa Copernicus da União Europeia (Agência Espacial Europeia). Acesso via AWS Open Data.</p>
+    <p class="credito-rotulo">Batimetria</p>
+    <p>Terrain Tiles da Mapzen (AWS Open Data), que no mar provêm do ETOPO1 (NOAA) e do GEBCO.</p>
+    <p class="credito-rotulo">Limites e nomes</p>
+    <p>Fronteira com Espanha, limites dos distritos e dos concelhos: Carta Administrativa Oficial de Portugal (CAOP 2025), © <a href="https://www.dgterritorio.gov.pt/" rel="noopener">Direção-Geral do Território</a>, <a href={CC_BY_4} rel="noopener">CC BY 4.0</a>.</p>
+    <p class="credito-rotulo">Costa e rios</p>
+    <p>Natural Earth, domínio público.</p>
+
+    <h2>Maquetas</h2>
+    <p class="credito-rotulo">Relevo, alturas e árvores</p>
+    <p>Nuvens de pontos LiDAR classificadas e modelos digitais do terreno e de superfície (MDT e MDS de 50 cm, 2025): © <a href="https://cdd.dgterritorio.gov.pt/" rel="noopener">Direção-Geral do Território</a>, Centro de Dados da DGT, <a href={CC_BY_4} rel="noopener">CC BY 4.0</a>. Blocos descarregados e enviados por Tiago Pinto. No Castro Máximo, onde a DGT não tem pontos à volta da prisão, o relevo vem dos Terrain Tiles (AWS Open Data).</p>
+    <p class="credito-rotulo">Plantas e documentação</p>
+    <p>As muralhas, casas e restantes estruturas foram georreferenciadas a partir das plantas publicadas (levantamento geral da Unidade de Arqueologia da Universidade do Minho em Briteiros; planta de Mário Cardozo de 1930 em Sabroso), dos painéis dos sítios, da <a href="https://www.csarmento.uminho.pt/" rel="noopener">Revista de Guimarães</a> (Sociedade Martins Sarmento), do <a href="http://www.monumentos.gov.pt/" rel="noopener">SIPA</a> e do LiDAR. Cada maqueta lista as suas fontes e as suas lacunas no painel «Fontes».</p>
+    <p class="credito-rotulo">Edifícios, estradas e caminhos</p>
+    <p>© <a href="https://www.openstreetmap.org/copyright" rel="noopener">colaboradores do OpenStreetMap</a>, dados disponíveis sob a <a href={ODBL} rel="noopener">Open Database License (ODbL)</a>.</p>
+
+    <h2>Fotografias</h2>
+    <p>As fotografias das fichas são de Tiago Pinto, tiradas nas visitas da tese de doutoramento; todos os direitos reservados, reprodução só com autorização.</p>
+    {doCommons > 0 && <p>Há também {doCommons} imagens da <a href="https://commons.wikimedia.org/" rel="noopener">Wikimedia Commons</a>, cada uma com o seu autor e a sua licença junto a ela.</p>}
+
+    <h2>Textos</h2>
+    <p>Os sítios e as visitas vêm da tese de doutoramento de Tiago Pinto (Turismo, Universidade de Santiago de Compostela; <a href="https://www.castrosdonoroestedeportugal.pt/" rel="noopener">castrosdonoroestedeportugal.pt</a>). Os textos históricos das fichas foram escritos a partir das fontes indicadas no fim de cada ficha. Quando uma ficha se apoia na <a href="https://pt.wikipedia.org/" rel="noopener">Wikipédia</a>, o conteúdo usado está disponível sob a licença <a href="https://creativecommons.org/licenses/by-sa/4.0/deed.pt" rel="noopener">CC BY-SA 4.0</a>.</p>
+
+    <h2>Programas</h2>
+    <p>three.js e React Three Fiber (licença MIT), Astro (MIT), proj4js (MIT). Preparação das maquetas com glTF Transform (MIT) e meshoptimizer (MIT); maquetas construídas no Blender (GPL).</p>
+    <p>Tipografia: Cinzel, Alegreya e Alegreya Sans SC (SIL Open Font License).</p>
+  </main>
+</Base>
