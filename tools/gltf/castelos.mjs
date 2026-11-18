@@ -130,7 +130,8 @@ async function converter(id) {
   // ——— dados do visor ———
   const fontes = Object.fromEntries(Object.entries(meta.sources || {}).map(([k, t]) => {
     const u = (t.match(/https?:\/\/\S+/) || [])[0];
-    return [k, u ? { titulo: t, url: u.replace(/[).,]+$/, '') } : { titulo: t }];
+    // o endereço sai do título (uma palavra tão longa transborda das caixas no telemóvel) e fica só como ligação
+    return [k, u ? { titulo: t.replace(u, '').replace(/[\s:;,—-]+$/, '').trim(), url: u.replace(/[).,]+$/, '') } : { titulo: t }];
   }));
   const tour = new Map((maq.tour || []).map((t) => [t.sid, t]));
   // primeira frase (sem partir em «D.», «N.ª», «c.», números decimais…), ou o primeiro troço antes de « · »; até 90 carateres
