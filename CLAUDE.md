@@ -69,7 +69,7 @@ sh tools/fetch_dem.sh            # só para refazer a maqueta do noroeste
    em `tools/gltf/reports/<id>.json`; nov. 2026: p95 5–13 cm, máximo 0,3–1,4 m só em faces verticais de pedreiras), texturas ≤ 2048 px,
    weld + quantize (14/8/12) e sem apagar os nós vazios `LBL-*` (rótulos) → `app/dio/<id>.glb.png`; depois `tools/gltf/draco.mjs`
    (Google Draco, edgebreaker, sem weld nem prune; verifica nós, malhas e triângulos não degenerados; as posições ficam exatas) → `app/dio/<id>.drc.glb.png`,
-   cerca de metade do tamanho (nov. 2026: as 7 maquetas 17,8 → 9,0 MB). O visor carrega o `.drc` e descodifica-o na thread principal com
+   cerca de metade do tamanho (nov. 2026: as 7 maquetas 17,8 → 9,1 MB). O visor carrega o `.drc` e descodifica-o na thread principal com
    `app/draco/` (descodificador glTF do Draco 1.5.7 vindo do three 0.170, WebAssembly; se falhar, a cópia na CDN); se o Draco falhar por
    qualquer motivo, carrega o `.glb.png` normal. Por isso os dois ficheiros são publicados. `NODRACO=1` nos testes `dio_all`/`dio_pick` força o recurso.
    No visor as árvores têm nível de pormenor: uma copa com menos de 24 px no ecrã usa uma cópia simplificada do protótipo (agrupamento de vértices, refeito com a câmara).
