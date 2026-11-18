@@ -1,0 +1,244 @@
+{
+  "monumento": "vila-do-conde-castro-de-sao-paio",
+  "titulo": "Castro de São Paio",
+  "variante": "estado-atual",
+  "versao": "1.0",
+  "data": "2025-07-19",
+  "origem": {
+    "lat": 41.281917,
+    "lon": -8.730639,
+    "nota": "Ponto do sítio na tese. Eixos da maqueta: x para este, y para cima, z para sul, em metros; o relevo está exagerado 1× na vertical."
+  },
+  "fontes": {
+    "alm": {
+      "titulo": "Almeida, P. B. de; Araújo, M. A.; Abrunhosa, M. J.; Teixeira, J.; Cruz, V. (2012). O Castro de S. Paio (Labruge, Vila do Conde). Vila do Conde: Câmara Municipal (livro do Centro Interpretativo; arqueologia por P. Brochado de Almeida, pp. 15-26). ISBN 978-972-9453-95-3. Cópia no Repositório Aberto da U. Porto: https://hdl.handle.net/10216/22268",
+      "url": "https://hdl.handle.net/10216/22268"
+    },
+    "pa": {
+      "titulo": "DGPC — Portal do Arqueólogo, sítio «São Paio» (CNS 3560): povoado fortificado da Idade do Ferro; escavações de C. A. Brochado de Almeida e P. J. L. Costa Pinto (1993-1996), sondagem (2004) e levantamento (2005). https://arqueologia.patrimoniocultural.pt/index.php?sid=sitios&subsid=49316",
+      "url": "https://arqueologia.patrimoniocultural.pt/index.php?sid=sitios&subsid=49316"
+    },
+    "pan": {
+      "titulo": "Painéis interpretativos da Câmara Municipal de Vila do Conde no sítio («Ruínas de Habitação / Family House» e outros), fotografados por T. Pinto em 2025."
+    },
+    "hmdb": {
+      "titulo": "The Historical Marker Database — «Ruínas de Habitação / Family House» (n.º 233697), «Os penedos amoladoiros» (233600), «Gravuras da área de S. Paio» (233448), com as coordenadas dos painéis (2023). https://www.hmdb.org/m.asp?m=233697",
+      "url": "https://www.hmdb.org/m.asp?m=233697"
+    },
+    "muni": {
+      "titulo": "Município de Vila do Conde (Visit Vila do Conde) — Castro de São Paio; Rota do Castro de São Paio. https://www.visitviladoconde.pt/fazer/patrimonio/patrimonio-arqueologico/geo_artigo/castro-de-sao-paio-43",
+      "url": "https://www.visitviladoconde.pt/fazer/patrimonio/patrimonio-arqueologico/geo_artigo/castro-de-sao-paio-43"
+    },
+    "tese": {
+      "titulo": "Pinto, T. — Castros do Noroeste de Portugal (tese de doutoramento, Univ. de Santiago de Compostela); visitas em 2022 e 2025: casas circulares, vestígios de fosso e muralha, capela na acrópole, passadiço com painéis, Centro Interpretativo de 2012."
+    },
+    "orto": {
+      "titulo": "Ortofotografia de satélite (Google, consultada em novembro de 2026, 0,11-0,22 m por píxel), alinhada ao LiDAR pelos edifícios e muros (desvio corrigido ≈ 1 m): áreas escavadas, estrutura circular, caminhos, passadiço, praia e cores do solo."
+    },
+    "lidar": {
+      "titulo": "DGT — LiDAR 2025: nuvem de pontos classificada do bloco 150480 (LO-150480-07-2025, ≈ 21 pontos de solo por m², terreno de 25 cm no lado de terra) e MDT/MDS de 50 cm dos blocos 149480 e 150480 (o castro fica no 149480, a 40-60 m da junção). Talude traçado no relevo e ajustado à crista; edifícios e árvores com a altura do MDS. Sem exagero vertical."
+    }
+  },
+  "limitacoes": [
+    "Sem planta publicada. Terreno do LiDAR da DGT (2025): nuvem de pontos com 25 cm do lado de terra e MDT de 50 cm no castro (bloco 149480); talude nascente traçado no relevo; áreas escavadas, estrutura circular, caminhos e cores do solo lidos na ortofotografia alinhada ao LiDAR; capela e edifícios com a altura do MDS; mar ao nível dos retornos LiDAR sobre a água. Sem exagero vertical. Casas da reconstituição hipotéticas.",
+    "Não há planta publicada do castro. Nenhuma muralha, casa ou rua foi desenhada a partir de planta: o talude foi traçado no LiDAR e as áreas escavadas na ortofotografia. Falta consultar o relatório e as plantas das escavações de 1993-1996 (C. A. Brochado de Almeida e P. J. L. Costa Pinto) e da sondagem de 2004, que devem estar no arquivo da DGPC / Gabinete de Arqueologia de Vila do Conde.",
+    "Terreno do castro com 50 cm e não 25 cm: o núcleo fica no bloco 149480, de que só há MDT/MDS de 50 cm. Com a nuvem de pontos LO-149480-07-2025 o terreno passaria a 25 cm, como do lado de terra (bloco 150480).",
+    "Só o talude nascente é claro no LiDAR. A norte foi cortado pela estrada e pelos edifícios do Centro Interpretativo; a poente o povoado acaba na penedia, explorada como pedreira (Almeida et al. 2012); a sul o rebordo confunde-se com o adro da capela. Esses troços não foram desenhados.",
+    "Muralha: largura, altura e aparelho não publicados. A reconstituição (2,5 m de largura, 1,6 m acima da crista) é hipotética.",
+    "Fosso: hipótese sem confirmação arqueológica (um fosso que deixaria entrar o mar na maré-alta); se existir está entulhado (Almeida et al. 2012). Não se vê no LiDAR e não foi representado.",
+    "Entrada: «julga-se que só teria uma entrada», sem localização publicada. Não representada.",
+    "Casas: número, diâmetros e posições não publicados. As três casas da reconstituição (uma nas «Ruínas de Habitação», duas no conjunto do pátio) usam o diâmetro interior de 4,2 m da estrutura circular C1 e posições hipotéticas dentro das áreas escavadas. Vestíbulos, lajeados, pátio e portas não foram desenhados por não haver planta.",
+    "Estrutura circular C1 (junto ao Centro Interpretativo): visível na ortofotografia mas ausente das fontes consultadas; não se sabe se é castreja.",
+    "As duas áreas escavadas foram medidas na ortofotografia de satélite (0,11 m por píxel), alinhada ao LiDAR com um desvio corrigido de cerca de 1 m; erro estimado ≤ 1 m.",
+    "Capela, Centro Interpretativo e edifícios: formas simplificadas a partir do MDS (cobertura) e da ortofotografia. A cobertura do Centro Interpretativo está à cota do terreno e foi classificada como solo pela DGT; aparece no relevo e não como edifício.",
+    "Vegetação: posições e alturas das árvores do LiDAR (MDS − MDT); as espécies não vêm do LiDAR (eucalipto, castanheiro, carvalho e sobreiro escolhidos pela forma da copa). O canavial a sueste e a vegetação das dunas não foram modelados como árvores.",
+    "Penedos amoladoiros e gravuras: posição aproximada pelas coordenadas dos painéis; as rochas gravadas não foram identificadas no LiDAR.",
+    "Mar: superfície plana a 0,3 m, nível dos retornos LiDAR sobre a água no dia do voo; não representa a maré."
+  ],
+  "placas": [
+    "CH",
+    "T1",
+    "E1",
+    "E2",
+    "C1",
+    "B1"
+  ],
+  "elementos": [
+    {
+      "id": "T1",
+      "nome": "Talude coroado por muralha, a nascente",
+      "grupo": "Muralhas",
+      "estado": "estado-atual",
+      "confianca": "alta",
+      "descricao": "«Talude coroado por uma muralha de pedra, da qual apenas resta o seu alicerce», bem demarcado sobretudo na vertente Este (Almeida et al. 2012). No LiDAR de 2025 é o rebordo nascente do povoado: uma crista ligeiramente elevada sobre o interior e um talude de cerca de 3,6 m para os campos. Traçado no modelo do terreno e ajustado à crista. Largura e altura da muralha não publicadas: valores da reconstituição hipotéticos. Fase: Idade do Ferro.",
+      "fontes": [
+        "alm",
+        "pa",
+        "lidar"
+      ],
+      "medidas": "comprimento ≈ 103 m · talude com ≈ 3,6 m de desnível (LiDAR) · crista ≈ 0,5 m acima do interior · reconstituição: muro com 2,5 m de largura e 1,6 m acima da crista (hipotético)",
+      "resumo": "O povoado era defendido por um talude coroado por uma muralha de pedra",
+      "ancora": [
+        10.58,
+        7.99,
+        -46.09
+      ]
+    },
+    {
+      "id": "E1",
+      "nome": "Ruínas de Habitação (área escavada protegida)",
+      "grupo": "Área escavada",
+      "estado": "estado-atual",
+      "confianca": "alta",
+      "descricao": "Área escavada coberta por gravilha, com bordo de pedra e troncos e painel interpretativo. Segundo o painel, a construção circular era o compartimento de uma habitação associada a um pátio e a um lajeado, com lareira central e piso de argila decorado com círculos; pertence ao nível mais recente do povoado (séculos II–I a.C.). Contorno medido na ortofotografia; as paredes estão tapadas e não se veem. Fase: atual.",
+      "fontes": [
+        "pan",
+        "hmdb",
+        "alm",
+        "orto"
+      ],
+      "medidas": "≈ 9,9 × 3,4 m (34 m², medido na ortofotografia)",
+      "resumo": "Área escavada coberta por gravilha, com bordo de pedra e troncos e painel interpretativo",
+      "ancora": [
+        -9.8,
+        1.03,
+        20.94
+      ]
+    },
+    {
+      "id": "E1W",
+      "nome": "Bordo da área escavada",
+      "grupo": "Envolvente",
+      "estado": "estado-atual",
+      "confianca": "alta",
+      "descricao": "Bordo de proteção da área escavada (pedra e troncos), posto na valorização do sítio. Fase: atual.",
+      "fontes": [
+        "pan",
+        "orto"
+      ],
+      "medidas": "≈ 0,35 m de altura (aproximado)",
+      "resumo": "Bordo de proteção da área escavada (pedra e troncos), posto na valorização do sítio"
+    },
+    {
+      "id": "E2",
+      "nome": "Conjunto habitacional à volta de um pátio (área escavada protegida)",
+      "grupo": "Área escavada",
+      "estado": "estado-atual",
+      "confianca": "alta",
+      "descricao": "Área escavada coberta por gravilha, rodeada por um muro de pedra, junto ao passadiço. O painel descreve um conjunto de três ou quatro compartimentos à volta de um pequeno pátio, talvez fechado por um muro de pedra ou de madeira, do nível mais recente; no interior apareceram uma fíbula, uma mó manual redonda e uma lareira central decorada. Contorno medido na ortofotografia; as paredes estão tapadas e não se veem. Fase: atual.",
+      "fontes": [
+        "pan",
+        "alm",
+        "orto"
+      ],
+      "medidas": "≈ 7,1 × 3,9 m (27 m², medido na ortofotografia)",
+      "resumo": "Três ou quatro compartimentos à volta de um pequeno pátio",
+      "ancora": [
+        -15.68,
+        3.38,
+        -14.77
+      ]
+    },
+    {
+      "id": "E2W",
+      "nome": "Bordo da área escavada",
+      "grupo": "Envolvente",
+      "estado": "estado-atual",
+      "confianca": "alta",
+      "descricao": "Bordo de proteção da área escavada (pedra e troncos), posto na valorização do sítio. Fase: atual.",
+      "fontes": [
+        "pan",
+        "orto"
+      ],
+      "medidas": "≈ 0,35 m de altura (aproximado)",
+      "resumo": "Bordo de proteção da área escavada (pedra e troncos), posto na valorização do sítio"
+    },
+    {
+      "id": "C1",
+      "nome": "Estrutura circular junto ao Centro Interpretativo",
+      "grupo": "Estrutura",
+      "estado": "estado-atual",
+      "confianca": "alta",
+      "descricao": "Estrutura circular de pedra à vista, entre o parque do Centro Interpretativo e o caminho para a capela. Não foi encontrada nas fontes consultadas: pode ser uma casa castreja consolidada ou uma estrutura moderna. Altura aproximada. Fase: —.",
+      "fontes": [
+        "orto"
+      ],
+      "medidas": "diâmetro exterior ≈ 5,2 m · parede ≈ 0,5 m (ortofotografia)",
+      "resumo": "Estrutura circular de pedra à vista",
+      "ancora": [
+        -35,
+        5.7,
+        -28
+      ]
+    },
+    {
+      "id": "B2",
+      "nome": "Anexo agrícola",
+      "grupo": "Envolvente",
+      "estado": "estado-atual",
+      "confianca": "alta",
+      "descricao": "Edifício atual, fora do castro; forma e altura do LiDAR (MDS). Fase: atual.",
+      "fontes": [
+        "lidar",
+        "orto"
+      ],
+      "medidas": "planta ≈ 26 m² · altura ≈ 6,3 m (LiDAR)",
+      "resumo": "Edifício atual, fora do castro; forma e altura do LiDAR (MDS)"
+    },
+    {
+      "id": "B1",
+      "nome": "Edifício a norte do castro",
+      "grupo": "Envolvente",
+      "estado": "estado-atual",
+      "confianca": "alta",
+      "descricao": "Edifício atual, fora do castro; forma e altura do LiDAR (MDS). Fase: atual.",
+      "fontes": [
+        "lidar",
+        "orto"
+      ],
+      "medidas": "planta ≈ 88 m² · altura ≈ 5,4 m (LiDAR)",
+      "resumo": "Edifício atual, fora do castro; forma e altura do LiDAR (MDS)",
+      "ancora": [
+        13,
+        -6.35,
+        76
+      ]
+    },
+    {
+      "id": "CH",
+      "nome": "Capela de São Paio",
+      "grupo": "Envolvente",
+      "estado": "estado-atual",
+      "confianca": "alta",
+      "descricao": "No extremo sul do castro. Apesar do aspeto recente, incorpora elementos provavelmente do século XVII; no interior há a data de 1885, talvez de obras; nos anos 70 do século XX foi largamente remodelada e só restou a fachada principal. O altar-mor é um rochedo tirado da penedia (Almeida et al. 2012). Forma e alturas do LiDAR (MDS), com cobertura e paredes simplificadas. Fase: séc. XVII (?), remodelada em 1885 (?) e nos anos 70 do séc. XX.",
+      "fontes": [
+        "alm",
+        "lidar",
+        "tese"
+      ],
+      "medidas": "corpo ≈ 10,8 × 9,1 m · beirado ≈ 4,9 m e cumeeira ≈ 5,7 m acima do solo · eixo a 63° do norte (LiDAR)",
+      "resumo": "No extremo sul do castro",
+      "ancora": [
+        29,
+        11.32,
+        14.41
+      ]
+    },
+    {
+      "id": "vegetacao",
+      "nome": "Vegetação",
+      "grupo": "Envolvente",
+      "estado": "estado-atual",
+      "confianca": "média",
+      "descricao": "897 árvores nas posições e alturas medidas pelo LiDAR.",
+      "fontes": [
+        "lidar"
+      ]
+    }
+  ],
+  "direcao": [
+    0.814,
+    0.5,
+    0.296
+  ]
+}
