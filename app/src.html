@@ -3098,6 +3098,7 @@ async function dioBuild(s){
     apply()};
   const stage2=$("#dioStage");if(stage2){stage2.innerHTML="";stage2.appendChild(wrap)}resize();home(false);frame();bind();
   DIO.cur={id:s.id,wrap,bind,resize,camPos:()=>[cam.position.x,cam.position.y,cam.position.z,ctl.target.x,ctl.target.y,ctl.target.z].map(v=>Math.round(v)),
+    setCam(p,fov){cam.position.set(p[0],p[1],p[2]);ctl.target.set(p[3],p[4],p[5]);if(fov){cam.fov=fov;cam.updateProjectionMatrix()}ctl.autoRotate=false;ctl.maxPolarAngle=1.62;ctl.minDistance=1;ctl.update();dirty=true},   // tests: photo-matching viewpoints (eye level allowed)
     stats(n=10){lodSplit();r.info.autoReset=false;r.info.reset();const t0=performance.now();for(let i=0;i<n;i++)r.render(scene,cam);r.getContext().finish();const ms=(performance.now()-t0)/n,o={calls:r.info.render.calls/n,tris:r.info.render.triangles/n,ms:+ms.toFixed(1),geoms:r.info.memory.geometries};r.info.autoReset=true;dirty=true;return o},   // tests: draw calls and time per frame (without GTAO)
     dispose(){cancelAnimationFrame(raf);ro.disconnect();ctl.dispose();if(comp)comp.dispose();envT.dispose();BC.forEach(m=>m.geometry.dispose());selMat.forEach(m=>m.dispose());r.dispose();r.forceContextLoss&&r.forceContextLoss();scene.traverse(o=>{if(o.geometry)o.geometry.dispose()})}};
 }
