@@ -32,6 +32,9 @@
     "tese": {
       "titulo": "Pinto, T. — Castros do Noroeste de Portugal (tese de doutoramento, Univ. de Santiago de Compostela); visitas em 2022 e 2025: casas circulares, vestígios de fosso e muralha, capela na acrópole, passadiço com painéis, Centro Interpretativo de 2012."
     },
+    "foto": {
+      "titulo": "Fotografias de T. Pinto, 2025: área escavada E2 vista para poente (muro de pedra seca, troncos, corda, passadiço, banco), vala E1 com taipais e painel vista para nascente com a capela ao fundo (empena poente com janela alta e cruz, anexo poente com janela pequena), painéis municipais."
+    },
     "orto": {
       "titulo": "Ortofotografia de satélite (Google, consultada em novembro de 2026, 0,11-0,22 m por píxel), alinhada ao LiDAR pelos edifícios e muros (desvio corrigido ≈ 1 m): áreas escavadas, estrutura circular, caminhos, passadiço, praia e cores do solo."
     },
@@ -47,13 +50,16 @@
     "Muralha: largura, altura e aparelho não publicados. A reconstituição (2,5 m de largura, 1,6 m acima da crista) é hipotética.",
     "Fosso: hipótese sem confirmação arqueológica (um fosso que deixaria entrar o mar na maré-alta); se existir está entulhado (Almeida et al. 2012). Não se vê no LiDAR e não foi representado.",
     "Entrada: «julga-se que só teria uma entrada», sem localização publicada. Não representada.",
-    "Casas: número, diâmetros e posições não publicados. As três casas da reconstituição (uma nas «Ruínas de Habitação», duas no conjunto do pátio) usam o diâmetro interior de 4,2 m da estrutura circular C1 e posições hipotéticas dentro das áreas escavadas. Vestíbulos, lajeados, pátio e portas não foram desenhados por não haver planta.",
+    "Casas: número, diâmetros e posições não publicados. As três casas da reconstituição (uma nas «Ruínas de Habitação», duas no conjunto do pátio) usam o diâmetro interior de 4,2 m da estrutura circular C1 e posições hipotéticas dentro das áreas escavadas. Os vestíbulos em «pinça de caranguejo» das casas do pátio e os pátios lajeados seguem a descrição genérica de Almeida et al. 2012 (p. 19) e os desenhos dos painéis; a orientação das portas e o tamanho dos pátios são hipotéticos.",
     "Estrutura circular C1 (junto ao Centro Interpretativo): visível na ortofotografia mas ausente das fontes consultadas; não se sabe se é castreja.",
     "As duas áreas escavadas foram medidas na ortofotografia de satélite (0,11 m por píxel), alinhada ao LiDAR com um desvio corrigido de cerca de 1 m; erro estimado ≤ 1 m.",
-    "Capela, Centro Interpretativo e edifícios: formas simplificadas a partir do MDS (cobertura) e da ortofotografia. A cobertura do Centro Interpretativo está à cota do terreno e foi classificada como solo pela DGT; aparece no relevo e não como edifício.",
-    "Vegetação: posições e alturas das árvores do LiDAR (MDS − MDT); as espécies não vêm do LiDAR (eucalipto, castanheiro, carvalho e sobreiro escolhidos pela forma da copa). O canavial a sueste e a vegetação das dunas não foram modelados como árvores.",
+    "Capela: comprimento, largura, beirados, cumeeira, cruzes e anexo poente medidos no MDS; janela alta da empena poente e janela do anexo pelas fotografias de 2025. A porta principal não aparece no LiDAR nem nas fotografias consultadas e não foi desenhada; um segundo anexo a norte não se distingue no MDS. Centro Interpretativo: a cobertura está à cota do terreno e foi classificada como solo pela DGT; o contorno foi traçado no mapa de declives e na ortofotografia e as fachadas descem até à cota do parque, por isso o volume é aproximado.",
+    "Vegetação: posições e alturas das árvores do LiDAR (MDS − MDT); as espécies não vêm do LiDAR (escolhidas pela forma da copa). O canavial a sueste foi separado das árvores pela textura do MDS (altura de 1,8 a 6,5 m e copa lisa) e desenhado como canas; sebes, arbustos e tufos de erva seguem a ortofotografia. A densidade real das canas não é medida.",
     "Penedos amoladoiros e gravuras: posição aproximada pelas coordenadas dos painéis; as rochas gravadas não foram identificadas no LiDAR.",
-    "Mar: superfície plana a 0,3 m, nível dos retornos LiDAR sobre a água no dia do voo; não representa a maré."
+    "Mar: superfície plana a 0,3 m, nível dos retornos LiDAR sobre a água no dia do voo; não representa a maré.",
+    "Solo: a cor do terreno vem da ortofotografia, usada como mapa de classes (mar, areia, rocha, pavimento, relva, mato e terra); o pormenor fino de cada classe é procedimental e não reproduz pedras ou tufos concretos. As sombras dos edifícios na ortofotografia foram retiradas por interpolação.",
+    "Equipamento das áreas escavadas (taipais, vedações, troncos, painéis, banco e passadiço): desenhado pelas fotografias de 2025 e pela ortofotografia; posição dos painéis e do banco aproximada (± 1 m), alturas lidas nas fotografias. Os outros painéis do percurso não têm posição conhecida e não foram desenhados.",
+    "Estrutura C1: não se sabe se tem porta nem para onde abre; foi desenhada como anel fechado."
   ],
   "placas": [
     "CH",
@@ -61,7 +67,8 @@
     "E1",
     "E2",
     "C1",
-    "B1"
+    "B1",
+    "CI"
   ],
   "elementos": [
     {
@@ -70,7 +77,7 @@
       "grupo": "Muralhas",
       "estado": "estado-atual",
       "confianca": "alta",
-      "descricao": "«Talude coroado por uma muralha de pedra, da qual apenas resta o seu alicerce», bem demarcado sobretudo na vertente Este (Almeida et al. 2012). No LiDAR de 2025 é o rebordo nascente do povoado: uma crista ligeiramente elevada sobre o interior e um talude de cerca de 3,6 m para os campos. Traçado no modelo do terreno e ajustado à crista. Largura e altura da muralha não publicadas: valores da reconstituição hipotéticos. Fase: Idade do Ferro.",
+      "descricao": "«Talude coroado por uma muralha de pedra, da qual apenas resta o seu alicerce», bem demarcado sobretudo na vertente Este (Almeida et al. 2012). No LiDAR de 2025 é o rebordo nascente do povoado: uma crista ligeiramente elevada sobre o interior e um talude de cerca de 3,6 m para os campos. Traçado no modelo do terreno e ajustado à crista. No estado atual o talude é de terra e erva: só se mostra pedra nos 72 m onde a crista sobressai mais de 0,3 m do interior (restos do alicerce, por confirmar no terreno). Largura e altura da muralha não publicadas: valores da reconstituição hipotéticos. Fase: Idade do Ferro.",
       "fontes": [
         "alm",
         "pa",
@@ -83,75 +90,6 @@
         7.99,
         -46.09
       ]
-    },
-    {
-      "id": "E1",
-      "nome": "Ruínas de Habitação (área escavada protegida)",
-      "grupo": "Área escavada",
-      "estado": "estado-atual",
-      "confianca": "alta",
-      "descricao": "Área escavada coberta por gravilha, com bordo de pedra e troncos e painel interpretativo. Segundo o painel, a construção circular era o compartimento de uma habitação associada a um pátio e a um lajeado, com lareira central e piso de argila decorado com círculos; pertence ao nível mais recente do povoado (séculos II–I a.C.). Contorno medido na ortofotografia; as paredes estão tapadas e não se veem. Fase: atual.",
-      "fontes": [
-        "pan",
-        "hmdb",
-        "alm",
-        "orto"
-      ],
-      "medidas": "≈ 9,9 × 3,4 m (34 m², medido na ortofotografia)",
-      "resumo": "Área escavada coberta por gravilha, com bordo de pedra e troncos e painel interpretativo",
-      "ancora": [
-        -9.8,
-        1.03,
-        20.94
-      ]
-    },
-    {
-      "id": "E1W",
-      "nome": "Bordo da área escavada",
-      "grupo": "Envolvente",
-      "estado": "estado-atual",
-      "confianca": "alta",
-      "descricao": "Bordo de proteção da área escavada (pedra e troncos), posto na valorização do sítio. Fase: atual.",
-      "fontes": [
-        "pan",
-        "orto"
-      ],
-      "medidas": "≈ 0,35 m de altura (aproximado)",
-      "resumo": "Bordo de proteção da área escavada (pedra e troncos), posto na valorização do sítio"
-    },
-    {
-      "id": "E2",
-      "nome": "Conjunto habitacional à volta de um pátio (área escavada protegida)",
-      "grupo": "Área escavada",
-      "estado": "estado-atual",
-      "confianca": "alta",
-      "descricao": "Área escavada coberta por gravilha, rodeada por um muro de pedra, junto ao passadiço. O painel descreve um conjunto de três ou quatro compartimentos à volta de um pequeno pátio, talvez fechado por um muro de pedra ou de madeira, do nível mais recente; no interior apareceram uma fíbula, uma mó manual redonda e uma lareira central decorada. Contorno medido na ortofotografia; as paredes estão tapadas e não se veem. Fase: atual.",
-      "fontes": [
-        "pan",
-        "alm",
-        "orto"
-      ],
-      "medidas": "≈ 7,1 × 3,9 m (27 m², medido na ortofotografia)",
-      "resumo": "Três ou quatro compartimentos à volta de um pequeno pátio",
-      "ancora": [
-        -15.68,
-        3.38,
-        -14.77
-      ]
-    },
-    {
-      "id": "E2W",
-      "nome": "Bordo da área escavada",
-      "grupo": "Envolvente",
-      "estado": "estado-atual",
-      "confianca": "alta",
-      "descricao": "Bordo de proteção da área escavada (pedra e troncos), posto na valorização do sítio. Fase: atual.",
-      "fontes": [
-        "pan",
-        "orto"
-      ],
-      "medidas": "≈ 0,35 m de altura (aproximado)",
-      "resumo": "Bordo de proteção da área escavada (pedra e troncos), posto na valorização do sítio"
     },
     {
       "id": "C1",
@@ -172,37 +110,61 @@
       ]
     },
     {
-      "id": "B2",
-      "nome": "Anexo agrícola",
-      "grupo": "Envolvente",
+      "id": "E1",
+      "nome": "Ruínas de Habitação (área escavada protegida)",
+      "grupo": "Área escavada",
       "estado": "estado-atual",
       "confianca": "alta",
-      "descricao": "Edifício atual, fora do castro; forma e altura do LiDAR (MDS). Fase: atual.",
+      "descricao": "Vala comprida coberta de gravilha, com as paredes forradas de taipais de madeira escura, uma vedação de troncos em postes e o painel interpretativo na ponta poente (fotografia de 2025, tirada do painel para nascente, com a capela ao fundo). Segundo o painel, a construção circular era o compartimento de uma habitação associada a um pátio e a um lajeado, com lareira central e piso de argila decorado com círculos; pertence ao nível mais recente do povoado (séculos II–I a.C.). Contorno na ortofotografia; profundidade e alturas da vedação aproximadas, lidas na fotografia. As paredes antigas estão tapadas e não se veem. Fase: atual.",
       "fontes": [
-        "lidar",
+        "foto",
+        "pan",
+        "hmdb",
+        "alm",
         "orto"
       ],
-      "medidas": "planta ≈ 26 m² · altura ≈ 6,3 m (LiDAR)",
-      "resumo": "Edifício atual, fora do castro; forma e altura do LiDAR (MDS)"
+      "medidas": "≈ 9,9 × 3,4 m (34 m², medido na ortofotografia) · fundo ≈ 0,45 m abaixo do terreno (fotografia, aproximado)",
+      "resumo": "Vala comprida coberta de gravilha, com as paredes forradas de taipais de madeira escura",
+      "ancora": [
+        -9.8,
+        1.03,
+        20.94
+      ]
     },
     {
-      "id": "B1",
-      "nome": "Edifício a norte do castro",
-      "grupo": "Envolvente",
+      "id": "E2",
+      "nome": "Conjunto habitacional à volta de um pátio (área escavada protegida)",
+      "grupo": "Área escavada",
       "estado": "estado-atual",
       "confianca": "alta",
-      "descricao": "Edifício atual, fora do castro; forma e altura do LiDAR (MDS). Fase: atual.",
+      "descricao": "Área escavada coberta de gravilha, dentro de um muro baixo de pedra seca; do lado norte, cinco troncos deitados em degrau seguram a terra; à volta, corda em postes de madeira; a sul passa o passadiço e a poente há um banco virado ao mar (fotografia de 2025). O painel descreve um conjunto de três ou quatro compartimentos à volta de um pequeno pátio, talvez fechado por um muro de pedra ou de madeira, do nível mais recente; no interior apareceram uma fíbula, uma mó manual redonda e uma lareira central decorada. Contorno na ortofotografia; medidas dos troncos, da vedação e posição do banco aproximadas. As paredes antigas estão tapadas e não se veem. Fase: atual.",
       "fontes": [
-        "lidar",
+        "foto",
+        "pan",
+        "alm",
         "orto"
       ],
-      "medidas": "planta ≈ 88 m² · altura ≈ 5,4 m (LiDAR)",
-      "resumo": "Edifício atual, fora do castro; forma e altura do LiDAR (MDS)",
+      "medidas": "≈ 7,1 × 3,9 m (27 m², medido na ortofotografia) · muro ≈ 0,5 m (fotografia, aproximado)",
+      "resumo": "Três ou quatro compartimentos à volta de um pequeno pátio",
       "ancora": [
-        13,
-        -6.35,
-        76
+        -15.68,
+        3.38,
+        -14.77
       ]
+    },
+    {
+      "id": "BW",
+      "nome": "Passadiço de madeira",
+      "grupo": "Equipamento de visita",
+      "estado": "estado-atual",
+      "confianca": "alta",
+      "descricao": "Passadiço de tábuas que liga o parque do Centro Interpretativo às áreas escavadas e à capela; traçado na ortofotografia, tábuas como na fotografia de 2025 junto a E2. Altura sobre o terreno aproximada. Fase: atual.",
+      "fontes": [
+        "orto",
+        "foto"
+      ],
+      "medidas": "≈ 1,3 m e 2 m de largura (ortofotografia)",
+      "resumo": "≈ 1,3 m e 2 m de largura (ortofotografia)"
     },
     {
       "id": "CH",
@@ -210,19 +172,69 @@
       "grupo": "Envolvente",
       "estado": "estado-atual",
       "confianca": "alta",
-      "descricao": "No extremo sul do castro. Apesar do aspeto recente, incorpora elementos provavelmente do século XVII; no interior há a data de 1885, talvez de obras; nos anos 70 do século XX foi largamente remodelada e só restou a fachada principal. O altar-mor é um rochedo tirado da penedia (Almeida et al. 2012). Forma e alturas do LiDAR (MDS), com cobertura e paredes simplificadas. Fase: séc. XVII (?), remodelada em 1885 (?) e nos anos 70 do séc. XX.",
+      "descricao": "No extremo sul do castro. Apesar do aspeto recente, incorpora elementos provavelmente do século XVII; no interior há a data de 1885, talvez de obras; nos anos 70 do século XX foi largamente remodelada e só restou a fachada principal. O altar-mor é um rochedo tirado da penedia (Almeida et al. 2012). Volumes e alturas do LiDAR (MDS): nave de duas águas e dois anexos mais baixos do lado norte; o MDS tem um pico de 1,3–1,6 m sobre cada empena, as cruzes. Silharia de granito em fiadas, cunhais e remates das empenas de granito mais claro, janela alta e estreita na empena poente e janela pequena no anexo poente, como na fotografia de 2025 (medidas das janelas aproximadas, lidas na fotografia). A porta não se vê nas fotografias consultadas e não foi desenhada. Fase: séc. XVII (?), remodelada em 1885 (?) e nos anos 70 do séc. XX.",
       "fontes": [
         "alm",
         "lidar",
-        "tese"
+        "tese",
+        "pan"
       ],
-      "medidas": "corpo ≈ 10,8 × 9,1 m · beirado ≈ 4,9 m e cumeeira ≈ 5,7 m acima do solo · eixo a 63° do norte (LiDAR)",
+      "medidas": "nave ≈ 12,8 × 7,9 m · beirado ≈ 4,6 m e cumeeira ≈ 6,1 m acima do solo · eixo a 65° do norte; anexo de 5,6 × 2,6 m, beirado ≈ 3,8 m e cumeeira ≈ 4,5 m (LiDAR)",
       "resumo": "No extremo sul do castro",
       "ancora": [
-        29,
-        11.32,
-        14.41
+        29.63,
+        11.38,
+        14.94
       ]
+    },
+    {
+      "id": "B1",
+      "nome": "Edifício a norte do castro",
+      "grupo": "Envolvente",
+      "estado": "estado-atual",
+      "confianca": "alta",
+      "descricao": "Edifício atual, fora do castro: volume simples em cinzento neutro, com o contorno e a altura mediana do LiDAR (MDS). Fase: atual.",
+      "fontes": [
+        "lidar",
+        "orto"
+      ],
+      "medidas": "planta ≈ 123 m² · altura ≈ 5,4 m (LiDAR)",
+      "resumo": "Edifício atual, fora do castro: volume simples em cinzento neutro",
+      "ancora": [
+        13,
+        -6.35,
+        76
+      ]
+    },
+    {
+      "id": "B2",
+      "nome": "Anexo agrícola",
+      "grupo": "Envolvente",
+      "estado": "estado-atual",
+      "confianca": "alta",
+      "descricao": "Edifício atual, fora do castro: volume simples em cinzento neutro, com o contorno e a altura mediana do LiDAR (MDS). Fase: atual.",
+      "fontes": [
+        "lidar",
+        "orto"
+      ],
+      "medidas": "planta ≈ 93 m² · altura ≈ 6,2 m (LiDAR)",
+      "resumo": "Edifício atual, fora do castro: volume simples em cinzento neutro"
+    },
+    {
+      "id": "CI",
+      "nome": "Centro Interpretativo do Castro de São Paio",
+      "grupo": "Envolvente",
+      "estado": "estado-atual",
+      "confianca": "alta",
+      "descricao": "Aberto no fim de 2012, no mesmo edifício de um café-restaurante; mostra o espólio do castro e painéis de arqueologia, geologia e biologia. O edifício está encaixado na encosta e o LiDAR classifica a cobertura como solo: o contorno é o degrau de 3–4 m do modelo do terreno do lado do mar (mapa de declives), e a ala mais baixa do lado do mar vem do MDS. Volume simples em cinzento neutro. Fase: 2012.",
+      "fontes": [
+        "alm",
+        "muni",
+        "tese",
+        "lidar"
+      ],
+      "medidas": "cobertura ≈ 13,0 m de altitude, à cota do terreno do lado do castro; fachadas até ≈ 9,4 m do lado do mar (LiDAR)",
+      "resumo": "O Centro abriu no fim de 2012, num edifício encaixado na encosta"
     },
     {
       "id": "vegetacao",
@@ -230,15 +242,15 @@
       "grupo": "Envolvente",
       "estado": "estado-atual",
       "confianca": "média",
-      "descricao": "897 árvores nas posições e alturas medidas pelo LiDAR.",
+      "descricao": "2165 árvores nas posições e alturas medidas pelo LiDAR.",
       "fontes": [
         "lidar"
       ]
     }
   ],
   "direcao": [
-    0.814,
-    0.5,
-    0.296
+    0.837,
+    0.454,
+    0.305
   ]
 }

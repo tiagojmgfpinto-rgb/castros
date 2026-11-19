@@ -1,26 +1,66 @@
 {
  "input": "app/dio/vila-do-conde-castro-de-sao-paio.glb",
- "terrain": {
-  "before": 593100,
-  "after": 60000,
-  "checked": 297001,
-  "of": 297001,
-  "err_cm": {
-   "median": 1,
-   "p95": 4,
-   "p99": 6,
-   "max": 47.4
-  }
- },
- "textures": [
+ "terrain": [
   {
-   "name": "ground",
-   "from": "3072x3072",
-   "to": 2048,
-   "kb": [
-    1692,
-    555
-   ]
+   "before": 146187,
+   "after": 22215,
+   "checked": 74094,
+   "of": 74094,
+   "err_cm": {
+    "median": 0.7,
+    "p95": 2.8,
+    "p99": 4.1,
+    "max": 24.1
+   }
+  },
+  {
+   "before": 148275,
+   "after": 22533,
+   "checked": 74581,
+   "of": 74581,
+   "err_cm": {
+    "median": 0.4,
+    "p95": 1.7,
+    "p99": 2.5,
+    "max": 4.8
+   }
+  },
+  {
+   "before": 139110,
+   "after": 21140,
+   "checked": 73042,
+   "of": 73042,
+   "err_cm": {
+    "median": 0.6,
+    "p95": 3.9,
+    "p99": 5.8,
+    "max": 14.5
+   }
+  },
+  {
+   "before": 148193,
+   "after": 22521,
+   "checked": 74581,
+   "of": 74581,
+   "err_cm": {
+    "median": 0.6,
+    "p95": 2.6,
+    "p99": 3.7,
+    "max": 8.2
+   }
+  },
+  {
+   "before": 10432,
+   "after": 7260,
+   "checked": 10830,
+   "of": 10830,
+   "err_cm": {
+    "median": 0,
+    "p95": 34.3,
+    "p99": 82.7,
+    "max": 248.6
+   }
   }
- ]
+ ],
+ "textures": []
 }

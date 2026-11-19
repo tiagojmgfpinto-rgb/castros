@@ -30,7 +30,7 @@
  ],
  "cam": {
   "az": 70,
-  "el": 30
+  "el": 27
  },
  "tour": [
   {
@@ -51,7 +51,7 @@
   {
    "sid": "CH",
    "title": "A capela de São Paio",
-   "text": "No extremo sul do castro. Tem elementos provavelmente do século XVII, a data de 1885 no interior e foi quase toda refeita nos anos 70 do século XX; o altar-mor é um rochedo tirado da penedia (Almeida et al. 2012)."
+   "text": "No extremo sul do castro. Tem elementos provavelmente do século XVII, a data de 1885 no interior e foi quase toda refeita nos anos 70 do século XX; o altar-mor é um rochedo tirado da penedia (Almeida et al. 2012). Na maqueta: medidas do LiDAR, cruzes nas duas empenas e anexo poente; a porta não foi desenhada por falta de fonte."
   },
   {
    "sid": "C1",
@@ -71,12 +71,15 @@
   "Muralha: largura, altura e aparelho não publicados. A reconstituição (2,5 m de largura, 1,6 m acima da crista) é hipotética.",
   "Fosso: hipótese sem confirmação arqueológica (um fosso que deixaria entrar o mar na maré-alta); se existir está entulhado (Almeida et al. 2012). Não se vê no LiDAR e não foi representado.",
   "Entrada: «julga-se que só teria uma entrada», sem localização publicada. Não representada.",
-  "Casas: número, diâmetros e posições não publicados. As três casas da reconstituição (uma nas «Ruínas de Habitação», duas no conjunto do pátio) usam o diâmetro interior de 4,2 m da estrutura circular C1 e posições hipotéticas dentro das áreas escavadas. Vestíbulos, lajeados, pátio e portas não foram desenhados por não haver planta.",
+  "Casas: número, diâmetros e posições não publicados. As três casas da reconstituição (uma nas «Ruínas de Habitação», duas no conjunto do pátio) usam o diâmetro interior de 4,2 m da estrutura circular C1 e posições hipotéticas dentro das áreas escavadas. Os vestíbulos em «pinça de caranguejo» das casas do pátio e os pátios lajeados seguem a descrição genérica de Almeida et al. 2012 (p. 19) e os desenhos dos painéis; a orientação das portas e o tamanho dos pátios são hipotéticos.",
   "Estrutura circular C1 (junto ao Centro Interpretativo): visível na ortofotografia mas ausente das fontes consultadas; não se sabe se é castreja.",
   "As duas áreas escavadas foram medidas na ortofotografia de satélite (0,11 m por píxel), alinhada ao LiDAR com um desvio corrigido de cerca de 1 m; erro estimado ≤ 1 m.",
-  "Capela, Centro Interpretativo e edifícios: formas simplificadas a partir do MDS (cobertura) e da ortofotografia. A cobertura do Centro Interpretativo está à cota do terreno e foi classificada como solo pela DGT; aparece no relevo e não como edifício.",
-  "Vegetação: posições e alturas das árvores do LiDAR (MDS − MDT); as espécies não vêm do LiDAR (eucalipto, castanheiro, carvalho e sobreiro escolhidos pela forma da copa). O canavial a sueste e a vegetação das dunas não foram modelados como árvores.",
+  "Capela: comprimento, largura, beirados, cumeeira, cruzes e anexo poente medidos no MDS; janela alta da empena poente e janela do anexo pelas fotografias de 2025. A porta principal não aparece no LiDAR nem nas fotografias consultadas e não foi desenhada; um segundo anexo a norte não se distingue no MDS. Centro Interpretativo: a cobertura está à cota do terreno e foi classificada como solo pela DGT; o contorno foi traçado no mapa de declives e na ortofotografia e as fachadas descem até à cota do parque, por isso o volume é aproximado.",
+  "Vegetação: posições e alturas das árvores do LiDAR (MDS − MDT); as espécies não vêm do LiDAR (escolhidas pela forma da copa). O canavial a sueste foi separado das árvores pela textura do MDS (altura de 1,8 a 6,5 m e copa lisa) e desenhado como canas; sebes, arbustos e tufos de erva seguem a ortofotografia. A densidade real das canas não é medida.",
   "Penedos amoladoiros e gravuras: posição aproximada pelas coordenadas dos painéis; as rochas gravadas não foram identificadas no LiDAR.",
-  "Mar: superfície plana a 0,3 m, nível dos retornos LiDAR sobre a água no dia do voo; não representa a maré."
+  "Mar: superfície plana a 0,3 m, nível dos retornos LiDAR sobre a água no dia do voo; não representa a maré.",
+  "Solo: a cor do terreno vem da ortofotografia, usada como mapa de classes (mar, areia, rocha, pavimento, relva, mato e terra); o pormenor fino de cada classe é procedimental e não reproduz pedras ou tufos concretos. As sombras dos edifícios na ortofotografia foram retiradas por interpolação.",
+  "Equipamento das áreas escavadas (taipais, vedações, troncos, painéis, banco e passadiço): desenhado pelas fotografias de 2025 e pela ortofotografia; posição dos painéis e do banco aproximada (± 1 m), alturas lidas nas fotografias. Os outros painéis do percurso não têm posição conhecida e não foram desenhados.",
+  "Estrutura C1: não se sabe se tem porta nem para onde abre; foi desenhada como anel fechado."
  ]
 }
