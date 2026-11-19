@@ -37,13 +37,15 @@ const report = { input: inp, terrain: null, textures: [] };
 
 for (const node of doc.getRoot().listNodes()) {
   if (node.getName() !== 'terrain' || !node.getMesh()) continue;
+  // a terrain split in several materials (São Paio: four texture tiles + rock faces) shares the triangle budget by size
+  const total = node.getMesh().listPrimitives().reduce((a, p) => a + triCount(p), 0);
   for (const prim of node.getMesh().listPrimitives()) {
-    const before = triCount(prim);
+    const before = triCount(prim), budget = TERRAIN_TRIS * before / total;
     const P0 = prim.getAttribute('POSITION').getArray().slice();   // original vertices (local space) for the error check
     const SC = node.getWorldMatrix()[5];                            // local -> model units (m): the quantized terrain keeps a node scale
-    if (before > TERRAIN_TRIS * 1.1) {
+    if (before > budget * 1.1) {
       // the ratio sets the target; the error bound is generous so the target is what stops the simplifier
-      simplifyPrimitive(prim, { simplifier: MeshoptSimplifier, ratio: TERRAIN_TRIS / before, error: 0.05, lockBorder: true });
+      simplifyPrimitive(prim, { simplifier: MeshoptSimplifier, ratio: budget / before, error: 0.05, lockBorder: true });
     }
     const after = triCount(prim);
     // vertical error: height of the simplified surface under each original vertex (bucketed triangle lookup in x/z)
@@ -73,7 +75,8 @@ for (const node of doc.getRoot().listNodes()) {
     }
     errs.sort((a, b) => a - b);
     const q = k => +(errs[Math.min(errs.length - 1, Math.floor(errs.length * k))] * 100).toFixed(1);
-    report.terrain = { before, after, checked: errs.length, of: P0.length / 3, err_cm: { median: q(.5), p95: q(.95), p99: q(.99), max: q(1) } };
+    const rep = { before, after, checked: errs.length, of: P0.length / 3, err_cm: { median: q(.5), p95: q(.95), p99: q(.99), max: q(1) } };
+    report.terrain = report.terrain ? [].concat(report.terrain, rep) : rep;
     console.log(`terrain: ${before} -> ${after} triangles; vertical error (cm) median ${q(.5)}, p95 ${q(.95)}, p99 ${q(.99)}, max ${q(1)}`);
   }
 }
