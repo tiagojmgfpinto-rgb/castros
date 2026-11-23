@@ -54,7 +54,7 @@
       "grupo": "Muralhas",
       "estado": "estado-atual",
       "confianca": "alta",
-      "descricao": "Rebordo da plataforma do cume, com um talude de cerca de 1.7 m no modelo do terreno LiDAR. É a mais baixa das três linhas e a menos marcada; pode ser uma muralha soterrada ou só o rebordo aplanado do cume. Traçado no modelo do terreno do LiDAR da DGT (2025); a pedra está soterrada e coberta de mato, por isso no estado atual a linha aparece como um cordão de pedra sobre o talude. A altura original não está publicada: valor hipotético. Fase: —.",
+      "descricao": "Rebordo da plataforma do cume, com um talude de cerca de 1.7 m no modelo do terreno LiDAR. É a mais baixa das três linhas e a menos marcada; pode ser uma muralha soterrada ou só o rebordo aplanado do cume. Traçado no modelo do terreno do LiDAR da DGT (2025); a pedra está soterrada e coberta de mato, por isso no estado atual a linha aparece como um talude coberto de mato, sem pedra à vista; a pedra só se desenha na interpretação e na reconstituição. A altura original não está publicada: valor hipotético. Fase: —.",
       "fontes": [
         "lidar",
         "sipa",
@@ -74,7 +74,7 @@
       "grupo": "Muralhas",
       "estado": "estado-atual",
       "confianca": "alta",
-      "descricao": "A linha mais forte: um talude de cerca de 3.8 m, contínuo à volta do monte, com um terraço por dentro. O troço de muralha de 43 m posto a descoberto pelos escuteiros fica nesta linha (ponto «Muro Celta» do OpenStreetMap). A altura da reconstituição (2 m acima do terraço) segue a altura conservada desse troço. Traçado no modelo do terreno do LiDAR da DGT (2025); a pedra está soterrada e coberta de mato, por isso no estado atual a linha aparece como um cordão de pedra sobre o talude.  Fase: —.",
+      "descricao": "A linha mais forte: um talude de cerca de 3.8 m, contínuo à volta do monte, com um terraço por dentro. O troço de muralha de 43 m posto a descoberto pelos escuteiros fica nesta linha (ponto «Muro Celta» do OpenStreetMap). A altura da reconstituição (2 m acima do terraço) segue a altura conservada desse troço. Traçado no modelo do terreno do LiDAR da DGT (2025); a pedra está soterrada e coberta de mato, por isso no estado atual a linha aparece como um talude coberto de mato, sem pedra à vista; a pedra só se desenha na interpretação e na reconstituição.  Fase: —.",
       "fontes": [
         "lidar",
         "sipa",
@@ -96,7 +96,7 @@
       "grupo": "Muralhas",
       "estado": "estado-atual",
       "confianca": "alta",
-      "descricao": "Segundo talude, 15 a 30 m para fora da muralha intermédia, visível a poente e a norte (cerca de 2.6 m de desnível). A nascente e a sul perde-se entre os caminhos florestais. Traçado no modelo do terreno do LiDAR da DGT (2025); a pedra está soterrada e coberta de mato, por isso no estado atual a linha aparece como um cordão de pedra sobre o talude. A altura original não está publicada: valor hipotético. Fase: —.",
+      "descricao": "Segundo talude, 15 a 30 m para fora da muralha intermédia, visível a poente e a norte (cerca de 2.6 m de desnível). A nascente e a sul perde-se entre os caminhos florestais. Traçado no modelo do terreno do LiDAR da DGT (2025); a pedra está soterrada e coberta de mato, por isso no estado atual a linha aparece como um talude coberto de mato, sem pedra à vista; a pedra só se desenha na interpretação e na reconstituição. A altura original não está publicada: valor hipotético. Fase: —.",
       "fontes": [
         "lidar",
         "sipa",

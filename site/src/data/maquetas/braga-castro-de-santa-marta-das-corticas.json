@@ -63,7 +63,7 @@
       "grupo": "Muralhas",
       "estado": "estado-atual",
       "confianca": "alta",
-      "descricao": "Rebordo da plataforma do cume, com um talude de cerca de 3.6 m no modelo do terreno LiDAR. A poente e a sul a estrada de acesso dá a volta ao alto por cima desta linha e cortou-a; a nascente coincide com os afloramentos sobre a encosta. Fecha a plataforma onde estão a capela, o monumento, a basílica e o edifício palatino. Traçado no modelo do terreno do LiDAR da DGT (2025), sem planta publicada que se pudesse consultar; a pedra está soterrada e coberta de mato, por isso no estado atual a linha aparece como um cordão de pedra sobre o talude. A altura original não está publicada: valor hipotético. Fase: Idade do Ferro.",
+      "descricao": "Rebordo da plataforma do cume, com um talude de cerca de 3.6 m no modelo do terreno LiDAR. A poente e a sul a estrada de acesso dá a volta ao alto por cima desta linha e cortou-a; a nascente coincide com os afloramentos sobre a encosta. Fecha a plataforma onde estão a capela, o monumento, a basílica e o edifício palatino. Traçado no modelo do terreno do LiDAR da DGT (2025), sem planta publicada que se pudesse consultar; a pedra está soterrada e coberta de mato, por isso no estado atual a linha aparece como um talude coberto de mato, sem pedra à vista; a pedra só se desenha na interpretação e na reconstituição. A altura original não está publicada: valor hipotético. Fase: Idade do Ferro.",
       "fontes": [
         "lidar",
         "barroca",
@@ -83,7 +83,7 @@
       "grupo": "Muralhas",
       "estado": "estado-atual",
       "confianca": "alta",
-      "descricao": "Segundo talude, 40 a 75 m para fora da primeira linha, visível a norte e a nascente (cerca de 2.6 m de desnível). A poente e a sul perde-se entre os penedos de granito e os caminhos e não foi desenhada. Belino escavou em 1899 «pelo lado sul, entre a primeira e a segunda muralhas». Traçado no modelo do terreno do LiDAR da DGT (2025), sem planta publicada que se pudesse consultar; a pedra está soterrada e coberta de mato, por isso no estado atual a linha aparece como um cordão de pedra sobre o talude. A altura original não está publicada: valor hipotético. Fase: Idade do Ferro.",
+      "descricao": "Segundo talude, 40 a 75 m para fora da primeira linha, visível a norte e a nascente (cerca de 2.6 m de desnível). A poente e a sul perde-se entre os penedos de granito e os caminhos e não foi desenhada. Belino escavou em 1899 «pelo lado sul, entre a primeira e a segunda muralhas». Traçado no modelo do terreno do LiDAR da DGT (2025), sem planta publicada que se pudesse consultar; a pedra está soterrada e coberta de mato, por isso no estado atual a linha aparece como um talude coberto de mato, sem pedra à vista; a pedra só se desenha na interpretação e na reconstituição. A altura original não está publicada: valor hipotético. Fase: Idade do Ferro.",
       "fontes": [
         "lidar",
         "barroca",
