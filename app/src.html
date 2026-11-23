@@ -2943,7 +2943,7 @@ async function dioBuild(s){
   Object.assign(sun.shadow.camera,{left:-R*1.1,right:R*1.1,top:R*1.1,bottom:-R*1.1,near:1,far:R*5});sun.shadow.mapSize.setScalar(FINE?LS.map:LS.mapTouch);sun.shadow.bias=LS.bias;sun.shadow.normalBias=LS.normalBias;scene.add(sun,sun.target);
   const root=g.scene,protos={},objs=[];
   root.traverse(o=>{if(!o.isMesh)return;const n=o.name;
-    if(n.startsWith("PROTO-")){const [,k,p]=n.split("-");o.updateWorldMatrix(true,false);(protos[k]=protos[k]||[]).push({p,g:o.geometry.clone().applyMatrix4(o.matrixWorld),m:o.material});o.visible=false;return}
+    if(n.startsWith("PROTO-")){const [,k,p]=n.split("-");o.updateWorldMatrix(true,false);const g0=o.geometry.clone();for(const nm in g0.attributes){const at=g0.attributes[nm];if(at.normalized||!(at.array instanceof Float32Array)){const f=new Float32Array(at.count*at.itemSize);for(let i=0;i<at.count;i++)for(let j=0;j<at.itemSize;j++)f[i*at.itemSize+j]=at.getComponent(i,j);g0.setAttribute(nm,new T.BufferAttribute(f,at.itemSize))}}(protos[k]=protos[k]||[]).push({p,g:g0.applyMatrix4(o.matrixWorld),m:o.material});o.visible=false;return}
     o.castShadow=!/terrain|skirt/.test(n);o.receiveShadow=true;if(o.material&&o.material.map){o.material.map.anisotropy=r.capabilities.getMaxAnisotropy();o.material.map.needsUpdate=true}
     const u=o.userData||{};if(u.sid){o.userData.base=o.material;objs.push(o)}});
   scene.add(root);
@@ -2981,7 +2981,7 @@ async function dioBuild(s){
     const G=new T.BufferGeometry();G.setAttribute("position",new T.Float32BufferAttribute(out,3));G.computeVertexNormals();return G};
   if(meta&&meta.trees){const tr=meta.trees,m4=new T.Matrix4(),q=new T.Quaternion(),c=new T.Color(),up=new T.Vector3(0,1,0);
     const TY=meta.types||["oak","pine"];for(const k of TY){const ti=TY.indexOf(k),list=tr.filter(t=>t[4]===ti);if(!list.length||!protos[k])continue;
-      protos[k].forEach(pp=>{const mat=pp.m.clone();if(pp.p==="leaf")mat.color.set(0xffffff);const im=new T.InstancedMesh(pp.g,mat,list.length);im.castShadow=true;im.receiveShadow=pp.p==="leaf";   // thin trunks self-shadow to black with the normal bias
+      protos[k].forEach(pp=>{const mat=pp.m.clone();if(pp.p==="leaf")mat.color.set(0xffffff);const im=new T.InstancedMesh(pp.g,mat,list.length);im.name="T-"+k+"-"+pp.p;im.castShadow=true;im.receiveShadow=pp.p==="leaf";   // thin trunks self-shadow to black with the normal bias
         const lg=tris(pp.g)>LODMIN?simp(pp.g,LODC):null;if(lg){const lo=new T.InstancedMesh(lg,mat,list.length);lo.castShadow=true;lo.receiveShadow=im.receiveShadow;lo.frustumCulled=im.frustumCulled=false;LOD.push({hi:im,lo,list,leaf:pp.p==="leaf"});scene.add(lo);trees.push(lo)}
 
         list.forEach((t,i)=>{q.setFromAxisAngle(up,t[6]);m4.compose(new T.Vector3(t[0],t[2],-t[1]),q,new T.Vector3(t[3]*(t[7]||(.85+.3*((i*7)%10)/10)),t[3],t[3]*(t[7]||1)));im.setMatrixAt(i,m4);
@@ -3129,7 +3129,7 @@ async function dioBuild(s){
       else if(a==="full"){const f=$("#dio");if(document.fullscreenElement){document.exitFullscreen()}else if(f.requestFullscreen){f.requestFullscreen().catch(()=>f.classList.toggle("full"))}else f.classList.toggle("full");setTimeout(resize,150)}};
     apply()};
   const stage2=$("#dioStage");if(stage2){stage2.innerHTML="";stage2.appendChild(wrap)}resize();home(false);frame();bind();
-  DIO.cur={id:s.id,wrap,bind,resize,camPos:()=>[cam.position.x,cam.position.y,cam.position.z,ctl.target.x,ctl.target.y,ctl.target.z].map(v=>Math.round(v)),
+  DIO.cur={id:s.id,wrap,bind,resize,scene,cam,camPos:()=>[cam.position.x,cam.position.y,cam.position.z,ctl.target.x,ctl.target.y,ctl.target.z].map(v=>Math.round(v)),
     setCam(p,fov){cam.position.set(p[0],p[1],p[2]);ctl.target.set(p[3],p[4],p[5]);if(fov){cam.fov=fov;cam.updateProjectionMatrix()}ctl.autoRotate=false;ctl.maxPolarAngle=1.62;ctl.minDistance=1;ctl.update();dirty=true},   // tests: photo-matching viewpoints (eye level allowed)
     stats(n=10){lodSplit();r.info.autoReset=false;r.info.reset();const t0=performance.now();for(let i=0;i<n;i++)r.render(scene,cam);r.getContext().finish();const ms=(performance.now()-t0)/n,o={calls:r.info.render.calls/n,tris:r.info.render.triangles/n,ms:+ms.toFixed(1),geoms:r.info.memory.geometries};r.info.autoReset=true;dirty=true;return o},   // tests: draw calls and time per frame (without GTAO)
     dispose(){cancelAnimationFrame(raf);ro.disconnect();ctl.dispose();if(comp)comp.dispose();envT.dispose();BC.forEach(m=>m.geometry.dispose());selMat.forEach(m=>m.dispose());r.dispose();r.forceContextLoss&&r.forceContextLoss();scene.traverse(o=>{if(o.geometry)o.geometry.dispose()})}};
