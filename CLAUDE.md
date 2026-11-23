@@ -100,11 +100,6 @@ sh tools/fetch_dem.sh            # só para refazer a maqueta do noroeste
   escavadas e a estrutura circular C1 na ortofoto, capela pelo LiDAR (MDS + ajuste de empena), mar plano a 0,3 m; casas da reconstituição
   hipotéticas (4,2 m = diâmetro interior de C1); a cobertura do Centro Interpretativo está classificada como solo no LiDAR; faltam as plantas
   das escavações de 1993-96 e a ortofoto da DGT, que o proxy bloqueia — a ortofoto veio de capturas do navegador do Tiago). A nuvem de pontos (LAZ, quando o Tiago a envia) dá terreno de 25 cm, melhor que o MDT de 50 cm.
-- **Revisão de 23 nov. 2026 (todas as maquetas, regras do prompt e do perito):** depois de refazer uma maqueta no Blender, correr
-  `/opt/bvenv/bin/python tools/arvores_regras.py <id>` (árvores a ≥ 5 m das estruturas e sem copa por cima, recinto com ≤ 15 % da
-  densidade de fora, tojo verde com flor em 12 %) e, para S. Miguel-o-Anjo, Santa Marta e Sabroso, `node tools/gltf/regras.mjs <id>`
-  (muralhas soterradas como talude com mato no estado atual; granito dos afloramentos de Sabroso). Os protótipos das árvores vêm
-  quantizados: o visor passa-os a float antes do `applyMatrix4` (antes, parte das copas descia ao chão como uma coluna preta).
 - Briteiros: espécies de Sabroso (eucalipto, castanheiro, carvalho, sobreiro, sem pinheiros) postas sem novo Blender com `tools/gltf/graft_protos.mjs` (protótipos) + `tools/brit_species.py` (altura e largura de copa do MDS−MDT); `tools/unpng.py` tira o GLB do PNG. O `blend/dio_brit.py` já não corre de raiz: faltam `lidar/houses.json`, `lidar/walls.json` e `app/t3/<id>-c.jpg` (e os scripts `lidar/walls.py`/`houses.py`). O `lidar/mosaic.py` precisa de rasterio (`/opt/bvenv`).
 - **Citânia de Sanfins** (nov. 2026; `blend/dio_sfn.py`, disco de 225 m, `TRIS=150000 bash mkparts.sh <id>`): sem planta publicada consultada,
   tudo medido na nuvem de pontos. Os muros escavados sobressaem 0,15–2 m no MDS − MDT (a classe 6 «edifício» da DGT inclui muitos muros);
@@ -113,5 +108,10 @@ sh tools/fetch_dem.sh            # só para refazer a maqueta do noroeste
   geodésico com base e pilar medidos. A ortofoto `app/t3/<id>-c.jpg` alinha com o LiDAR. Fotografias do Commons: o browser do app do
   Tiago abre a API do Commons (curl e web-fetch não); `tests/dio_views.mjs` tira a maqueta do mesmo ponto de vista de uma fotografia.
   Faltam: plantas de Paço 1953 (Zephyrus 4), Silva e Centeno 1980 (Est. I) e Silva 1999 (roteiro); capela de S. Romão e balneário sem posição.
+- **Revisão de 23 nov. 2026 (todas as maquetas, regras do prompt e do perito):** depois de refazer uma maqueta no Blender, correr
+  `/opt/bvenv/bin/python tools/arvores_regras.py <id>` (árvores a ≥ 5 m das estruturas e sem copa por cima, recinto com ≤ 15 % da
+  densidade de fora, tojo verde com flor em 12 %) e, para S. Miguel-o-Anjo, Santa Marta e Sabroso, `node tools/gltf/regras.mjs <id>`
+  (muralhas soterradas como talude com mato no estado atual; granito dos afloramentos de Sabroso). Os protótipos das árvores vêm
+  quantizados: o visor passa-os a float antes do `applyMatrix4` (antes, parte das copas descia ao chão como uma coluna preta).
 - O Tiago quer este nível em **todos** os sítios, um a um. Próximo: Santa Luzia, Bagunte, Cossourado. (Sabroso já tem LiDAR: o bloco 182506 não é preciso, o disco cabe todo no 182505.) Ver `docs/blocos_lidar_castros.md`.
 - Por confirmar com o Tiago: classificação de Roriz e de N.ª Sr.ª da Graça; Ázere MN 1910.
