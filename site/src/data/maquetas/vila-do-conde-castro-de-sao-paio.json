@@ -53,7 +53,9 @@
     "Casas: número, diâmetros e posições não publicados. As três casas da reconstituição (uma nas «Ruínas de Habitação», duas no conjunto do pátio) usam o diâmetro interior de 4,2 m da estrutura circular C1 e posições hipotéticas dentro das áreas escavadas. Os vestíbulos em «pinça de caranguejo» das casas do pátio e os pátios lajeados seguem a descrição genérica de Almeida et al. 2012 (p. 19) e os desenhos dos painéis; a orientação das portas e o tamanho dos pátios são hipotéticos.",
     "Estrutura circular C1 (junto ao Centro Interpretativo): visível na ortofotografia mas ausente das fontes consultadas; não se sabe se é castreja.",
     "As duas áreas escavadas foram medidas na ortofotografia de satélite (0,11 m por píxel), alinhada ao LiDAR com um desvio corrigido de cerca de 1 m; erro estimado ≤ 1 m.",
-    "Capela: comprimento, largura, beirados, cumeeira, cruzes e anexo poente medidos no MDS; janela alta da empena poente e janela do anexo pelas fotografias de 2025. A porta principal não aparece no LiDAR nem nas fotografias consultadas e não foi desenhada; um segundo anexo a norte não se distingue no MDS. Centro Interpretativo: a cobertura está à cota do terreno e foi classificada como solo pela DGT; o contorno foi traçado no mapa de declives e na ortofotografia e as fachadas descem até à cota do parque, por isso o volume é aproximado.",
+    "Capela: comprimento, largura, beirados, cumeeira, cruzes e anexo poente medidos no MDS; janela alta da empena poente e janela do anexo pelas fotografias de 2025. A porta principal não aparece no LiDAR nem nas fotografias consultadas e não foi desenhada; um segundo anexo a norte não se distingue no MDS.",
+    "Centro Interpretativo: três blocos de cobertura plana, o terraço de madeira sobre o bloco central e o alpendre branco da esplanada, com os contornos medidos na ortofotografia (erro ≤ 1 m). A DGT classifica as coberturas como solo: as cotas vêm do MDT dentro de cada contorno (bloco norte ≈ 12,9 m, centro e sul ≈ 13,8 m) e o alpendre do MDS (≈ 2 m acima da esplanada). Fachadas, portas, janelas, guardas, apoios do alpendre, chapéus de sol e o pátio rebaixado a nordeste não se distinguem nas fontes consultadas: as fachadas são planas e brancas e o pátio fica com o relevo do LiDAR.",
+    "Passadiços: os quatro ramais (≈ 1,3 m e 2 m de largura) foram traçados na ortofotografia (erro ≈ 1 m); a altura sobre o terreno (≈ 0,2 m), as guardas, os degraus e as rampas não foram medidos.",
     "Vegetação: posições e alturas das árvores do LiDAR (MDS − MDT); as espécies não vêm do LiDAR (escolhidas pela forma da copa). O canavial a sueste foi separado das árvores pela textura do MDS (altura de 1,8 a 6,5 m e copa lisa) e desenhado como canas; sebes, arbustos e tufos de erva seguem a ortofotografia. A densidade real das canas não é medida.",
     "Penedos amoladoiros e gravuras: posição aproximada pelas coordenadas dos painéis; as rochas gravadas não foram identificadas no LiDAR.",
     "Mar: superfície plana a 0,3 m, nível dos retornos LiDAR sobre a água no dia do voo; não representa a maré.",
@@ -106,7 +108,7 @@
       "resumo": "Estrutura circular de pedra à vista",
       "ancora": [
         -35,
-        5.7,
+        5.19,
         -28
       ]
     },
@@ -159,13 +161,13 @@
       "grupo": "Equipamento de visita",
       "estado": "estado-atual",
       "confianca": "alta",
-      "descricao": "Passadiço de tábuas que liga o parque do Centro Interpretativo às áreas escavadas e à capela; traçado na ortofotografia, tábuas como na fotografia de 2025 junto a E2. Altura sobre o terreno aproximada. Fase: atual.",
+      "descricao": "Passadiços de tábuas que ligam o parque e o Centro Interpretativo às áreas escavadas e à capela: o ramal nascente sobe pelo castro, o ramal poente passa ao longo do Centro Interpretativo e o ramal sul desce para a capela. Traçados na ortofotografia; tábuas como na fotografia de 2025 junto a E2. Altura sobre o terreno (≈ 0,2 m), guardas e escadas não medidas. Fase: atual.",
       "fontes": [
         "orto",
         "foto"
       ],
-      "medidas": "≈ 1,3 m e 2 m de largura (ortofotografia)",
-      "resumo": "≈ 1,3 m e 2 m de largura (ortofotografia)"
+      "medidas": "≈ 233 m de passadiço, ≈ 1,3 m e 2 m de largura (ortofotografia)",
+      "resumo": "≈ 233 m de passadiço, ≈ 1,3 m e 2 m de largura (ortofotografia)"
     },
     {
       "id": "CH",
@@ -227,14 +229,15 @@
       "grupo": "Envolvente",
       "estado": "estado-atual",
       "confianca": "alta",
-      "descricao": "Aberto no fim de 2012, no mesmo edifício de um café-restaurante; mostra o espólio do castro e painéis de arqueologia, geologia e biologia. O edifício está encaixado na encosta e o LiDAR classifica a cobertura como solo: o contorno é o degrau de 3–4 m do modelo do terreno do lado do mar (mapa de declives), e a ala mais baixa do lado do mar vem do MDS. Volume simples em cinzento neutro. Fase: 2012.",
+      "descricao": "Aberto no fim de 2012, no mesmo edifício de um café-restaurante; mostra o espólio do castro e painéis de arqueologia, geologia e biologia. O edifício está encaixado na encosta, com a cobertura à cota do terreno do lado do castro, e o LiDAR classifica as coberturas como solo. Contornos dos três blocos, do terraço de madeira sobre a cobertura do bloco central e do alpendre branco da esplanada medidos na ortofotografia; cotas das coberturas = MDT dentro de cada contorno, alpendre = MDS (≈ 2,5 m acima da esplanada). Fachadas, vãos, guardas e apoios do alpendre não se distinguem nas fontes consultadas: as fachadas são planas e brancas. Fase: 2012.",
       "fontes": [
         "alm",
         "muni",
         "tese",
-        "lidar"
+        "lidar",
+        "orto"
       ],
-      "medidas": "cobertura ≈ 13,0 m de altitude, à cota do terreno do lado do castro; fachadas até ≈ 9,4 m do lado do mar (LiDAR)",
+      "medidas": "três blocos de cobertura plana: norte ≈ 12,9 m de altitude, centro e sul ≈ 13,8 m (à cota do planalto do castro); esplanada do lado do mar ≈ 9,8 m; alpendre ≈ 11,9 m (LiDAR)",
       "resumo": "O Centro abriu no fim de 2012, num edifício encaixado na encosta"
     },
     {
@@ -243,7 +246,7 @@
       "grupo": "Envolvente",
       "estado": "estado-atual",
       "confianca": "média",
-      "descricao": "2165 árvores nas posições e alturas medidas pelo LiDAR.",
+      "descricao": "2137 árvores nas posições e alturas medidas pelo LiDAR.",
       "fontes": [
         "lidar"
       ]

@@ -66,6 +66,27 @@ def inset(poly, d):   # convex quadrilateral moved inwards by d metres (offset o
         (p1, t1), (p2, t2) = L[i - 1], L[i]
         A = np.array([t1, -t2]).T; s = np.linalg.solve(A, p2 - p1); out.append(p1 + t1 * s[0])
     return np.array(out)
+# --- Interpretation Centre (lidar/spa/ci.json, outlines on the orthophoto in box coordinates): the DGT classifies its roofs as ground,
+# so the MDT holds them; each roof = median MDT inside the outline (1 m in), then the ground model is lowered under the outline
+# (otherwise the terrain mesh, a mound with the roof on top, shows through the flat roofs)
+CIJ = json.load(open('lidar/spa/ci.json')); CIR = {}
+import cv2 as _cvf
+def _boxpix(poly):  # box coordinates -> (col,row) pixel coordinates of the grid (cell centres at integers)
+    poly = np.asarray(poly, float); return np.c_[(X0L + poly[:, 0] - LB['x0']) / LB['cs'] - .5, (LB['y1'] - (Y0L + poly[:, 1])) / LB['cs'] - .5]
+def _polymask(poly):
+    m = np.zeros(DTM.shape, np.uint8); _cvf.fillPoly(m, [np.round(_boxpix(poly) * 4).astype(np.int32)], 1, shift=2); return m.astype(bool)
+for k_, v_ in CIJ.items():
+    if k_.startswith('_'): continue
+    if v_['roof'] == 'dtm':
+        CIR[k_] = float(np.median(_dtm[_polymask(inset(v_['poly'], 1.0))]))
+        _m = _polymask(inset(v_['poly'], -.15)); DTM = np.where(_m, np.minimum(DTM, CIR[k_] - .5), DTM).astype(np.float32)
+    else:   # awning: MDS; the MDT has bumps where the awning was taken as ground, set to the terrace under it
+        _m = _polymask(inset(v_['poly'], -.15)); CIR[k_] = float(np.median(_dsm[_polymask(inset(v_['poly'], .6))]))
+        CIR[k_ + '0'] = float(np.percentile(_dtm[_m], 10)); DTM = np.where(_m, np.minimum(DTM, CIR[k_ + '0']), DTM).astype(np.float32)
+CIMASK = np.zeros(DTM.shape, bool)
+for k_, v_ in CIJ.items():
+    if not k_.startswith('_'): CIMASK |= _polymask(inset(v_['poly'], -6.0 if k_ == 'W' else -1.5))   # the terrace with its parasols lies west of the awning
+print('CI roofs', {k: round(v, 2) for k, v in CIR.items()})
 E1_BOX = [(-29.75, -31.7), (-20.1, -30.75), (-19.6, -34.2), (-29.75, -35.1)]
 CUTS = []                      # (the E1 trench is a hole in the terrain mesh, see below)
 E1_HOLE = inset(loc(E1_BOX), .12)
@@ -485,7 +506,10 @@ for _n in list(bpy.data.objects.keys()):
     for _k in ('E1t', 'E1f', 'E1p', 'E1pf', 'E2w', 'E2l', 'E2f', 'E2r', 'E2b'):
         if _n.split('.')[0] == f'A-{_k}': bpy.data.objects[_n]['sid'] = _k[:2]
 # boardwalks of weathered wood (orthophoto: planks across, 1.3 and 2 m wide; photograph of 2025 by E2)
-BW = [(np.array([(-40.0, -3.5), (-24.6, -3.5)]), 1.3), (np.array([(-24.6, -3.5), (-21.3, 0.0), (-19.5, 5.0), (-18.8, 10.0), (-19.3, 15.0), (-20.5, 20.0), (-22.0, 25.0), (-23.0, 28.0)]), 2.0)]
+BW = [(np.array([(-43.5, -3.6), (-24.6, -3.5)]), 1.3),
+      (np.array([(-24.6, -3.5), (-21.3, 0.0), (-19.5, 5.0), (-18.8, 10.0), (-19.3, 15.0), (-20.5, 20.0), (-22.0, 25.0), (-23.0, 28.0), (-29.5, 37.5), (-36.0, 44.0)]), 2.0),
+      (np.array([(-44.2, 65.0), (-55.0, 50.4), (-65.4, 36.0), (-65.0, 33.5), (-53.9, 0.5), (-52.5, -1.6), (-43.5, -3.6)]), 2.0),     # west path, along the Centre
+      (np.array([(-43.5, -3.6), (-40.0, -15.0), (-30.0, -42.5), (-11.25, -57.5), (-5.0, -65.0)]), 2.0)]                            # south branch, towards the chapel
 def deck(pts, w, above=.18):
     p = dense(loc(pts), .5); n = len(p); d = np.gradient(p, axis=0); d /= np.linalg.norm(d, axis=1, keepdims=True); nr = np.stack([-d[:, 1], d[:, 0]], 1)
     zs = np.array([max(float(ground_nocut(*(p[i] + nr[i] * o))) for o in (-w / 2, 0, w / 2)) for i in range(n)]) + above
@@ -499,8 +523,8 @@ def deck(pts, w, above=.18):
         for j in range(3): a = i * 4 + j; F.append((a + 1, a + 5, a + 4, a) if False else (a, a + 4, a + 5, a + 1))
     return V, F, UV
 put('BW', 'Passadiço de madeira', deck_m, [deck(pts, w) for pts, w in BW], 'A', 'conf')
-item(id='BW', name='Passadiço de madeira', kind='Equipamento de visita', phase='atual', ev='conf', evB='conf', dims='≈ 1,3 m e 2 m de largura (ortofotografia)',
-     note='Passadiço de tábuas que liga o parque do Centro Interpretativo às áreas escavadas e à capela; traçado na ortofotografia, tábuas como na fotografia de 2025 junto a E2. Altura sobre o terreno aproximada.', src=['orto', 'foto'])
+item(id='BW', name='Passadiço de madeira', kind='Equipamento de visita', phase='atual', ev='conf', evB='conf', dims=f'≈ {sum(float(np.linalg.norm(np.diff(pts, axis=0), axis=1).sum()) for pts, w in BW):.0f} m de passadiço, ≈ 1,3 m e 2 m de largura (ortofotografia)',
+     note='Passadiços de tábuas que ligam o parque e o Centro Interpretativo às áreas escavadas e à capela: o ramal nascente sobe pelo castro, o ramal poente passa ao longo do Centro Interpretativo e o ramal sul desce para a capela. Traçados na ortofotografia; tábuas como na fotografia de 2025 junto a E2. Altura sobre o terreno (≈ 0,2 m), guardas e escadas não medidas.', src=['orto', 'foto'])
 # reconstitution of the houses under the two areas: round stone houses with conical thatch (hypothetical diameters and positions);
 # the later phase had «a vestibule whose shape recalls the claws of a crab» added to some of the round rooms (Almeida et al. 2012,
 # p. 19), as drawn on the panel of E2; H1 follows the single round house of the E1 panel. Pátios with flagstones (panels).
@@ -709,41 +733,41 @@ def bld_simple(bid, nm, cxy, rad=12):
     BINFO[bid] = dict(area=float(m_.sum() * LB['cs'] ** 2), top=float(np.percentile(zt, 97)), base=base + .3, c=(float(_GXl[cc].mean()), float(_GYl[rr].mean())))
     BLD_PTS.append(np.c_[_GXl[cc] - CX, _GYl[rr] - CY][::7])
 bld_simple('B1', 'Edifício a norte do castro', (-22.2, 47.1)); bld_simple('B2', 'Anexo agrícola', (32.5, 66.0))
-# --- Interpretation Centre: roof = ground model inside the outline of its 3-4 m step (slope map), walls down to the ground outside
-CI_POLY = [(-61.0, 27.5), (-53.3, 28.6), (-53.3, 24.6), (-48.6, 25.2), (-46.0, 20.0), (-43.5, 13.5), (-41.0, 7.2), (-46.0, 5.6), (-51.0, 5.9),
-           (-52.0, 9.0), (-52.2, 12.0), (-53.2, 15.0), (-54.2, 17.2), (-55.5, 20.0), (-57.5, 22.0), (-60.5, 24.0)]
-_cip = loc(np.array(CI_POLY))
-from matplotlib.path import Path as _MP
-_ctr = _cip.mean(0); _cipo = _ctr + (_cip - _ctr) * (1 + .6 / np.linalg.norm(_cip - _ctr, axis=1, keepdims=True))   # 0.6 m outwards: covers the steep ground faces
-_gx, _gy = np.meshgrid(np.arange(-55, -35, .25), np.arange(-10, 45, .25))
-_ins = _MP(_cip).contains_points(np.c_[_gx.ravel(), _gy.ravel()])
-_roofz = float(np.median(hz(_gx.ravel()[_ins], _gy.ravel()[_ins]))) + .06
-_ring = _MP(_cipo + (_cipo - _ctr) * .15).contains_points(np.c_[_gx.ravel(), _gy.ravel()]) & ~_MP(_cipo).contains_points(np.c_[_gx.ravel(), _gy.ravel()])
-_low = float(np.percentile(hz(_gx.ravel()[_ring], _gy.ravel()[_ring]), 10)) - .3
-_rz = np.maximum(hz(*_cipo.T) + .06, _roofz)        # roof edge follows the ground where it rises above the median (east side)
-Vr = [(x, y, z) for (x, y), z in zip(_cipo, _rz)]; n_ = len(Vr)
-ci_w = (Vr + [(x, y, _low) for x, y in _cipo], [(i, (i + 1) % n_, n_ + (i + 1) % n_, n_ + i) for i in range(n_)], [(0, 0)] * (2 * n_))
-ci_r = (Vr, [tuple(range(n_))], [(0, 0)] * n_)
-_bm = bmesh.new()
-put('CIw', 'Centro Interpretativo (paredes)', lime_m, [ci_w], 'A', 'conf'); put('CI', 'Centro Interpretativo', grey_m, [ci_r], 'A', 'conf')
-for nm_ in ('A-CIw', 'A-CI'):
+# --- Interpretation Centre: three flat-roofed blocks set into the slope (roofs and outlines above), the wooden terrace on the roof of
+# the middle block and the white awning over the café terrace on the sea side (MDS 2.5 m above the terrace, held by the façade of B)
+ciA_m = col_mat('ci_grey', (140, 143, 150), .8); ciB_m = col_mat('ci_light', (205, 203, 195), .8); ciW_m = col_mat('ci_white', (236, 236, 232), .6)
+CIMAT = dict(grey=ciA_m, light=ciB_m, deck=deck_m, white=ciW_m)
+def ci_block(poly_box, zroof):
+    """Walls along the outline (0.25 m out) from the roof down to 0.3 m under the lowest ground within 1.5 m outside; flat roof."""
+    P = loc(outward(poly_box, .25)); z1 = (zroof - H0) * EX; V = []; F = []; UV = []
+    ring = dense(np.vstack([P, P[:1]]), .5)
+    ctr = P.mean(0); s_ = 0.
+    for q in range(len(ring)):
+        p_ = ring[q]; o_ = (p_ - ctr) / np.linalg.norm(p_ - ctr)
+        z0 = min(float(ground_nocut(*(p_ + o_ * t))) for t in (.1, .5, 1.0, 1.5)) - .3
+        if q: s_ += float(np.linalg.norm(p_ - ring[q - 1]))
+        V += [(p_[0], p_[1], min(z0, z1 - .2)), (p_[0], p_[1], z1)]; UV += [(s_ / 3, z0 / 3), (s_ / 3, z1 / 3)]
+    for q in range(len(ring) - 1): a = 2 * q; F.append((a, a + 2, a + 3, a + 1))
+    roofV = [(x, y, z1) for x, y in P]
+    rUV = [(x * .5, y * .5) for x, y in P]
+    return (V, F, UV), (roofV, [tuple(range(len(P)))], rUV)
+_ciw, _cir = [], {}
+for k_ in ('A', 'D', 'B'):
+    w_, r_ = ci_block(CIJ[k_]['poly'], CIR[k_]); _ciw.append(w_); _cir.setdefault(CIJ[k_]['mat'], []).append(r_)
+    BLDM |= _polymask(outward(CIJ[k_]['poly'], .3)); BLD_PTS.append(dense(np.vstack([loc(CIJ[k_]['poly']), loc(CIJ[k_]['poly'])[:1]]), 1.0))
+put('CIw', 'Centro Interpretativo (fachadas)', lime_m, _ciw, 'A', 'conf')
+put('CI', 'Centro Interpretativo (cobertura do bloco norte)', ciA_m, _cir['grey'], 'A', 'conf'); put('CIb', 'Centro Interpretativo (cobertura do bloco sul)', ciB_m, _cir['light'], 'A', 'conf')
+put('CIt', 'Centro Interpretativo, terraço de madeira', deck_m, _cir['deck'], 'A', 'conf')
+_wp = loc(CIJ['W']['poly']); _wz1 = (CIR['W'] - H0) * EX; _wz0 = _wz1 - CIJ['W'].get('slab', .12)
+w_, r_ = extrude([tuple(p) for p in _wp], _wz0, _wz1)
+put('CIa', 'Centro Interpretativo, alpendre da esplanada', ciW_m, [w_, r_, (r_[0][:len(_wp)], [tuple(range(len(_wp)))[::-1]], [(0, 0)] * len(_wp))], 'A', 'conf')
+for nm_ in ('A-CIw', 'A-CI', 'A-CIb', 'A-CIt', 'A-CIa'):
     o_ = bpy.data.objects.get(nm_)
     if o_:
         _bm = bmesh.new(); _bm.from_mesh(o_.data); bmesh.ops.recalc_face_normals(_bm, faces=_bm.faces); _bm.to_mesh(o_.data); _bm.free()
-BLD_PTS.append(dense(np.vstack([_cip, _cip[:1]]), 1.0))
-# the lower wing of the same building on the sea side (café-restaurant): MDS − MDT > 1.8 m next to the outline
-_r0, _c0 = int((LB['y1'] - (Y0L + 32)) / LB['cs']), int((X0L - 64 - LB['x0']) / LB['cs'])
-_sw = binary_opening(nd[_r0:_r0 + int(30 / LB['cs']), _c0:_c0 + int(26 / LB['cs'])] > 1.8, iterations=2)
-_gw, _gr = [], []
-for poly in outline(_sw, _r0, _c0):
-    if _MP(_cip).contains_points(poly).mean() > .5: continue
-    pr_ = _MP(poly); sel = [(i, j) for i in range(_sw.shape[0]) for j in range(_sw.shape[1]) if _sw[i, j] and pr_.contains_point((_GXl[_c0 + j] - CX, _GYl[_r0 + i] - CY))]
-    if not sel: continue
-    ii_, jj_ = np.array(sel).T; zt = _dsm[_r0 + ii_, _c0 + jj_]; b0 = float(_dtm[_r0 + ii_, _c0 + jj_].min()) - .3
-    w_, rf_ = extrude(poly, (b0 - H0) * EX, (float(np.median(zt)) - H0) * EX); _gw.append(w_); _gr.append(rf_); BLDM[_r0 + ii_, _c0 + jj_] = True
-put('CI2w', 'Centro Interpretativo, ala do lado do mar (paredes)', lime_m, _gw, 'A', 'conf'); put('CI2', 'Centro Interpretativo, ala do lado do mar', grey_m, _gr, 'A', 'conf')
+_roofz = CIR['D'] - H0; _low = min(CIR['A'], CIR['D']) - H0
 BLD_PTS = np.vstack(BLD_PTS) if BLD_PTS else np.zeros((0, 2))
-print('buildings', {k: (round(v['area']), round(v['top'] - v['base'], 1)) for k, v in BINFO.items()}, 'CI roof', round(_roofz + H0, 2), 'low', round(_low + H0, 2))
+print('buildings', {k: (round(v['area']), round(v['top'] - v['base'], 1)) for k, v in BINFO.items()})
 _ann = '; '.join(f'anexo de {a["L"]:.1f} × {a["W"]:.1f} m, beirado ≈ {a["eave"]:.1f} m e cumeeira ≈ {a["ridge"]:.1f} m' for a in CHFIT['ann'])
 item(id='CH', name='Capela de São Paio', kind='Edifício moderno', phase='séc. XVII (?), remodelada em 1885 (?) e nos anos 70 do séc. XX', ev='conf', evB='conf',
      dims=f'nave ≈ {CHFIT["L"]:.1f} × {CHFIT["W"]:.1f} m · beirado ≈ {CHFIT["eave"]:.1f} m e cumeeira ≈ {CHFIT["ridge"]:.1f} m acima do solo · eixo a {CHFIT["az"]:.0f}° do norte; {_ann} (LiDAR)',
@@ -754,8 +778,12 @@ for bid, nm in (('B1', 'Edifício a norte do castro'), ('B2', 'Anexo agrícola')
     if bid in BINFO:
         item(id=bid, name=nm, kind='Edifício moderno', phase='atual', ev='conf', evB='conf', dims=f'planta ≈ {BINFO[bid]["area"]:.0f} m² · altura ≈ {BINFO[bid]["top"] - BINFO[bid]["base"]:.1f} m (LiDAR)',
              note='Edifício atual, fora do castro: volume simples em cinzento neutro, com o contorno e a altura mediana do LiDAR (MDS).', src=['lidar', 'orto'])
-item(id='CI', name='Centro Interpretativo do Castro de São Paio', kind='Edifício moderno', phase='2012', ev='conf', evB='conf', dims=f'cobertura ≈ {_roofz + H0:.1f} m de altitude, à cota do terreno do lado do castro; fachadas até ≈ {_low + H0:.1f} m do lado do mar (LiDAR)',
-     note='Aberto no fim de 2012, no mesmo edifício de um café-restaurante; mostra o espólio do castro e painéis de arqueologia, geologia e biologia. O edifício está encaixado na encosta e o LiDAR classifica a cobertura como solo: o contorno é o degrau de 3–4 m do modelo do terreno do lado do mar (mapa de declives), e a ala mais baixa do lado do mar vem do MDS. Volume simples em cinzento neutro.', src=['alm', 'muni', 'tese', 'lidar'])
+item(id='CI', name='Centro Interpretativo do Castro de São Paio', kind='Edifício moderno', phase='2012', ev='conf', evB='conf',
+     dims=f'três blocos de cobertura plana: norte ≈ {CIR["A"]:.1f} m de altitude, centro e sul ≈ {CIR["D"]:.1f} m (à cota do planalto do castro); esplanada do lado do mar ≈ 9,8 m; alpendre ≈ {CIR["W"]:.1f} m (LiDAR)',
+     note='Aberto no fim de 2012, no mesmo edifício de um café-restaurante; mostra o espólio do castro e painéis de arqueologia, geologia e biologia. '
+          'O edifício está encaixado na encosta, com a cobertura à cota do terreno do lado do castro, e o LiDAR classifica as coberturas como solo. '
+          'Contornos dos três blocos, do terraço de madeira sobre a cobertura do bloco central e do alpendre branco da esplanada medidos na ortofotografia; '
+          'cotas das coberturas = MDT dentro de cada contorno, alpendre = MDS (≈ 2,5 m acima da esplanada). Fachadas, vãos, guardas e apoios do alpendre não se distinguem nas fontes consultadas: as fachadas são planas e brancas.', src=['alm', 'muni', 'tese', 'lidar', 'orto'])
 # ---------- orthophoto (aligned on the LiDAR, lidar/spa_orto.py) on the box grid: z20 where captured, z19 elsewhere
 def orto_at(x, y): return np.stack([_samp(ORT[..., k], x, y) for k in range(3)], -1)
 # masks on a 0.5 m grid over the disc: paved paths and boardwalk (grey, low saturation), granite on the shore (relief + grey)
@@ -795,6 +823,7 @@ ntp0 = len(tp)
 _chs = gaussian_filter(CHM, 2); _sd = np.sqrt(np.maximum(uniform_filter(CHM ** 2, 13) - uniform_filter(CHM, 13) ** 2, 0))
 REED = binary_opening(binary_closing((_chs > 1.8) & (_chs < 6.5) & (_sd < 1.0), iterations=2), iterations=3)
 _lr, _nr = label(REED); _szr = np.bincount(_lr.ravel()); REED = (_szr[_lr] > 30 / LB['cs'] ** 2) & (_lr > 0)
+REED &= ~CIMASK          # the awning and the parasols of the café terrace are flat tops 2-3 m high too
 def is_reed(x, y): return _samp(REED.astype(np.float32), x, y) > .5
 tp = [p for p in tp if not is_reed(*p)]
 tp = [p for p in tp if (kd.query(p)[0] > 8 and not _encl.contains_point(p)) or (kd.query(p)[0] > 5 and rng.random() < .12)]   # real trees, thinned inside the enclosure (10-15 %) and none within 5 m of the structures

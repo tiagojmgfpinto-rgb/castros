@@ -1,0 +1,96 @@
+{
+ "_doc": "Centro Interpretativo de São Paio: contornos medidos na ortofotografia (coordenadas do bloco LiDAR, m, x = este, y = norte); cotas das coberturas = MDT dentro do contorno (a DGT classifica as coberturas como solo).",
+ "A": {
+  "name": "bloco norte, cobertura cinzenta",
+  "poly": [
+   [
+    -60.75,
+    27.0
+   ],
+   [
+    -53.25,
+    28.0
+   ],
+   [
+    -52.25,
+    17.0
+   ],
+   [
+    -58.25,
+    16.0
+   ]
+  ],
+  "roof": "dtm",
+  "mat": "grey"
+ },
+ "D": {
+  "name": "terraço de madeira sobre a cobertura",
+  "poly": [
+   [
+    -46.26,
+    24.56
+   ],
+   [
+    -53.94,
+    22.26
+   ],
+   [
+    -51.07,
+    12.69
+   ],
+   [
+    -43.39,
+    15.0
+   ]
+  ],
+  "roof": "dtm",
+  "mat": "deck"
+ },
+ "B": {
+  "name": "bloco sul, cobertura clara",
+  "poly": [
+   [
+    -44.83,
+    13.98
+   ],
+   [
+    -50.68,
+    12.02
+   ],
+   [
+    -48.18,
+    4.53
+   ],
+   [
+    -42.33,
+    6.48
+   ]
+  ],
+  "roof": "dtm",
+  "mat": "light"
+ },
+ "W": {
+  "name": "alpendre branco sobre a esplanada",
+  "poly": [
+   [
+    -55.25,
+    16.75
+   ],
+   [
+    -52.75,
+    17.0
+   ],
+   [
+    -48.25,
+    4.5
+   ],
+   [
+    -50.5,
+    3.9
+   ]
+  ],
+  "roof": "dsm",
+  "mat": "white",
+  "slab": 0.12
+ }
+}
