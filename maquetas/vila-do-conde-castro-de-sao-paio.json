@@ -80,6 +80,7 @@
   "Mar: superfície plana a 0,3 m, nível dos retornos LiDAR sobre a água no dia do voo; não representa a maré.",
   "Solo: a cor do terreno vem da ortofotografia, usada como mapa de classes (mar, areia, rocha, pavimento, relva, mato e terra); o pormenor fino de cada classe é procedimental e não reproduz pedras ou tufos concretos. As sombras dos edifícios na ortofotografia foram retiradas por interpolação.",
   "Equipamento das áreas escavadas (taipais, vedações, troncos, painéis, banco e passadiço): desenhado pelas fotografias de 2025 e pela ortofotografia; posição dos painéis e do banco aproximada (± 1 m), alturas lidas nas fotografias. Os outros painéis do percurso não têm posição conhecida e não foram desenhados.",
-  "Estrutura C1: não se sabe se tem porta nem para onde abre; foi desenhada como anel fechado."
+  "Estrutura C1: não se sabe se tem porta nem para onde abre; foi desenhada como anel fechado.",
+  "Costa: as rochas vêm do MDT de 50 cm, com até 1,2 m do MDS onde a DGT deixou parte dos penedos fora do terreno; a espuma das ondas que o LiDAR registou até 2,5 m acima do mar foi posta debaixo de água. A cor das rochas (fendas, zona molhada, algas, líquenes) é procedimental, pela altitude e pela forma do relevo, e a espuma na água é desenhada junto às rochas: nada disto foi medido nem fotografado rocha a rocha."
  ]
 }

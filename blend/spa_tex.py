@@ -25,21 +25,34 @@ def classify(O, H, sea, relief):
     lum = O.mean(2)
     SEA = H < sea + .05
     SAND = (mx > 160) & (sat < .32) & (r >= b) & (H < 8) & ~SEA
-    SAND = binary_closing(binary_opening(SAND, iterations=2), iterations=3) & ~SEA
+    rough = gaussian_filter(np.abs(H - gaussian_filter(H, 2)), 2)          # beach sand is smooth; surf foam lies on rough rock
+    FOAM = (mx > 175) & (sat < .25) & (H < 7) & (rough > .1) & ~SEA
+    FOAM = binary_dilation(binary_opening(FOAM, iterations=1), iterations=2) & ~SEA
+    SAND = SAND & ~FOAM
+    SAND = binary_closing(binary_opening(SAND, iterations=2), iterations=3) & ~SEA & ~FOAM
     ROCK = (((relief > .35) & (H < 12)) | ((sat < .17) & (mx < 155) & (H < 9))) & (H > sea + .1) & ~SAND
-    ROCK = binary_opening(ROCK, iterations=1)
-    PAVED = (sat < .1) & (mx > 170) & (H > 3) & ~SAND
+    ROCK = binary_opening(ROCK, iterations=1) | (FOAM & (H > sea + .1))
+    PAVED = (sat < .1) & (mx > 170) & (H > 3) & ~SAND & ~FOAM
     PAVED = binary_closing(binary_opening(PAVED, iterations=2), iterations=4)
     from scipy.ndimage import label as _lab
     lb, nl = _lab(~PAVED); sz = np.bincount(lb.ravel()); small = (sz < 480); small[0] = False
     PAVED |= small[lb] & (H > 3)                    # cars and their shadows inside the car parks and on the roads
     WATER = SEA | ((H < 1.3) & ((b > r + 6) | ((mx > 185) & (sat < .2))))   # waves and foam the LiDAR puts just above the sea
     WATER = binary_closing(WATER, iterations=2) & (H < 1.6)
+    # surf: the LiDAR also caught the breaking waves up to 2-3 m above the sea; white, smooth, next to the water
+    from scipy.ndimage import distance_transform_edt as _edt
+    _d = _edt(~WATER) * .25; _rgh = gaussian_filter(np.abs(H - gaussian_filter(H, 2)), 2)
+    SURF = (mx > 165) & (sat < .14) & (_d < 10) & (H < 3) & (_rgh < .06)
+    from scipy.ndimage import label as _lb2
+    _l, _n = _lb2(WATER | SURF); _keep = np.zeros(_n + 1, bool); _keep[np.unique(_l[WATER])] = True; _keep[0] = False
+    SURF = SURF & _keep[_l] & (_d < 6) & (H < 2.5)        # only surf joined to the water (white lichen or flat rock tops stay rock)
+    WATER = binary_closing(WATER | SURF, iterations=2) & (H < 2.5)
     SEA = SEA | WATER
+    SAND &= ~SEA; ROCK &= ~SEA; PAVED &= ~SEA; FOAM &= ~SEA
     GREEN = (g > r + 4) & (g > b + 4) & ~(SEA | SAND | ROCK | PAVED)
     VIOLET = (b > g + 2) & (r > g - 6) & ~(SEA | SAND | ROCK | PAVED | GREEN)
     EARTH = ~(SEA | SAND | ROCK | PAVED | GREEN | VIOLET)
-    return dict(WATER=WATER, SEA=SEA, SAND=SAND, ROCK=ROCK, PAVED=PAVED, GREEN=GREEN, VIOLET=VIOLET, EARTH=EARTH, lum=lum)
+    return dict(FOAM=FOAM, WATER=WATER, SEA=SEA, SAND=SAND, ROCK=ROCK, PAVED=PAVED, GREEN=GREEN, VIOLET=VIOLET, EARTH=EARTH, lum=lum)
 
 
 def clean_ortho(O, dark_near):
@@ -51,8 +64,9 @@ def clean_ortho(O, dark_near):
     return out.astype(float)
 
 
-def ground(sample, TS, R, classes_at, rng, sea_col=(38, 66, 72)):
+def ground(sample, TS, R, classes_at, rng, sea_col=(38, 66, 72), hgt=None, sea=.3):
     """sample(x, y) -> orthophoto RGB at disc coordinates; classes_at(x, y) -> dict of class weights (0..1) on the texture grid.
+    hgt(x, y) -> ground altitude (m): crevices, ridges and the tide zone of the shore rocks.
     Returns the TS×TS RGB texture of the disc (row 0 = north)."""
     mpp = 2 * R / TS
     jj, ii = np.mgrid[0:TS, 0:TS]; GX = (ii + .5) * mpp - R; GY = R - (jj + .5) * mpp
@@ -84,11 +98,35 @@ def ground(sample, TS, R, classes_at, rng, sea_col=(38, 66, 72)):
     rk *= (1 + .07 * n_m[..., None] + .06 * n_c[..., None])
     sp = rng.random(sh); rk[sp > .99] *= 1.2; rk[sp < .008] *= .8
     lich = np.clip(n_c - 1.1, 0, None)[..., None]; rk = rk * (1 - .25 * lich) + np.array([150, 150, 120]) * .25 * lich
+    if hgt is not None:
+        # shore granite as it looks on the photographs: grey-ochre rock (half the orthophoto tone, half granite grey), dark joints and
+        # crevices, light rounded tops; black-brown wet rock and seaweed in the tide zone; orange and grey-green lichen on the tops
+        Hg = hgt(GX, GY)
+        cav = Hg - gaussian_filter(Hg, .35 / mpp); cav2 = Hg - gaussian_filter(Hg, 1.2 / mpp)
+        rk = (gk * .5 + lo * .5) * .5 + np.array([150, 146, 136]) * .5
+        rk *= (1 + .07 * n_m[..., None] + .06 * n_c[..., None])
+        sp = rng.random(sh); rk[sp > .985] *= 1.22; rk[sp < .012] *= .72
+        crev = np.clip(-cav * 5 - .1, 0, 1) + .6 * np.clip(-cav2 * 1.5 - .15, 0, 1)
+        rk *= (1 - .55 * np.clip(crev, 0, 1))[..., None]
+        rk *= (1 + .14 * np.clip(cav * 4, 0, 1) + .08 * np.clip(cav2 * 1.5, 0, 1))[..., None]
+        wet = np.clip((sea + 1.8 - Hg) / 1.3, 0, 1)[..., None]
+        rk = rk * (1 - .5 * wet) + np.array([58, 58, 50]) * .5 * wet
+        weed = (np.clip((sea + .8 - Hg) / .5, 0, 1) * np.clip(.6 + .5 * n_m, 0, 1))[..., None]
+        rk = rk * (1 - .7 * weed) + np.array([56, 60, 34]) * .7 * weed
+        top = np.clip((Hg - sea - 2.5) / 1.5, 0, 1) * np.clip(cav2 * 2 + .3, 0, 1)
+        lo_ = (np.clip(n_c * .7 + n_f * .5 - 1.0, 0, 1) * top)[..., None]
+        rk = rk * (1 - .55 * lo_) + np.array([200, 150, 64]) * .55 * lo_
+        lg_ = (np.clip(n_p * .8 + n_m * .4 - .9, 0, 1) * top)[..., None]
+        rk = rk * (1 - .35 * lg_) + np.array([168, 172, 150]) * .35 * lg_
+        # sand: darker and wet below the tide line
+        s = s * (1 - .35 * wet) + np.array([120, 110, 92]) * .35 * wet
     # pavement: 2 m colour (no cars), fine aggregate
     pv = lo2.mean(-1, keepdims=True) * .6 + lo2 * .4
     pv = np.clip(pv, 150, 225) * (1 + .03 * n_f[..., None])
     # sea floor under the water: one colour, darker with depth (the foam of the photo is not painted)
     sf = np.array(sea_col, float) * (1 + .05 * n_c[..., None])
+    if hgt is not None:
+        sf = sf * (1 + .25 * np.clip(Hg - sea + .6, -1, .4)[..., None]) * (1 + .08 * n_m[..., None])   # darker with depth
     for k, t in (('GREEN', gr), ('VIOLET', v), ('EARTH', e), ('SAND', s), ('ROCK', rk), ('PAVED', pv), ('SEA', sf)):
         out += W[k][..., None] * t
     return np.clip(out, 0, 255), GX, GY
@@ -97,10 +135,11 @@ def ground(sample, TS, R, classes_at, rng, sea_col=(38, 66, 72)):
 # ---------- tiles (seamless) ----------
 def granite_tile(N=512, seed=4):
     rng = np.random.default_rng(seed); sh = (N, N)
-    c = np.array([150, 147, 138], float) * (1 + .08 * fbm(sh, (2, 8, 30), (.4, .4, .5), rng))[..., None]
+    c = np.array([128, 124, 114], float) * (1 + .10 * fbm(sh, (2, 8, 30), (.4, .4, .5), rng))[..., None]
     sp = rng.random(sh); c[sp > .975] *= 1.3; c[sp < .03] *= .5
     lich = np.clip(_noise(sh, 18, rng) - 1, 0, None)[..., None]; c = c * (1 - .3 * lich) + np.array([170, 168, 130]) * .3 * lich
-    cr = np.abs(_noise(sh, 10, rng)) < .04; c[cr] *= .6
+    cr = np.abs(_noise(sh, 10, rng)) < .05; c[cr] *= .45
+    cr2 = np.abs(_noise(sh, 30, rng)) < .03; c[cr2] *= .5
     return np.clip(c, 0, 255).astype(np.uint8)
 
 

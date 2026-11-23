@@ -42,7 +42,18 @@ ORT = np.where((_o20.sum(2) > 30)[..., None], _o20, _o19)
 CLS = TX.classify(ORT, _dtm, SEA, _dtm - gaussian_filter(_dtm, 12))
 # waves and foam: the LiDAR puts returns on the breaking waves 0.3-1.6 m above the sea; they are taken down under the water
 # (otherwise the sea shows as white and blue blotches stretched over the rocks)
-_wat = gaussian_filter(CLS['WATER'].astype(np.float32), 1.0)
+_wat = gaussian_filter(CLS['WATER'].astype(np.float32), 1.5)
+# shore rocks: the MDT of the castro block (50 cm) rounds off the granite outcrops, and part of each boulder is left in the MDS as
+# non-ground; on the rock class the surface takes back up to 1.2 m of MDS − MDT (low vegetation does not grow on these rocks)
+_rkw = gaussian_filter((CLS['ROCK'] & (_dtm < 10)).astype(np.float32), 1.0)
+DTM = np.where(_rkw > .5, gaussian_filter(_dtm, .4), DTM) + _rkw * np.clip(gaussian_filter(CHM, .6), 0, 1.2)   # less smoothing on the rocks
+# waves and foam taken down under the water on the grid itself, with a ramp of ≈ 1.5 m into the rocks next to them (a drop of up to
+# 2 m from one 25 cm cell to the next made a saw-tooth edge once the terrain was meshed and simplified)
+_W = CLS['WATER']
+_T = np.where(_W, SEA - .45, DTM)
+from scipy.ndimage import distance_transform_edt as _edt0
+_near = (_edt0(~_W) * LB['cs'] < 1.5) & ~_W
+DTM = np.where(_W, np.minimum(DTM, SEA - .45), np.where(_near, np.minimum(DTM, gaussian_filter(_T, 2.0)), DTM)).astype(np.float32)
 # cuts in the ground model: the trench of E1 (local box coordinates, measured on the orthophoto), 0.45 m deep
 def inset(poly, d):   # convex quadrilateral moved inwards by d metres (offset of each edge)
     poly = np.asarray(poly, float); n_ = len(poly); out = []
@@ -65,8 +76,7 @@ def _cut_depth(x, y):
         P = np.c_[np.ravel(x), np.ravel(y)]; ins = _P(poly).contains_points(P).reshape(np.shape(x)); d = np.where(ins, depth, d)
     return d
 def hz(x, y):
-    h = hraw(x, y); w = _samp(_wat, x, y)
-    h = np.where(w > .5, np.minimum(h, SEA - .45), h)
+    h = hraw(x, y)
     return (np.maximum(h, SEA - 1.2) - _cut_depth(x, y) - H0) * EX
 def new_obj(name, me, mat=None):
     ob = bpy.data.objects.new(name, me); bpy.context.scene.collection.objects.link(ob)
@@ -91,7 +101,7 @@ for o in list(bpy.data.objects): bpy.data.objects.remove(o)
 def uv_of(x, y): return np.stack([(x + R) / (2 * R), (y + R) / (2 * R)], -1)
 Image.new('RGB', (64, 64), (120, 130, 70)).save('blend/spa/ground_raw.jpg')
 # ---------- terrain disc (polar grid, ≈ 0.3 m radial step)
-NR, NA = 330, 900
+NR, NA = 330, 2400
 rr = np.linspace(0, R, NR + 1)[1:]; aa = np.linspace(0, 2 * np.pi, NA, endpoint=False)
 X = np.concatenate([[0], (rr[:, None] * np.cos(aa)[None]).ravel()]); Y = np.concatenate([[0], (rr[:, None] * np.sin(aa)[None]).ravel()])
 Z = hz(X, Y); V = np.stack([X, Y, Z], 1); F = []
@@ -127,7 +137,10 @@ for m_ in [g[0] for g in GQ] + [rockf_m]: me.materials.append(m_)
 FN = np.zeros((len(me.polygons), 3)); FC = np.zeros((len(me.polygons), 3))
 me.polygons.foreach_get('normal', FN.ravel()); me.polygons.foreach_get('center', FC.ravel())
 _rockd = binary_dilation(CLS['ROCK'] | CLS['SEA'], iterations=6).astype(np.float32)
-steep = (FN[:, 2] < math.cos(math.radians(55))) & (_samp(_rockd, FC[:, 0], FC[:, 1]) > .5)   # granite only on the shore rocks, not on the earth banks
+_gy, _gx = np.gradient(gaussian_filter(DTM, 1.5), LB['cs']); _slope = np.degrees(np.arctan(np.hypot(_gx, _gy))).astype(np.float32)
+# steepness from the smoothed slope map at the face centre, not from each face's normal: per-face normals flip around the threshold
+# along a rock edge and made a saw-tooth of granite and ground triangles
+steep = np.zeros(len(FC), bool) & (_samp(_slope, FC[:, 0], FC[:, 1]) > 52)   # granite tile on the rock faces turned off (seams);  & (FN[:, 2] < math.cos(math.radians(40))) & (_samp(_rockd, FC[:, 0], FC[:, 1]) > .5)   # granite only on the shore rocks, not on the earth banks
 mi = np.where(steep, 4, (FC[:, 0] >= 0).astype(int) + 2 * (FC[:, 1] < 0).astype(int))
 me.polygons.foreach_set('material_index', mi.astype(np.int32))
 uvl = me.uv_layers.new(name='UVMap')
@@ -166,15 +179,32 @@ st[20:26] = [88, 64, 42]
 Image.fromarray(np.clip(st[::-1] + rng.normal(0, 6, st.shape), 0, 255).astype(np.uint8)).resize((64, 256)).save('blend/spa/strata.jpg', quality=90)
 smat, _ = img_mat('earth', 'blend/spa/strata.jpg')
 skirt = new_obj('skirt', mesh_from('skirt', SV, SF, SUV), smat)# ---------- sea: a flat water surface at the level of the LiDAR returns over the water, clipped to the disc
-water_m = bpy.data.materials.new('water'); water_m.use_nodes = True
-_wb = water_m.node_tree.nodes['Principled BSDF']; _wb.inputs['Base Color'].default_value = (.12, .32, .40, 1); _wb.inputs['Roughness'].default_value = .25
+# the water carries a texture: deeper blue-green offshore, lighter over the shallow rock shelves, a white foam band along the rocks
+# (where the surf breaks in the photographs and the orthophoto) broken up with noise; nothing of it is measured, it is look only
+_WG = 2048; _wm = 2 * R / _WG; _wj, _wi = np.mgrid[0:_WG, 0:_WG]; _wx = (_wi + .5) * _wm - R; _wy = R - (_wj + .5) * _wm
+_wh = _samp(_dtm.astype(np.float32), _wx, _wy)
+_land = (_wh > SEA + .05) & ~(_samp(_wat, _wx, _wy) > .5)
+from scipy.ndimage import distance_transform_edt as _edt
+_wd = _edt(~_land) * _wm
+_wrng = np.random.default_rng(7)
+_wn1 = TX._noise((_WG, _WG), 3, _wrng); _wn2 = TX._noise((_WG, _WG), 12, _wrng); _wn3 = TX._noise((_WG, _WG), (1.2, 6), _wrng)
+_dep = np.clip((SEA - _wh) / 2.5, 0, 1)
+_wc = np.array([62, 128, 126.]) * (1 - _dep[..., None]) + np.array([24, 74, 90.]) * _dep[..., None]
+_wc *= (1 + .05 * _wn2[..., None])
+_fo = np.exp(-_wd / .9) * np.clip(.6 + .35 * _wn1 + .25 * _wn2, 0, 1) + np.exp(-_wd / 2.5) * np.clip(_wn2 - .8, 0, 1) * .35
+_fo = np.clip(_fo, 0, 1)[..., None]
+_wc = _wc * (1 - _fo) + np.array([232, 238, 234.]) * _fo
+Image.fromarray(np.clip(_wc, 0, 255).astype(np.uint8)).save('blend/spa/water.jpg', quality=88)
+del _wj, _wi, _wx, _wy, _wh, _wd, _wn1, _wn2, _wn3, _dep, _wc, _fo, _land
+water_m, _wt = img_mat('water', 'blend/spa/water.jpg', .25)
+_wb = water_m.node_tree.nodes['Principled BSDF']
 _wb.inputs['Alpha'].default_value = .82; water_m.blend_method = 'BLEND' if hasattr(water_m, 'blend_method') else None
 NWA = 360; wa = np.linspace(0, 2 * np.pi, NWA, endpoint=False); wz = (SEA - H0) * EX
 WV = [(0, 0, wz)] + [(math.cos(a) * (R - .02), math.sin(a) * (R - .02), wz) for a in wa]
 WF = [(0, 1 + k, 1 + (k + 1) % NWA) for k in range(NWA)]
 WVs = [(math.cos(a) * (R - .03), math.sin(a) * (R - .03), z) for z in (wz, wz - 1.6) for a in wa]   # side band: inside the earth skirt on land, visible over the sea
 WFs = [(k, (k + 1) % NWA, NWA + (k + 1) % NWA, NWA + k) for k in range(NWA)]
-sea_o = new_obj('sea', mesh_from('sea', WV + WVs, WF + [tuple(i + len(WV) for i in f) for f in WFs]), water_m)
+sea_o = new_obj('sea', mesh_from('sea', WV + WVs, WF + [tuple(i + len(WV) for i in f) for f in WFs], [(v[0] / (2 * R) + .5, v[1] / (2 * R) + .5) for v in WV + WVs]), water_m)
 # ---------- wall sweep helper (trapezoid profile following the ground)
 stone_m, _ = img_mat('stone', 'blend/stone.jpg', .85)
 def dense(pts, step=.8, closed=False):
@@ -937,12 +967,15 @@ lbl('Oceano Atlântico', loc([-95.0, -40.0]), 2)
 TS = 4096; mpp = 2 * R / TS
 _dark = binary_dilation(BLDM, iterations=40) if 'BLDM' in globals() else np.zeros_like(CLS['SEA'])
 ORTC = TX.clean_ortho(ORT, _dark)
+import cv2 as _cv2                         # surf foam on the rocks (white in the photograph) painted over with the rock around it
+_fm = _cv2.dilate(CLS['FOAM'].astype(np.uint8) * 255, np.ones((5, 5), np.uint8))
+ORTC = _cv2.inpaint(np.clip(ORTC, 0, 255).astype(np.uint8), _fm, 8, _cv2.INPAINT_TELEA).astype(float)
 def _samp_c(x, y): return np.stack([_samp(ORTC[..., k], x, y) for k in range(3)], -1)
 _CLF = {k: gaussian_filter(CLS[k].astype(np.float32), 1.0) for k in ('SEA', 'SAND', 'ROCK', 'PAVED', 'GREEN', 'VIOLET', 'EARTH')}
 def _classes_at(x, y):
     W = {k: _samp(v, x, y) for k, v in _CLF.items()}; s_ = sum(W.values()) + 1e-6
     return {k: v / s_ for k, v in W.items()}
-col, GX, GY = TX.ground(_samp_c, TS, R, _classes_at, np.random.default_rng(1))
+col, GX, GY = TX.ground(_samp_c, TS, R, _classes_at, np.random.default_rng(1), hgt=lambda x, y: _samp(DTM, x, y), sea=SEA)
 zz2 = hz(GX[::4, ::4], GY[::4, ::4]); gy2, gx2 = np.gradient(zz2, mpp * 4)
 nx, ny = -gx2, gy2; nn = np.sqrt(nx * nx + ny * ny + 1); L_ = np.array([-.55, .45, .7]); L_ /= np.linalg.norm(L_)
 shade = (nx * L_[0] + ny * L_[1] + L_[2]) / nn; shade = np.asarray(Image.fromarray(shade.astype(np.float32)).resize((TS, TS), Image.BILINEAR))
