@@ -77,6 +77,13 @@ sh tools/fetch_dem.sh            # só para refazer a maqueta do noroeste
    O artifact não serve `.glb`; o PNG reduz ~3× e o visualizador extrai os bytes. Limite de 16 MB por ficheiro publicado.
 6. **Visualizador** (em `app/src.html`: `dioMount`; dados em `maquetas/<id>.json` e luz em `maquetas/luz.json`; tone mapping `tone` aces/neutral em `luz.json` (comparados em nov. 2026, fica aces); a mesma luz no Blender com `blend/luz.py` e render de controlo `blend/luz_render.py <glb> <png> <id>` (Cycles CPU); computador = sombra 4096 ajustada à maqueta + RoomEnvironment + GTAO, telemóvel/tátil = sombra 1024 sem pós-processamento; enquadramento automático pela silhueta, `"cam":{az,el}` opcional no ficheiro da maqueta; `?v=` dos ficheiros escrito pelo `build.py`; capturas antes/depois de todas as maquetas: `CDN=<pasta npm> node tests/dio_all.mjs <saída> desk|phone`, `BASE=` para outro servidor): camadas A–E (A estado atual, B interpretação = cores de evidência confirmado / documentado / hipotético, C reconstituição se não houver `noB`, D só relevo com curvas de nível de 1 m em altitude real a partir de `ex`/`h0` do `app/dio/<id>.json` e exagero × 1/× 2, E estrutura isolada), grupos de peças (`layers`), rótulos que aproximam a câmara, botão norte, ficha por estrutura, visita guiada, fontes e lacunas. Teste das camadas: `node tests/dio_pick.mjs <saída> [id]` (`VP=desk`). Fases por estrutura só quando houver fonte (ainda nenhuma maqueta tem `phases`).
 
+## Merges
+
+- O Tiago quer os merges automáticos (24 nov. 2026). `.github/workflows/auto-merge.yml`: quando «Publicar o site» passa num PR
+  aberto com a conta dele a partir de um ramo `claude/*` deste repositório, o PR é integrado (merge commit) e a publicação no `main`
+  é relançada (um merge com o `GITHUB_TOKEN` não dispara o push). Um PR em rascunho não é integrado. Se os testes falharem ou houver
+  conflito, o PR fica aberto: corrigir no ramo e voltar a enviar. `app/index.html` é gerado: num conflito, refazer com `python3 build.py`.
+
 ## Segurança
 
 - Não há chaves de API nem servidor próprio: os dados partilhados vivem na base de dados do artifact, com regras no servidor
