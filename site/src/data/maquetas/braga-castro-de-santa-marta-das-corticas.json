@@ -48,55 +48,11 @@
   "placas": [
     "CH",
     "MN",
-    "BA",
-    "PA",
     "VG",
     "TV",
-    "SW",
-    "M1",
-    "M2"
+    "SW"
   ],
   "elementos": [
-    {
-      "id": "M1",
-      "nome": "Primeira muralha, à volta da plataforma do cume",
-      "grupo": "Muralhas",
-      "estado": "estado-atual",
-      "confianca": "alta",
-      "descricao": "Rebordo da plataforma do cume, com um talude de cerca de 3.6 m no modelo do terreno LiDAR. A poente e a sul a estrada de acesso dá a volta ao alto por cima desta linha e cortou-a; a nascente coincide com os afloramentos sobre a encosta. Fecha a plataforma onde estão a capela, o monumento, a basílica e o edifício palatino. Traçado no modelo do terreno do LiDAR da DGT (2025), sem planta publicada que se pudesse consultar; a pedra está soterrada e coberta de mato, por isso no estado atual a linha aparece como um talude coberto de mato, sem pedra à vista; a pedra só se desenha na interpretação e na reconstituição. A altura original não está publicada: valor hipotético. Fase: Idade do Ferro.",
-      "fontes": [
-        "lidar",
-        "barroca",
-        "wiki"
-      ],
-      "medidas": "comprimento ≈ 561 m · recinto com 2.25 ha · desnível atual na linha ≈ 3.6 m (LiDAR) · reconstituição: 1.8 m acima do terraço",
-      "resumo": "O rebordo da plataforma do cume, com um talude de 3 a 4 m no LiDAR de 2025",
-      "ancora": [
-        75.41,
-        -3.9,
-        11
-      ]
-    },
-    {
-      "id": "M2",
-      "nome": "Segunda muralha, a norte e a nascente",
-      "grupo": "Muralhas",
-      "estado": "estado-atual",
-      "confianca": "alta",
-      "descricao": "Segundo talude, 40 a 75 m para fora da primeira linha, visível a norte e a nascente (cerca de 2.6 m de desnível). A poente e a sul perde-se entre os penedos de granito e os caminhos e não foi desenhada. Belino escavou em 1899 «pelo lado sul, entre a primeira e a segunda muralhas». Traçado no modelo do terreno do LiDAR da DGT (2025), sem planta publicada que se pudesse consultar; a pedra está soterrada e coberta de mato, por isso no estado atual a linha aparece como um talude coberto de mato, sem pedra à vista; a pedra só se desenha na interpretação e na reconstituição. A altura original não está publicada: valor hipotético. Fase: Idade do Ferro.",
-      "fontes": [
-        "lidar",
-        "barroca",
-        "wiki"
-      ],
-      "medidas": "comprimento ≈ 418 m · desnível atual na linha ≈ 2.6 m (LiDAR) · reconstituição: 1.5 m acima do terraço",
-      "resumo": "Um segundo talude a norte e a nascente",
-      "ancora": [
-        11.58,
-        -35.62,
-        -114.11
-      ]
-    },
     {
       "id": "CH",
       "nome": "Capela de Santa Marta das Cortiças",
@@ -168,58 +124,6 @@
         21.96,
         28.5
       ]
-    },
-    {
-      "id": "BA",
-      "nome": "Basílica paleocristã",
-      "grupo": "Basílica",
-      "estado": "estado-atual",
-      "confianca": "baixa",
-      "descricao": "Escavada em 1953-54 por Arlindo da Cunha e Russell Cortez: igreja de três naves, fachada ocidental reta, abside de ferradura inscrita (curva por dentro e reta por fora) e dois compartimentos ao lado dela (diaconicon a norte, prothesis a sul); seis bases de pilares ou colunas. Russell Cortez considerou-a a melhor igreja paleocristã do Norte de Portugal. A planta do relatório de 1954 não pôde ser consultada: as medidas são as publicadas, mas a posição dos pilares e a espessura dos muros são esquemáticas. A posição segue uma das coordenadas publicadas (ver lacunas). Hoje está tapada pelo mato; no estado atual aparece como um cordão baixo de pedra. Na reconstituição o muro sobe a 1,4 m só para se ler a planta (alçado não publicado). Fase: séc. V-VI.",
-      "fontes": [
-        "barroca",
-        "wiki"
-      ],
-      "medidas": "25 × 16 m · três naves: central 7,2 m, laterais 3,5 m · abside inscrita a nascente · orientada nascente-poente (publicado)",
-      "resumo": "Escavada em 1953-54: três naves e abside a nascente, 25 × 16 m",
-      "ancora": [
-        -34.8,
-        4.46,
-        27.9
-      ]
-    },
-    {
-      "id": "PA",
-      "nome": "Edifício palatino («palácio suevo»)",
-      "grupo": "Edifício palatino",
-      "estado": "estado-atual",
-      "confianca": "baixa",
-      "descricao": "Escavado por Rigaud de Sousa em 1966-70, a pouca distância a sul da basílica e com um alinhamento ligeiramente divergente (imposto pelo terreno e pelos penedos). Grande sala de duas naves separadas por sete pilares, dois compartimentos alongados a norte e, no topo leste, dois compartimentos e um corredor estreito. Capitéis jónicos e um coríntio de acantos lisos (séc. VI-VII). A planta faz lembrar o palácio visigótico de Recópolis; a destruição violenta, talvez em 585, na conquista visigoda, apoia a atribuição a um palácio suevo. A planta de 1970 não pôde ser consultada: a divisão interior é esquemática, segundo a descrição, e a posição e o ângulo são aproximados (ver lacunas). Fase: séc. VI.",
-      "fontes": [
-        "barroca",
-        "wiki",
-        "tese"
-      ],
-      "medidas": "34,2 × 12,6 m · grande sala de duas naves com sete pilares de secção quadrada (publicado)",
-      "resumo": "A sul da basílica, uma grande sala de duas naves com sete pilares, 34,2 × 12,6 m",
-      "ancora": [
-        -34.5,
-        2.81,
-        52
-      ]
-    },
-    {
-      "id": "PC",
-      "nome": "Coluna junto a um muro do palácio",
-      "grupo": "Ruínas",
-      "estado": "estado-atual",
-      "confianca": "baixa",
-      "descricao": "Na visita de 2022 o Tiago ainda viu, entre o mato, uma parede do palácio com uma coluna pegada a ela; em 2025 a vegetação tapava tudo. Posição aproximada. Fase: séc. VI.",
-      "fontes": [
-        "tese"
-      ],
-      "medidas": "posição e altura aproximadas",
-      "resumo": "Na visita de 2022 o Tiago ainda viu, entre o mato"
     },
     {
       "id": "TV",
@@ -304,6 +208,19 @@
         -0.59,
         35.8
       ]
+    },
+    {
+      "id": "RD",
+      "nome": "Estrada (atual)",
+      "grupo": "Envolvente",
+      "estado": "estado-atual",
+      "confianca": "alta",
+      "descricao": "Estradas pavimentadas do OpenStreetMap, assentes no terreno do LiDAR com textura de asfalto. Só no estado atual. A largura é a típica da categoria da via, não medida. Fase: atual.",
+      "fontes": [
+        "osm"
+      ],
+      "medidas": "largura ≈ 3,5 a 5 m · 597 m dentro da maqueta",
+      "resumo": "Estradas pavimentadas do OpenStreetMap"
     },
     {
       "id": "vegetacao",

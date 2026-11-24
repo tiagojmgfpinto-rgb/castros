@@ -100,34 +100,6 @@
       ]
     },
     {
-      "id": "M3",
-      "nome": "Terceira muralha (troço poente e norte)",
-      "grupo": "Muralhas",
-      "estado": "estado-atual",
-      "confianca": "média",
-      "descricao": "Traçado esquemático do painel, aproximado: a posição exata no terreno não foi verificada. A altura original não está publicada: o valor da reconstituição é hipotético. Fase: —.",
-      "fontes": [
-        "painel",
-        "cardoso1938"
-      ],
-      "medidas": "espessura ≈ 2 m (Cardoso 1938) · altura representada 1 m · reconstituição 3 m",
-      "resumo": "Traçado esquemático do painel, aproximado: a posição exata no terreno não foi verificada"
-    },
-    {
-      "id": "M3E",
-      "nome": "Terceira muralha (troço nascente)",
-      "grupo": "Muralhas",
-      "estado": "estado-atual",
-      "confianca": "média",
-      "descricao": "Traçado esquemático do painel, aproximado. A altura original não está publicada: o valor da reconstituição é hipotético. Fase: —.",
-      "fontes": [
-        "painel",
-        "cardoso1938"
-      ],
-      "medidas": "espessura ≈ 2 m (Cardoso 1938) · altura representada 1 m · reconstituição 3 m",
-      "resumo": "Traçado esquemático do painel, aproximado"
-    },
-    {
       "id": "S1",
       "nome": "Rua principal lajeada",
       "grupo": "Ruas",

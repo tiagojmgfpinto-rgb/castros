@@ -110,8 +110,13 @@ sh tools/fetch_dem.sh            # só para refazer a maqueta do noroeste
   Faltam: plantas de Paço 1953 (Zephyrus 4), Silva e Centeno 1980 (Est. I) e Silva 1999 (roteiro); capela de S. Romão e balneário sem posição.
 - **Revisão de 23 nov. 2026 (todas as maquetas, regras do prompt e do perito):** depois de refazer uma maqueta no Blender, correr
   `/opt/bvenv/bin/python tools/arvores_regras.py <id>` (árvores a ≥ 5 m das estruturas e sem copa por cima, recinto com ≤ 15 % da
-  densidade de fora, tojo verde com flor em 12 %) e, para S. Miguel-o-Anjo, Santa Marta e Sabroso, `node tools/gltf/regras.mjs <id>`
-  (muralhas soterradas como talude com mato no estado atual; granito dos afloramentos de Sabroso). Os protótipos das árvores vêm
+  densidade de fora, tojo verde com flor em 12 %) e, para S. Miguel-o-Anjo, Santa Marta, Briteiros e Sabroso, `node tools/gltf/regras.mjs <id>`
+  (`tirar`: no estado atual **não se desenha o que não se vê no terreno** (pedido do Tiago, 24 nov.: nada de «pseudo-reconstruções»):
+  muralhas soterradas de S. Miguel-o-Anjo e Santa Marta, basílica/palácio/coluna de Santa Marta, 3.ª muralha de Briteiros; ficam só em B e C,
+  e `lbl` liga os rótulos a essas peças para o visor e o site os esconderem no estado atual; granito dos afloramentos de Sabroso).
+  Estradas: `python3 tools/estradas_osm.py <id>` (vias pavimentadas do `osm/braga.pbf` → `tools/gltf/estradas/<id>.json`) e
+  `node tools/gltf/estradas.mjs <id>` (faixa A-RD assente no terreno com `blend/road_access.jpg`, tira as árvores da faixa, entrada RD no
+  catálogo); feito em Santa Marta e S. Miguel-o-Anjo; Sabroso não tem estrada no disco; Sanfins não está no `braga.pbf` (falta o OSM). Os protótipos das árvores vêm
   quantizados: o visor passa-os a float antes do `applyMatrix4` (antes, parte das copas descia ao chão como uma coluna preta).
 - O Tiago quer este nível em **todos** os sítios, um a um. Próximo: Santa Luzia, Bagunte, Cossourado. (Sabroso já tem LiDAR: o bloco 182506 não é preciso, o disco cabe todo no 182505.) Ver `docs/blocos_lidar_castros.md`.
 - Por confirmar com o Tiago: classificação de Roriz e de N.ª Sr.ª da Graça; Ázere MN 1910.

@@ -3090,7 +3090,7 @@ async function dioBuild(s){
     const moved=ctl.update();if(!(moved||dirty||fly))return;dirty=false;   // render only when something changed
     if(LOD.length){if(performance.now()-lodT>200)lodSplit();clearTimeout(lodTm);lodTm=setTimeout(()=>{if(lodSplit())dirty=true},250)}
     comp?comp.render():r.render(scene,cam);if(r.domElement.style.opacity==="0")r.domElement.style.opacity=1;
-    const placed=[];for(const l of labels){if(!st.L.lbl){l.e.style.display="none";continue}l.o.getWorldPosition(V);V.project(cam);if(V.z>1){l.e.style.display="none";continue}
+    const placed=[];for(const l of labels){const ls=l.o.userData.sid,lv=ls&&bySid[ls];if(!st.L.lbl||(lv&&![...lv.A,...lv.B].some(o=>o.visible))){l.e.style.display="none";continue}l.o.getWorldPosition(V);V.project(cam);if(V.z>1){l.e.style.display="none";continue}
       if(!l.w){l.e.style.display="";l.w=l.e.offsetWidth;l.h=l.e.offsetHeight}const x0=(V.x+1)/2*W,y=(1-V.y)/2*H;if(x0<0||x0>W||y<l.h+16||y>H){l.e.style.display="none";continue}const x=Math.min(Math.max(x0,l.w/2+4),W-l.w/2-4),bx={l:x-l.w/2,r:x+l.w/2,t:y-l.h-12,b:y};l.e.style.setProperty("--sx",(x0-x)+"px");
       if(placed.some(o=>bx.l<o.r&&bx.r>o.l&&bx.t<o.b&&bx.b>o.t)){l.e.style.display="none";continue}placed.push(bx);l.e.style.display="";l.e.style.transform=`translate(${x}px,${y}px) translate(-50%,-100%) translateY(-12px)`}
     cam.getWorldDirection(dirv);wrap.querySelector(".dio-n svg").style.transform=`rotate(${Math.atan2(dirv.x,-dirv.z)*-180/Math.PI}deg)`;
@@ -3100,7 +3100,7 @@ async function dioBuild(s){
   ctl.addEventListener("start",()=>{fly=null;if(ctl.autoRotate){ctl.autoRotate=false;const b=document.querySelector('#dioBar [data-a="spin"]');if(b)b.setAttribute("aria-pressed","false")}});
   // guided tour: fly to each stop (centre of the structure's geometry), with a short text
   const TO={on:false,i:0},tc=document.createElement("div");tc.className="dio-tour";tc.hidden=true;wrap.appendChild(tc);
-  const ctr=sid=>{const b=new T.Box3();let ok=false;objs.forEach(o=>{if(o.userData.sid===sid&&o.visible){b.expandByObject(o);ok=true}});return ok?b:null};
+  const ctr=sid=>{const b=new T.Box3();let ok=false;objs.forEach(o=>{if(o.userData.sid===sid&&o.visible){b.expandByObject(o);ok=true}});if(!ok)objs.forEach(o=>{if(o.userData.sid===sid){b.expandByObject(o);ok=true}});return ok?b:null};
   const tourEnd=()=>{TO.on=false;tc.hidden=true;const b=$("#dioBar [data-a='tour']");if(b)b.setAttribute("aria-pressed","false");st.sel=null;apply()};
   const tourGo=i=>{if(st.v==="D"||st.v==="E")setV("A");const L=DIOS[s.id].tour;TO.on=true;TO.i=(i+L.length)%L.length;const {sid,title:t,text:d}=L[TO.i];card.hidden=true;ctl.autoRotate=false;
     const b=$("#dioBar [data-a='tour']");if(b)b.setAttribute("aria-pressed","true");

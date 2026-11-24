@@ -42,74 +42,9 @@
   ],
   "placas": [
     "CH",
-    "M1",
-    "M2",
-    "M3",
     "S1"
   ],
   "elementos": [
-    {
-      "id": "M1",
-      "nome": "Linha interior, à volta da plataforma do cume",
-      "grupo": "Muralhas",
-      "estado": "estado-atual",
-      "confianca": "alta",
-      "descricao": "Rebordo da plataforma do cume, com um talude de cerca de 1.7 m no modelo do terreno LiDAR. É a mais baixa das três linhas e a menos marcada; pode ser uma muralha soterrada ou só o rebordo aplanado do cume. Traçado no modelo do terreno do LiDAR da DGT (2025); a pedra está soterrada e coberta de mato, por isso no estado atual a linha aparece como um talude coberto de mato, sem pedra à vista; a pedra só se desenha na interpretação e na reconstituição. A altura original não está publicada: valor hipotético. Fase: —.",
-      "fontes": [
-        "lidar",
-        "sipa",
-        "aap"
-      ],
-      "medidas": "comprimento ≈ 332 m · recinto com 0.74 ha · desnível atual na linha ≈ 1.7 m (LiDAR) · reconstituição: 1.2 m acima do terraço",
-      "resumo": "No alto, junto ao vértice geodésico Anjo (385 m), uma plataforma com penedos de granito",
-      "ancora": [
-        43.26,
-        3.78,
-        -47.46
-      ]
-    },
-    {
-      "id": "M2",
-      "nome": "Muralha intermédia, à volta de todo o monte",
-      "grupo": "Muralhas",
-      "estado": "estado-atual",
-      "confianca": "alta",
-      "descricao": "A linha mais forte: um talude de cerca de 3.8 m, contínuo à volta do monte, com um terraço por dentro. O troço de muralha de 43 m posto a descoberto pelos escuteiros fica nesta linha (ponto «Muro Celta» do OpenStreetMap). A altura da reconstituição (2 m acima do terraço) segue a altura conservada desse troço. Traçado no modelo do terreno do LiDAR da DGT (2025); a pedra está soterrada e coberta de mato, por isso no estado atual a linha aparece como um talude coberto de mato, sem pedra à vista; a pedra só se desenha na interpretação e na reconstituição.  Fase: —.",
-      "fontes": [
-        "lidar",
-        "sipa",
-        "aap",
-        "tese",
-        "osm"
-      ],
-      "medidas": "comprimento ≈ 451 m · recinto com 1.36 ha · desnível atual na linha ≈ 3.8 m (LiDAR) · reconstituição: 2 m acima do terraço",
-      "resumo": "O talude mais forte do monte, com 3 a 6 m de desnível no LiDAR de 2025",
-      "ancora": [
-        36.44,
-        0.9,
-        -119.83
-      ]
-    },
-    {
-      "id": "M3",
-      "nome": "Linha exterior, a poente e a norte",
-      "grupo": "Muralhas",
-      "estado": "estado-atual",
-      "confianca": "alta",
-      "descricao": "Segundo talude, 15 a 30 m para fora da muralha intermédia, visível a poente e a norte (cerca de 2.6 m de desnível). A nascente e a sul perde-se entre os caminhos florestais. Traçado no modelo do terreno do LiDAR da DGT (2025); a pedra está soterrada e coberta de mato, por isso no estado atual a linha aparece como um talude coberto de mato, sem pedra à vista; a pedra só se desenha na interpretação e na reconstituição. A altura original não está publicada: valor hipotético. Fase: —.",
-      "fontes": [
-        "lidar",
-        "sipa",
-        "aap"
-      ],
-      "medidas": "comprimento ≈ 316 m · desnível atual na linha ≈ 2.6 m (LiDAR) · reconstituição: 1.2 m acima do terraço",
-      "resumo": "Um segundo talude a poente e a norte, 15 a 30 m para fora: com as outras duas",
-      "ancora": [
-        -17.42,
-        -9.44,
-        -136.66
-      ]
-    },
     {
       "id": "S1",
       "nome": "Troço de muralha posto a descoberto pelos escuteiros",
@@ -143,6 +78,19 @@
         -5.53,
         139.38
       ]
+    },
+    {
+      "id": "RD",
+      "nome": "Estrada (atual)",
+      "grupo": "Envolvente",
+      "estado": "estado-atual",
+      "confianca": "alta",
+      "descricao": "Estradas pavimentadas do OpenStreetMap (Avenida Padre Flávio), assentes no terreno do LiDAR com textura de asfalto. Só no estado atual. A largura é a típica da categoria da via, não medida. Fase: atual.",
+      "fontes": [
+        "osm"
+      ],
+      "medidas": "largura ≈ 5 m · 112 m dentro da maqueta",
+      "resumo": "Estradas pavimentadas do OpenStreetMap (Avenida Padre Flávio)"
     },
     {
       "id": "vegetacao",
