@@ -77,6 +77,20 @@ sh tools/fetch_dem.sh            # só para refazer a maqueta do noroeste
    O artifact não serve `.glb`; o PNG reduz ~3× e o visualizador extrai os bytes. Limite de 16 MB por ficheiro publicado.
 6. **Visualizador** (em `app/src.html`: `dioMount`; dados em `maquetas/<id>.json` e luz em `maquetas/luz.json`; tone mapping `tone` aces/neutral em `luz.json` (comparados em nov. 2026, fica aces); a mesma luz no Blender com `blend/luz.py` e render de controlo `blend/luz_render.py <glb> <png> <id>` (Cycles CPU); computador = sombra 4096 ajustada à maqueta + RoomEnvironment + GTAO, telemóvel/tátil = sombra 1024 sem pós-processamento; enquadramento automático pela silhueta, `"cam":{az,el}` opcional no ficheiro da maqueta; `?v=` dos ficheiros escrito pelo `build.py`; capturas antes/depois de todas as maquetas: `CDN=<pasta npm> node tests/dio_all.mjs <saída> desk|phone`, `BASE=` para outro servidor): camadas A–E (A estado atual, B interpretação = cores de evidência confirmado / documentado / hipotético, C reconstituição se não houver `noB`, D só relevo com curvas de nível de 1 m em altitude real a partir de `ex`/`h0` do `app/dio/<id>.json` e exagero × 1/× 2, E estrutura isolada), grupos de peças (`layers`), rótulos que aproximam a câmara, botão norte, ficha por estrutura, visita guiada, fontes e lacunas. Teste das camadas: `node tests/dio_pick.mjs <saída> [id]` (`VP=desk`). Fases por estrutura só quando houver fonte (ainda nenhuma maqueta tem `phases`).
 
+## Merges
+
+- O Tiago quer os merges automáticos (24 nov. 2026). `.github/workflows/auto-merge.yml`: quando «Publicar o site» passa num PR
+  aberto com a conta dele a partir de um ramo `claude/*` deste repositório, o PR é integrado (merge commit) e a publicação no `main`
+  é relançada (um merge com o `GITHUB_TOKEN` não dispara o push). Um PR em rascunho não é integrado. Se os testes falharem ou houver
+  conflito, o PR fica aberto: corrigir no ramo e voltar a enviar. `app/index.html` é gerado: num conflito, refazer com `python3 build.py`.
+
+## Segurança
+
+- Não há chaves de API nem servidor próprio: os dados partilhados vivem na base de dados do artifact, com regras no servidor
+  (`comments/<id>` só o próprio escreve; `history` e `extra` só o dono). Não guardar segredos no código nem no `data.json`.
+- Tudo o que vem da base de dados passa por `SAN` em `app/src.html` (tipo, tamanho, formato, URLs só http/https) antes de chegar ao ecrã;
+  as escritas passam pelos mesmos limites e por `rlOk` (limite de rajadas no navegador). Teste: `CDN=<pasta npm> node tests/sanitize.mjs`.
+
 ## Regras do Tiago
 
 - **Nunca inventar** estruturas, medidas ou datas: tudo com fonte, e o que falta vai para a lista de lacunas (`gaps` em `maquetas/<id>.json`).
@@ -108,5 +122,15 @@ sh tools/fetch_dem.sh            # só para refazer a maqueta do noroeste
   geodésico com base e pilar medidos. A ortofoto `app/t3/<id>-c.jpg` alinha com o LiDAR. Fotografias do Commons: o browser do app do
   Tiago abre a API do Commons (curl e web-fetch não); `tests/dio_views.mjs` tira a maqueta do mesmo ponto de vista de uma fotografia.
   Faltam: plantas de Paço 1953 (Zephyrus 4), Silva e Centeno 1980 (Est. I) e Silva 1999 (roteiro); capela de S. Romão e balneário sem posição.
+- **Revisão de 23 nov. 2026 (todas as maquetas, regras do prompt e do perito):** depois de refazer uma maqueta no Blender, correr
+  `/opt/bvenv/bin/python tools/arvores_regras.py <id>` (árvores a ≥ 5 m das estruturas e sem copa por cima, recinto com ≤ 15 % da
+  densidade de fora, tojo verde com flor em 12 %) e, para S. Miguel-o-Anjo, Santa Marta, Briteiros e Sabroso, `node tools/gltf/regras.mjs <id>`
+  (`tirar`: no estado atual **não se desenha o que não se vê no terreno** (pedido do Tiago, 24 nov.: nada de «pseudo-reconstruções»):
+  muralhas soterradas de S. Miguel-o-Anjo e Santa Marta, basílica/palácio/coluna de Santa Marta, 3.ª muralha de Briteiros; ficam só em B e C,
+  e `lbl` liga os rótulos a essas peças para o visor e o site os esconderem no estado atual; granito dos afloramentos de Sabroso).
+  Estradas: `python3 tools/estradas_osm.py <id>` (vias pavimentadas do `osm/braga.pbf` → `tools/gltf/estradas/<id>.json`) e
+  `node tools/gltf/estradas.mjs <id>` (faixa A-RD assente no terreno com `blend/road_access.jpg`, tira as árvores da faixa, entrada RD no
+  catálogo); feito em Santa Marta e S. Miguel-o-Anjo; Sabroso não tem estrada no disco; Sanfins não está no `braga.pbf` (falta o OSM). Os protótipos das árvores vêm
+  quantizados: o visor passa-os a float antes do `applyMatrix4` (antes, parte das copas descia ao chão como uma coluna preta).
 - O Tiago quer este nível em **todos** os sítios, um a um. Próximo: Santa Luzia, Bagunte, Cossourado. (Sabroso já tem LiDAR: o bloco 182506 não é preciso, o disco cabe todo no 182505.) Ver `docs/blocos_lidar_castros.md`.
 - Por confirmar com o Tiago: classificação de Roriz e de N.ª Sr.ª da Graça; Ázere MN 1910.

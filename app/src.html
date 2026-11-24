@@ -577,7 +577,7 @@ sup.rf{font-size:10px;margin-left:2px}sup.rf a{color:var(--accent);text-decorati
 .mhl-lines{position:absolute;left:0;top:0;pointer-events:none;overflow:visible}.mhl-lines path{stroke:#2a221a;stroke-width:1;fill:none;opacity:.7}.mhl-lines circle{fill:#2a221a}
 .dio-tour{position:absolute;left:10px;right:10px;bottom:10px;max-width:440px;background:rgb(252 249 240/.97);color:#221B13;border:1px solid #cfc3a6;border-radius:6px;padding:10px 14px;box-shadow:0 6px 18px rgb(0 0 0/.22);font-size:13.5px;line-height:1.45}
 .dio-tour .k{font-family:Cinzel,serif;font-weight:700;font-size:10.5px;letter-spacing:.1em;color:#9B2D20;text-transform:uppercase}
-.dio-tour b{display:block;font-family:Cinzel,serif;font-size:16px;margin:2px 0}.dio-tour p{margin:4px 0 8px}
+.dio-tour b{display:block;font-family:Cinzel,serif;font-size:16px;margin:2px 0}.dio-tour p{margin:4px 0 8px}.dio-tour p.src{font-size:11.5px;color:#6b5d4a;margin-top:-4px}
 .dio-tour .nav{display:flex;gap:6px}.dio-tour .nav button{flex:1;border:1px solid #a8977a;background:transparent;color:#221B13;padding:6px;font-family:Cinzel,serif;font-weight:600;font-size:11px;cursor:pointer;border-radius:3px}
 .dio:fullscreen,.dio.full{background:linear-gradient(#9cc3e6,#dfeaf2 45%,#efe7d3)!important}
 /* site diorama */
@@ -613,7 +613,7 @@ sup.rf{font-size:10px;margin-left:2px}sup.rf a{color:var(--accent);text-decorati
 .dio-load{position:absolute;inset:0;display:grid;place-items:center;font-family:Cinzel,serif;letter-spacing:.14em;font-size:12px;color:var(--muted)}
 .dio-lbls{position:absolute;inset:0;pointer-events:none;overflow:hidden}
 .dio-l{position:absolute;left:0;top:0;white-space:nowrap;font-family:Cinzel,serif;font-weight:600;font-size:11px;letter-spacing:.08em;color:#2a221a;background:rgb(252 249 240/.94);border:1px solid #cfc3a6;padding:3px 7px;border-radius:2px;box-shadow:0 1px 3px rgb(0 0 0/.18)}
-.dio-l::after{content:"";position:absolute;left:50%;top:100%;width:1px;height:12px;background:#5d5040}
+.dio-l::after{content:"";position:absolute;left:calc(50% + var(--sx,0px));top:100%;width:1px;height:12px;background:#5d5040}
 .dio-scale{position:absolute;left:14px;bottom:12px;font-family:Cinzel,serif;font-size:10px;color:var(--ink)}
 .dio-scale i{display:block;height:5px;border:1.2px solid var(--ink);border-top:0;margin-bottom:2px;max-width:200px}
 .dio-n{position:absolute;right:12px;bottom:10px;display:flex;align-items:center;gap:3px;font-family:Cinzel,serif;font-size:10px;color:var(--ink)}
@@ -1177,6 +1177,35 @@ const DISTRICTS=["Viana do Castelo","Braga","Vila Real","Porto","Aveiro","Lisboa
 const MONTHS=["janeiro","fevereiro","março","abril","maio","junho","julho","agosto","setembro","outubro","novembro","dezembro"];
 const $=s=>document.querySelector(s);
 const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+
+/* ---------- sanitização: tudo o que vem da base de dados partilhada é tratado como não fiável ----------
+   As regras do servidor (capabilities db.rules) já limitam quem escreve: comments/<id> só o próprio, history e extra só o dono.
+   Mesmo assim, um contribuidor pode escrever no seu documento de comentários qualquer forma de dados fora da interface,
+   por isso cada campo é validado (tipo, tamanho, formato) antes de chegar ao ecrã. */
+const SAN={
+  str(v,max){return typeof v==="string"?v.replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F\u202A-\u202E\u2066-\u2069]/g,"").trim().slice(0,max):""},
+  num(v,lo,hi){return typeof v==="number"&&isFinite(v)&&v>=lo&&v<=hi?v:null},
+  url(v){if(typeof v!=="string"||v.length>2000)return "";try{const u=new URL(v.trim());return u.protocol==="https:"||u.protocol==="http:"?u.href:""}catch(_){return ""}},
+  uid(v){return typeof v==="string"&&/^[A-Za-z0-9_-]{1,128}$/.test(v)?v:null},
+  cid(v){return typeof v==="string"&&/^[a-z0-9]{1,24}$/.test(v)?v:null},
+  xid(v){return typeof v==="string"&&/^x-[a-z0-9-]{1,90}$/.test(v)?v:null},
+  asset(v){return typeof v==="string"&&/^[0-9a-f]{32}$/.test(v)?v:null},
+  date(v){return typeof v==="string"&&/^\d{4}-\d{2}-\d{2}$/.test(v)?v:""},
+  comment(c){if(!c||typeof c!=="object")return null;const id=SAN.cid(c.id),text=SAN.str(c.text,800),ts=SAN.num(c.ts,1.6e12,Date.now()+864e5);
+    if(!id||!text||!ts||typeof c.site!=="string"||!BY[c.site])return null;return {id,site:c.site,text,ts,hid:c.hid===true}},
+  comments(d){const it=d&&Array.isArray(d.items)?d.items.slice(-300):[];return {items:it.map(SAN.comment).filter(Boolean)}},
+  hist(d){const text=SAN.str(d&&d.text,30000);return text?{text,ts:SAN.num(d.ts,0,Date.now()+864e5)||0}:null},
+  extra(d){if(!d||typeof d!=="object"||!Array.isArray(d.coords)||d.coords.length!==2)return null;
+    const la=SAN.num(d.coords[0],36,44.5),lo=SAN.num(d.coords[1],-10.5,-5),name=SAN.str(d.name,200);if(la===null||lo===null||!name)return null;
+    return {name,kind:typeof d.kind==="string"&&TYPES[d.kind]?d.kind:"castro",cls:typeof d.cls==="string"&&CLS[d.cls]?d.cls:null,
+      distrito:SAN.str(d.distrito,60),municipio:SAN.str(d.municipio,80),coords:[la,lo],date:SAN.date(d.date),
+      text:SAN.str(d.text,20000),hist:SAN.str(d.hist,12000),
+      src:(Array.isArray(d.src)?d.src.slice(0,30):[]).map(x=>x&&typeof x==="object"?{t:SAN.str(x.t,300),u:SAN.url(x.u),k:["sci","sipa","muni","wiki","tese"].includes(x.k)?x.k:"sci"}:null).filter(x=>x&&x.t),
+      photos:(Array.isArray(d.photos)?d.photos.slice(0,40):[]).map(SAN.asset).filter(Boolean),ts:SAN.num(d.ts,0,Date.now()+864e5)||0}}
+};
+/* limite de escritas no navegador: rajadas de cliques ou scripts não martelam a base de dados (o servidor aplica as suas próprias quotas) */
+const RL={t:{},ok(k,n,ms){const now=Date.now(),a=(RL.t[k]||[]).filter(x=>now-x<ms);if(a.length>=n){RL.t[k]=a;return false}a.push(now);RL.t[k]=a;return true}};
+function rlOk(k,n,ms){if(RL.ok(k,n,ms))return true;toast("Demasiadas alterações seguidas. Aguarde um momento.");return false}
 const norm=s=>String(s||"").normalize("NFD").replace(/[̀-ͯ]/g,"").toLowerCase();
 const tc=k=>`var(--t-${k})`;
 function km(a,b){const R=6371,r=Math.PI/180,dl=(b[0]-a[0])*r,dn=(b[1]-a[1])*r;const h=Math.sin(dl/2)**2+Math.cos(a[0]*r)*Math.cos(b[0]*r)*Math.sin(dn/2)**2;return 2*R*Math.asin(Math.sqrt(h))}
@@ -1709,7 +1738,7 @@ function renderHistory(s,el,editing){
       <textarea id="htext" style="margin-top:6px">${esc(paras.join("\n\n"))}</textarea>
       <div class="row-btns"><button class="btn primary" id="hsave">Guardar</button><button class="btn" id="hcancel">Cancelar</button>${o?`<button class="btn" id="hreset">Repor texto original</button>`:""}</div></div>`;
     $("#hcancel").onclick=()=>renderHistory(s,el);
-    $("#hsave").onclick=async e=>{e.target.disabled=true;try{await SH.db.collection("history").doc(s.id).set({text:$("#htext").value.trim(),ts:Date.now()});toast("Texto guardado");renderHistory(s,el)}catch(err){e.target.disabled=false;toast("Não foi possível guardar. Tente de novo.")}};
+    $("#hsave").onclick=async e=>{if(!rlOk("hist",5,6e4))return;const text=SAN.str($("#htext").value,30000);if(!text){toast("O texto está vazio.");return}e.target.disabled=true;try{await SH.db.collection("history").doc(s.id).set({text,ts:Date.now()});toast("Texto guardado");renderHistory(s,el)}catch(err){e.target.disabled=false;toast("Não foi possível guardar. Tente de novo.")}};
     if($("#hreset"))$("#hreset").onclick=async()=>{try{await SH.db.collection("history").doc(s.id).delete();toast("Texto original reposto")}catch(err){toast("Não foi possível repor.")}renderHistory(s,el)};
     return;
   }
@@ -2065,7 +2094,7 @@ function xToSite(id,d){
   const m=Object.values(MUN).find(m=>m.name===d.municipio);
   return {id,x:1,name:d.name,kind:TYPES[d.kind]?d.kind:"castro",municipio:d.municipio||"",slug:m?m.slug:"x-"+xSlug(d.municipio||""),distrito:d.distrito||"",coords:d.coords,date:d.date||"",
     cls:d.cls&&CLS[d.cls]?{c:d.cls,l:CLS[d.cls].l}:undefined,text:(d.text||"").split(/\n\s*\n/).map(x=>x.trim()).filter(Boolean),
-    hist:{p:(d.hist||"").split(/\n\s*\n/).map(x=>x.trim()).filter(Boolean),src:(d.src||[]).map(x=>({t:x.t,u:x.u,k:x.k||"sci"}))},
+    hist:{p:(d.hist||"").split(/\n\s*\n/).map(x=>x.trim()).filter(Boolean),src:(d.src||[]).map(x=>({t:x.t,u:SAN.url(x.u),k:x.k||"sci"}))},
     xph:(d.photos||[]).filter(x=>/^[0-9a-f]{32}$/.test(x)),visit:!!d.date}}
 function applyExtras(){
   // remove previous extras, then add the current ones
@@ -2133,10 +2162,12 @@ function renderAdd(){
   f.onsubmit=async ev=>{ev.preventDefault();if(!SH.db){toast("Sem ligação à base de dados.");return}
     const la=parseFloat(String(f.lat.value).replace(",",".")),lo=parseFloat(String(f.lon.value).replace(",","."));
     if(!(la>36&&la<44.5&&lo>-10.5&&lo<-5)){toast("Coordenadas fora do noroeste peninsular.");return}
-    const src=f.src.value.split("\n").map(l=>l.trim()).filter(Boolean).map(l=>{const[t,u]=l.split("|").map(x=>x.trim());return{t:t.slice(0,300),u:/^https?:\/\//.test(u||"")?u:"",k:"sci"}}).slice(0,30);
-    const doc={name:f.name.value.trim(),kind:f.kind.value,cls:f.cls.value||null,distrito:f.distrito.value,municipio:f.municipio.value.trim(),coords:[+la.toFixed(6),+lo.toFixed(6)],date:f.date.value||"",
-      text:f.text.value.trim().slice(0,20000),hist:f.hist.value.trim().slice(0,12000),src,photos:XD.photos.slice(0,40),ts:Date.now()};
-    const id=XD.edit||("x-"+xSlug(doc.name+"-"+doc.municipio)).slice(0,90);
+    if(!rlOk("extra",5,6e4))return;
+    const src=f.src.value.split("\n").map(l=>l.trim()).filter(Boolean).map(l=>{const[t,u]=l.split("|").map(x=>x.trim());return{t:SAN.str(t,300),u:SAN.url(u),k:"sci"}}).filter(x=>x.t).slice(0,30);
+    const raw={name:f.name.value,kind:f.kind.value,cls:f.cls.value||null,distrito:f.distrito.value,municipio:f.municipio.value.trim(),coords:[+la.toFixed(6),+lo.toFixed(6)],date:f.date.value||"",
+      text:f.text.value,hist:f.hist.value,src,photos:XD.photos.slice(0,40),ts:Date.now()};
+    const doc=SAN.extra(raw);if(!doc){toast("Preencha o nome e as coordenadas.");return}
+    const id=SAN.xid(XD.edit||("x-"+xSlug(doc.name+"-"+doc.municipio)).slice(0,92));if(!id){toast("Nome inválido.");return}
     if(!XD.edit&&(BY[id]||XD.docs[id])){toast("Já existe um castro com este nome neste concelho.");return}
     $("#xsave").disabled=true;
     try{await SH.db.collection("extra").doc(id).set(doc);toast(XD.edit?"Castro atualizado":"Castro acrescentado ao atlas");XD.edit=null;xClearPick();XD.docs[id]=doc;applyExtras();openSite(id,{fly:true})}
@@ -2156,7 +2187,7 @@ function xMarker(){const f=$("#xform");if(!f||!map)return;const la=parseFloat(f.
 function xClearPick(){XD.pick=false;if(map)map.getContainer().style.cursor="";if(XD.pickMk){XD.pickMk.remove();XD.pickMk=null}}
 function initExtras(){
   if(!SH.db)return;
-  SH.db.collection("extra").onSnapshot(snap=>{const n={};snap.docs.forEach(d=>{if(d.exists)n[d.id]=d.data()});XD.docs=n;applyExtras();if(S.tab==="add"&&!S.sel&&!XD.edit&&document.activeElement&&!document.activeElement.closest("#xform"))renderAdd()},()=>{});
+  SH.db.collection("extra").onSnapshot(snap=>{const n={};snap.docs.forEach(d=>{const id=SAN.xid(d.id),x=d.exists&&id?SAN.extra(d.data()):null;if(x)n[id]=x});XD.docs=n;applyExtras();if(S.tab==="add"&&!S.sel&&!XD.edit&&document.activeElement&&!document.activeElement.closest("#xform"))renderAdd()},()=>{});
   if(OWNER&&window.claude)window.claude.use("assets").then(a=>{XD.assets=a;if(S.tab==="add"&&!S.sel)renderAdd()}).catch(()=>{});
 }
 /* ---------- comments: each person writes only their own document comments/<id> ---------- */
@@ -2168,9 +2199,9 @@ async function initShared(){
     SH.db=db;SH.user=user;
     if(user){SH.uid=await user.id();const c=await user.can("data.write");SH.canWrite=OWNER?true:c}
     if(!db){SH.ready=true;refreshComments();return}
-    db.collection("comments").onSnapshot(snap=>{SH.docs={};snap.docs.forEach(d=>{if(d.exists)SH.docs[d.id]=d.data()});SH.ready=true;refreshComments()},()=>{SH.ready=true;refreshComments()});
+    db.collection("comments").onSnapshot(snap=>{SH.docs={};snap.docs.forEach(d=>{const id=SAN.uid(d.id);if(d.exists&&id)SH.docs[id]=SAN.comments(d.data())});SH.ready=true;refreshComments()},()=>{SH.ready=true;refreshComments()});
     initExtras();
-    db.collection("history").onSnapshot(snap=>{SH.hist={};snap.docs.forEach(d=>{if(d.exists)SH.hist[d.id]=d.data()});if(S.sel&&!document.querySelector("#htext")){const el=$("#shist");if(el)renderHistory(BY[S.sel],el)}},()=>{});
+    db.collection("history").onSnapshot(snap=>{SH.hist={};snap.docs.forEach(d=>{const h=d.exists&&typeof d.id==="string"&&BY[d.id]?SAN.hist(d.data()):null;if(h)SH.hist[d.id]=h});if(S.sel&&!document.querySelector("#htext")){const el=$("#shist");if(el)renderHistory(BY[S.sel],el)}},()=>{});
   }catch(e){SH.ready=true;refreshComments()}
 }
 function allComments(){const out=[];for(const uid in SH.docs){const it=SH.docs[uid].items;if(Array.isArray(it))it.forEach(c=>{if(c&&c.text&&BY[c.site]&&(!c.hid||OWNER||uid===SH.uid))out.push({...c,uid})})}return out.sort((a,b)=>b.ts-a.ts)}
@@ -2193,13 +2224,15 @@ function formHtml(s){
 function bindForm(s){
   const f=$("#cform");if(!f)return;const t=$("#ctext");
   t.oninput=()=>{$("#ccount").textContent=t.value.length+"/800"};
-  f.onsubmit=async e=>{e.preventDefault();const text=t.value.trim();const site=s?s.id:$("#csite").value;
+  f.onsubmit=async e=>{e.preventDefault();const text=SAN.str(t.value,800);const site=s?s.id:$("#csite").value;
     if(!site){toast("Escolha o local do comentário");return}if(!text){toast("Escreva o comentário primeiro");return}
     const mine=(SH.docs[SH.uid]&&SH.docs[SH.uid].items)||[];
     if(!OWNER&&mine.filter(x=>Date.now()-x.ts<6e5).length>=5){toast("Muitos comentários seguidos. Tente daqui a alguns minutos.");return}
-    if(!OWNER&&mine.some(x=>x.text===text.slice(0,800)&&x.site===site)){toast("Esse comentário já foi publicado.");return}
+    if(!BY[site]){toast("Local desconhecido");return}
+    if(!rlOk("com",3,6e4))return;
+    if(!OWNER&&mine.some(x=>x.text===text&&x.site===site)){toast("Esse comentário já foi publicado.");return}
     const btn=$("#csend");btn.disabled=true;
-    const items=[...mine,{id:Date.now().toString(36)+Math.random().toString(36).slice(2,6),site,text:text.slice(0,800),ts:Date.now()}].slice(-300);
+    const items=[...mine,{id:Date.now().toString(36)+Math.random().toString(36).slice(2,6),site,text,ts:Date.now()}].slice(-300);
     try{await SH.db.collection("comments").doc(SH.uid).set({items});t.value="";$("#ccount").textContent="0/800";toast("Comentário publicado")}
     catch(err){if(err&&err.code==="invalid_argument"){SH.blocked=true;toast("Não tem permissão para comentar nesta página");refreshForm(s)}else if(err&&err.code==="quota_exceeded")toast("O espaço para comentários está cheio.");else toast("Não foi possível publicar. Tente de novo.")}
     btn.disabled=false};
@@ -2209,15 +2242,15 @@ async function fillList(el,list,showSite){
   if(!list.length){el.innerHTML=`<li class="empty">${showSite?"Ainda não há comentários. Seja o primeiro a partilhar a sua visita.":"Ainda não há comentários sobre este local."}</li>`;return}
   const ps=SH.user?await SH.user.profiles([...new Set(list.map(c=>c.uid))]):{};
   el.innerHTML=list.map(c=>{const p=ps[c.uid]||{};const s=BY[c.site];const mine=c.uid===SH.uid;
-    return `<li class="citem"${c.hid?' style="opacity:.55"':""}><img src="${esc(p.avatarUrl||"")}" alt=""><div style="min-width:0"><div class="who"><b data-n></b><span>${new Date(c.ts).toLocaleDateString("pt-PT",{day:"numeric",month:"short",year:"numeric"})}</span>${OWNER&&!mine?`<button class="del" data-hide="${c.uid}|${c.id}">${c.hid?"mostrar":"ocultar"}</button>`:""}${mine||OWNER?`<button class="del" data-del="${c.uid}|${c.id}">${mine?"apagar":"remover"}</button>`:""}</div>${c.hid?`<div class="muted" style="font-size:11.5px">Oculto para os visitantes</div>`:""}
+    return `<li class="citem"${c.hid?' style="opacity:.55"':""}><img src="${esc(p.avatarUrl||"")}" alt=""><div style="min-width:0"><div class="who"><b data-n></b><span>${new Date(c.ts).toLocaleDateString("pt-PT",{day:"numeric",month:"short",year:"numeric"})}</span>${OWNER&&!mine?`<button class="del" data-hide="${esc(c.uid)}|${esc(c.id)}">${c.hid?"mostrar":"ocultar"}</button>`:""}${mine||OWNER?`<button class="del" data-del="${esc(c.uid)}|${esc(c.id)}">${mine?"apagar":"remover"}</button>`:""}</div>${c.hid?`<div class="muted" style="font-size:11.5px">Oculto para os visitantes</div>`:""}
       ${showSite?`<button class="site" data-id="${s.id}">${esc(s.name)} · ${esc(s.municipio)}</button>`:""}<p>${esc(c.text)}</p></div></li>`}).join("");
   el.querySelectorAll("[data-n]").forEach((b,i)=>{const c=list[i],p=ps[c.uid]||{};b.textContent=(p.name||"Visitante")+(c.uid===SH.uid?" (você)":"")});
-  el.querySelectorAll("[data-hide]").forEach(b=>b.onclick=async e=>{e.stopPropagation();const [uid,id]=b.dataset.hide.split("|");
+  el.querySelectorAll("[data-hide]").forEach(b=>b.onclick=async e=>{e.stopPropagation();if(!rlOk("mod",10,6e4))return;const [uid,id]=b.dataset.hide.split("|");
     const items=((SH.docs[uid]&&SH.docs[uid].items)||[]).map(x=>x.id===id?{...x,hid:!x.hid}:x);
     try{await SH.db.collection("comments").doc(uid).set({items});toast("Visibilidade alterada")}catch(err){toast("Não foi possível alterar.")}});
   el.querySelectorAll("[data-del]").forEach(b=>b.onclick=async e=>{e.stopPropagation();
     if(!b.dataset.c){b.dataset.c=1;b.textContent="confirmar?";return}
-    const [uid,id]=b.dataset.del.split("|");const items=((SH.docs[uid]&&SH.docs[uid].items)||[]).filter(x=>x.id!==id);
+    if(!rlOk("mod",10,6e4))return;const [uid,id]=b.dataset.del.split("|");const items=((SH.docs[uid]&&SH.docs[uid].items)||[]).filter(x=>x.id!==id);
     try{await SH.db.collection("comments").doc(uid).set({items});toast("Comentário removido")}catch(err){toast("Não foi possível remover.")}});
 }
 function renderSiteComments(s,el){el.innerHTML=`<div id="cwrap">${formHtml(s)}</div><ul class="clist" id="clist"></ul>`;bindForm(s);fillList($("#clist"),siteComments(s.id),false)}
@@ -2943,7 +2976,7 @@ async function dioBuild(s){
   Object.assign(sun.shadow.camera,{left:-R*1.1,right:R*1.1,top:R*1.1,bottom:-R*1.1,near:1,far:R*5});sun.shadow.mapSize.setScalar(FINE?LS.map:LS.mapTouch);sun.shadow.bias=LS.bias;sun.shadow.normalBias=LS.normalBias;scene.add(sun,sun.target);
   const root=g.scene,protos={},objs=[];
   root.traverse(o=>{if(!o.isMesh)return;const n=o.name;
-    if(n.startsWith("PROTO-")){const [,k,p]=n.split("-");o.updateWorldMatrix(true,false);(protos[k]=protos[k]||[]).push({p,g:o.geometry.clone().applyMatrix4(o.matrixWorld),m:o.material});o.visible=false;return}
+    if(n.startsWith("PROTO-")){const [,k,p]=n.split("-");o.updateWorldMatrix(true,false);const g0=o.geometry.clone();for(const nm in g0.attributes){const at=g0.attributes[nm];if(at.normalized||!(at.array instanceof Float32Array)){const f=new Float32Array(at.count*at.itemSize);for(let i=0;i<at.count;i++)for(let j=0;j<at.itemSize;j++)f[i*at.itemSize+j]=at.getComponent(i,j);g0.setAttribute(nm,new T.BufferAttribute(f,at.itemSize))}}(protos[k]=protos[k]||[]).push({p,g:g0.applyMatrix4(o.matrixWorld),m:o.material});o.visible=false;return}
     o.castShadow=!/terrain|skirt/.test(n);o.receiveShadow=true;if(o.material&&o.material.map){o.material.map.anisotropy=r.capabilities.getMaxAnisotropy();o.material.map.needsUpdate=true}
     const u=o.userData||{};if(u.sid){o.userData.base=o.material;objs.push(o)}});
   scene.add(root);
@@ -2981,7 +3014,7 @@ async function dioBuild(s){
     const G=new T.BufferGeometry();G.setAttribute("position",new T.Float32BufferAttribute(out,3));G.computeVertexNormals();return G};
   if(meta&&meta.trees){const tr=meta.trees,m4=new T.Matrix4(),q=new T.Quaternion(),c=new T.Color(),up=new T.Vector3(0,1,0);
     const TY=meta.types||["oak","pine"];for(const k of TY){const ti=TY.indexOf(k),list=tr.filter(t=>t[4]===ti);if(!list.length||!protos[k])continue;
-      protos[k].forEach(pp=>{const mat=pp.m.clone();if(pp.p==="leaf")mat.color.set(0xffffff);const im=new T.InstancedMesh(pp.g,mat,list.length);im.castShadow=true;im.receiveShadow=pp.p==="leaf";   // thin trunks self-shadow to black with the normal bias
+      protos[k].forEach(pp=>{const mat=pp.m.clone();if(pp.p==="leaf")mat.color.set(0xffffff);const im=new T.InstancedMesh(pp.g,mat,list.length);im.name="T-"+k+"-"+pp.p;im.castShadow=true;im.receiveShadow=pp.p==="leaf";   // thin trunks self-shadow to black with the normal bias
         const lg=tris(pp.g)>LODMIN?simp(pp.g,LODC):null;if(lg){const lo=new T.InstancedMesh(lg,mat,list.length);lo.castShadow=true;lo.receiveShadow=im.receiveShadow;lo.frustumCulled=im.frustumCulled=false;LOD.push({hi:im,lo,list,leaf:pp.p==="leaf"});scene.add(lo);trees.push(lo)}
 
         list.forEach((t,i)=>{q.setFromAxisAngle(up,t[6]);m4.compose(new T.Vector3(t[0],t[2],-t[1]),q,new T.Vector3(t[3]*(t[7]||(.85+.3*((i*7)%10)/10)),t[3],t[3]*(t[7]||1)));im.setMatrixAt(i,m4);
@@ -3029,7 +3062,7 @@ async function dioBuild(s){
   const legend=()=>{const lg=$("#dioLegend");if(!lg)return;const V=st.v,c=st.sel&&CAT[st.sel];let h="";
     const evh=Object.keys(EVL).map(k=>`<span><i style="background:${EVC[k]}"></i>${EVL[k]}</span>`).join("");
     if(V==="B")h=evh;
-    else if(V==="C")h=`<label class="dio-chk"><input type="checkbox" data-x="evC"${st.evC?" checked":""}> Colorir por grau de evidência</label>${st.evC?evh:""}`;
+    else if(V==="C")h=`<span>A reconstituição junta o que está confirmado com o que é hipótese (alturas, coberturas, casas por paralelo): ative as cores para os distinguir.</span><label class="dio-chk"><input type="checkbox" data-x="evC"${st.evC?" checked":""}> Colorir por grau de evidência</label>${st.evC?evh:""}`;
     else if(V==="D")h=`<span>Curvas de nível de 1 m (mestras de 5 m) em altitude real, do modelo de terreno LiDAR.${EX0!==1?` Nas outras camadas o relevo tem exagero × ${String(EX0).replace(".",",")}.`:""}</span><span class="dio-ex">Exagero vertical: <button data-x="ex1" aria-pressed="${st.ex===1}">× 1</button><button data-x="ex2" aria-pressed="${st.ex===2}">× 2</button></span>`;
     else if(V==="E")h=c?`<span><b>${esc(c.name)}</b>${c.dims?` · ${esc(c.dims)}`:""} · fontes na ficha ao lado. Toque fora da estrutura para ver todas.</span>`:`<span>Toque numa estrutura para a isolar.</span>`;
     lg.innerHTML=h;lg.hidden=!h;
@@ -3090,8 +3123,8 @@ async function dioBuild(s){
     const moved=ctl.update();if(!(moved||dirty||fly))return;dirty=false;   // render only when something changed
     if(LOD.length){if(performance.now()-lodT>200)lodSplit();clearTimeout(lodTm);lodTm=setTimeout(()=>{if(lodSplit())dirty=true},250)}
     comp?comp.render():r.render(scene,cam);if(r.domElement.style.opacity==="0")r.domElement.style.opacity=1;
-    const placed=[];for(const l of labels){if(!st.L.lbl){l.e.style.display="none";continue}l.o.getWorldPosition(V);V.project(cam);if(V.z>1){l.e.style.display="none";continue}
-      if(!l.w){l.e.style.display="";l.w=l.e.offsetWidth;l.h=l.e.offsetHeight}const x=(V.x+1)/2*W,y=(1-V.y)/2*H,bx={l:x-l.w/2,r:x+l.w/2,t:y-l.h-12,b:y};
+    const placed=[];for(const l of labels){const ls=l.o.userData.sid,lv=ls&&bySid[ls];if(!st.L.lbl||(lv&&![...lv.A,...lv.B].some(o=>o.visible))){l.e.style.display="none";continue}l.o.getWorldPosition(V);V.project(cam);if(V.z>1){l.e.style.display="none";continue}
+      if(!l.w){l.e.style.display="";l.w=l.e.offsetWidth;l.h=l.e.offsetHeight}const x0=(V.x+1)/2*W,y=(1-V.y)/2*H;if(x0<0||x0>W||y<l.h+16||y>H){l.e.style.display="none";continue}const x=Math.min(Math.max(x0,l.w/2+4),W-l.w/2-4),bx={l:x-l.w/2,r:x+l.w/2,t:y-l.h-12,b:y};l.e.style.setProperty("--sx",(x0-x)+"px");
       if(placed.some(o=>bx.l<o.r&&bx.r>o.l&&bx.t<o.b&&bx.b>o.t)){l.e.style.display="none";continue}placed.push(bx);l.e.style.display="";l.e.style.transform=`translate(${x}px,${y}px) translate(-50%,-100%) translateY(-12px)`}
     cam.getWorldDirection(dirv);wrap.querySelector(".dio-n svg").style.transform=`rotate(${Math.atan2(dirv.x,-dirv.z)*-180/Math.PI}deg)`;
     const d=cam.position.distanceTo(ctl.target),mpx=2*d*Math.tan(cam.fov*Math.PI/360)/H,sb=d<R*.5?5:20;wrap.querySelector(".dio-scale i").style.width=(sb/mpx)+"px";wrap.querySelector(".dio-scale span").textContent=sb+" m"};
@@ -3100,13 +3133,13 @@ async function dioBuild(s){
   ctl.addEventListener("start",()=>{fly=null;if(ctl.autoRotate){ctl.autoRotate=false;const b=document.querySelector('#dioBar [data-a="spin"]');if(b)b.setAttribute("aria-pressed","false")}});
   // guided tour: fly to each stop (centre of the structure's geometry), with a short text
   const TO={on:false,i:0},tc=document.createElement("div");tc.className="dio-tour";tc.hidden=true;wrap.appendChild(tc);
-  const ctr=sid=>{const b=new T.Box3();let ok=false;objs.forEach(o=>{if(o.userData.sid===sid&&o.visible){b.expandByObject(o);ok=true}});return ok?b:null};
+  const ctr=sid=>{const b=new T.Box3();let ok=false;objs.forEach(o=>{if(o.userData.sid===sid&&o.visible){b.expandByObject(o);ok=true}});if(!ok)objs.forEach(o=>{if(o.userData.sid===sid){b.expandByObject(o);ok=true}});return ok?b:null};
   const tourEnd=()=>{TO.on=false;tc.hidden=true;const b=$("#dioBar [data-a='tour']");if(b)b.setAttribute("aria-pressed","false");st.sel=null;apply()};
   const tourGo=i=>{if(st.v==="D"||st.v==="E")setV("A");const L=DIOS[s.id].tour;TO.on=true;TO.i=(i+L.length)%L.length;const {sid,title:t,text:d}=L[TO.i];card.hidden=true;ctl.autoRotate=false;
     const b=$("#dioBar [data-a='tour']");if(b)b.setAttribute("aria-pressed","true");
     const bx=ctr(sid);if(bx){const c=bx.getCenter(new T.Vector3()),sz=bx.getSize(new T.Vector3()).length(),dist=Math.max(55,Math.min(R*1.3,sz*1.6)),dir=new T.Vector3(.35,.75,.62).normalize();c.y-=dist*.16;flyTo(c.clone().add(dir.multiplyScalar(dist)),c,1300)}
     st.sel=sid;apply();
-    tc.innerHTML=`<div class="k">Visita guiada · ${TO.i+1}/${L.length}</div><b>${esc(t)}</b><p>${esc(d)}</p><div class="nav"><button data-t="-1" aria-label="Anterior">‹ Anterior</button><button data-t="x">Terminar</button><button data-t="1" aria-label="Seguinte">Seguinte ›</button></div>`;tc.hidden=false;
+    tc.innerHTML=`<div class="k">Visita guiada · ${TO.i+1}/${L.length}</div><b>${esc(t)}</b><p>${esc(d)}</p>${(()=>{const c=CAT[sid],f=(c&&c.src||[]).map(k=>SRC[k]).filter(Boolean).map(x=>(x.match(/^[^(:«]*?\(\d{4}[^)]*\)/)||[/^[^:(]*«/.test(x)?x.slice(0,x.indexOf("»")+1):x.split(/[:(]|(?<=[a-zà-ú]{3})\. /)[0]])[0].trim()).map(x=>x.length>60?x.slice(0,58).replace(/\s\S*$/,"")+"…":x);return f.length?`<p class="src">Fontes: ${esc([...new Set(f)].join(" · "))}</p>`:""})()}<div class="nav"><button data-t="-1" aria-label="Anterior">‹ Anterior</button><button data-t="x">Terminar</button><button data-t="1" aria-label="Seguinte">Seguinte ›</button></div>`;tc.hidden=false;
     tc.onclick=e=>{const q=e.target.closest("[data-t]");if(!q)return;if(q.dataset.t==="x")tourEnd();else tourGo(TO.i+ +q.dataset.t)}};
   const setV=v=>{if(v===st.v)return;const was=st.v;if(v==="E")st.mode=was==="C"?"B":"A";if(TO.on&&(v==="D"||v==="E"))tourEnd();st.v=v;
     const bar=$("#dioBar");if(bar)bar.querySelectorAll("[data-v]").forEach(x=>x.setAttribute("aria-pressed",x.dataset.v===v));
@@ -3129,7 +3162,7 @@ async function dioBuild(s){
       else if(a==="full"){const f=$("#dio");if(document.fullscreenElement){document.exitFullscreen()}else if(f.requestFullscreen){f.requestFullscreen().catch(()=>f.classList.toggle("full"))}else f.classList.toggle("full");setTimeout(resize,150)}};
     apply()};
   const stage2=$("#dioStage");if(stage2){stage2.innerHTML="";stage2.appendChild(wrap)}resize();home(false);frame();bind();
-  DIO.cur={id:s.id,wrap,bind,resize,camPos:()=>[cam.position.x,cam.position.y,cam.position.z,ctl.target.x,ctl.target.y,ctl.target.z].map(v=>Math.round(v)),
+  DIO.cur={id:s.id,wrap,bind,resize,scene,cam,camPos:()=>[cam.position.x,cam.position.y,cam.position.z,ctl.target.x,ctl.target.y,ctl.target.z].map(v=>Math.round(v)),
     setCam(p,fov){cam.position.set(p[0],p[1],p[2]);ctl.target.set(p[3],p[4],p[5]);if(fov){cam.fov=fov;cam.updateProjectionMatrix()}ctl.autoRotate=false;ctl.maxPolarAngle=1.62;ctl.minDistance=1;ctl.update();dirty=true},   // tests: photo-matching viewpoints (eye level allowed)
     stats(n=10){lodSplit();r.info.autoReset=false;r.info.reset();const t0=performance.now();for(let i=0;i<n;i++)r.render(scene,cam);r.getContext().finish();const ms=(performance.now()-t0)/n,o={calls:r.info.render.calls/n,tris:r.info.render.triangles/n,ms:+ms.toFixed(1),geoms:r.info.memory.geometries};r.info.autoReset=true;dirty=true;return o},   // tests: draw calls and time per frame (without GTAO)
     dispose(){cancelAnimationFrame(raf);ro.disconnect();ctl.dispose();if(comp)comp.dispose();envT.dispose();BC.forEach(m=>m.geometry.dispose());selMat.forEach(m=>m.dispose());r.dispose();r.forceContextLoss&&r.forceContextLoss();scene.traverse(o=>{if(o.geometry)o.geometry.dispose()})}};

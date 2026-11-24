@@ -1,0 +1,44 @@
+name: Merge automático
+
+# O Tiago pediu (24/11/2026) que os PRs passem a ser integrados sozinhos. Quando os testes de «Publicar o site»
+# passam num PR aberto pelo Tiago (ou pelo Claude em nome dele) a partir de um ramo claude/* deste repositório,
+# este workflow faz o merge e volta a lançar a publicação no main (um merge feito com o GITHUB_TOKEN não dispara
+# o evento push, por isso a publicação é pedida à parte com workflow_dispatch).
+# Um PR em rascunho (draft) não é integrado: é a forma de travar um merge.
+
+on:
+  workflow_run:
+    workflows: ["Publicar o site"]
+    types: [completed]
+
+permissions:
+  contents: write
+  pull-requests: write
+  actions: write
+
+concurrency:
+  group: auto-merge
+  cancel-in-progress: false
+
+jobs:
+  merge:
+    if: >-
+      github.event.workflow_run.event == 'pull_request' &&
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.head_repository.full_name == github.repository &&
+      startsWith(github.event.workflow_run.head_branch, 'claude/')
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      REPO: ${{ github.repository }}
+      SHA: ${{ github.event.workflow_run.head_sha }}
+      BRANCH: ${{ github.event.workflow_run.head_branch }}
+      OWNER: ${{ github.repository_owner }}
+    steps:
+      - name: Merge do PR
+        run: |
+          pr=$(gh pr list -R "$REPO" --head "$BRANCH" --state open --json number,headRefOid,isDraft,author \
+            --jq ".[] | select(.headRefOid==\"$SHA\" and (.isDraft|not) and .author.login==\"$OWNER\") | .number")
+          if [ -z "$pr" ]; then echo "Nenhum PR aberto (e fora de rascunho) com o commit $SHA"; exit 0; fi
+          gh pr merge "$pr" -R "$REPO" --merge --match-head-commit "$SHA"
+          gh workflow run publicar.yml -R "$REPO" --ref main
