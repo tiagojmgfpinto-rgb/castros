@@ -67,7 +67,7 @@ async function converter(id) {
     const nome = n.getName();
     const x = n.getExtras() || {};
     if (nome.startsWith('PROTO-')) { const [, k, p] = nome.split('-'); (protos[k] ||= []).push({ p, n }); continue; }
-    if (nome.startsWith('LBL-')) { rotulos.push({ texto: nome.slice(4).replace(/-\d+$/, '').replace(/_/g, ' '), pos: n.getTranslation() }); n.dispose(); continue; }
+    if (nome.startsWith('LBL-')) { rotulos.push({ texto: nome.slice(4).replace(/-\d+$/, '').replace(/_/g, ' '), pos: n.getTranslation(), sid: n.getExtras().sid }); n.dispose(); continue; }
     if (nome === 'terrain' || nome === 'skirt') { n.setName(nome === 'terrain' ? 'Terreno' : 'Base'); cena.removeChild(n); grupo('Terreno').addChild(n); continue; }
     if (x.mode === 'B') { n.dispose(); continue; }
     if (x.sid) {
@@ -187,6 +187,7 @@ async function converter(id) {
     return nota >= 0.5 ? melhor : null;
   };
   for (const r of rotulos) {
+    if (r.sid && !elementosVistos.has(r.sid)) continue;   // rótulo de uma estrutura que não está no estado atual (tools/gltf/regras.mjs)
     let e = porNome.get(norm(r.texto)) || [...tour.values()].map((t) => (norm(t.title) === norm(r.texto) ? elementos.find((x) => x.id === t.sid) : null)).find(Boolean) || parecido(r.texto);
     if (!e) {
       e = { id: `rotulo-${norm(r.texto).replace(/[^a-z0-9]+/g, '-')}`, nome: r.texto, grupo: 'Rótulos', estado: 'estado-atual', confianca: 'média', descricao: '', fontes: [] };
